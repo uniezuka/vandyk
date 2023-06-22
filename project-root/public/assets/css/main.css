@@ -1,0 +1,62 @@
+body {
+    margin: 0px;
+    color: #0C090A;
+    font-size: 14px;
+    font-family: 'Avenir Next', Avenir, 'Helvetica Neue', 'Lato', 'Segoe UI', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #eeeeee;
+    font-style: normal;
+    font-weight: 500;
+    padding: 0px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Gotham, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+header > div {
+    background-color: #ffffff;
+}
+
+.themed-container { 
+    padding-top: 10px;
+}
+
+.card {
+    border: 1px solid #039;
+    background-color: #FFF;
+    border-radius: 5px;
+}
+
+/* Navigation */
+
+.navbar {
+    background-color: #13114E;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, Verdana, sans-serif;
+    padding: 0;
+}
+
+.navbar a {
+    color: #ffffff;
+    text-align: center;
+    padding: 8px 15px 8px 15px;
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.navbar a.active {
+    background-color: #13114E;
+    color: white;
+}
+
+.navbar a:hover {
+    background-color: #C2C2C2;
+    color: black;
+}
+
+.navbar .dropdown-menu {
+    background-color: #13114E;
+}
