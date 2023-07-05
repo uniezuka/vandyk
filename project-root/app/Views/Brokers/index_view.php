@@ -8,6 +8,12 @@
     $pager_links = $data['pager_links'];
 ?>
 
+<?php if (session()->getFlashdata('message')) : ?>
+    <div class="alert alert-success">
+        <?= session()->getFlashdata('message') ?>
+    </div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-7">
         <div class="card">
@@ -44,7 +50,7 @@
                                     <?= ($broker->iianj_member) ? '<i class="bi bi-check2-square"></i>' : '<i class="bi bi-square"></i>' ?>
                                 </td>
                                 <td><?= $broker->username ?></td>
-                                <td><a href="<?= base_url('/profile'); ?>">Edit</a></td>
+                                <td><a href="<?= base_url('/broker/update/' . $broker->broker_id); ?>">Edit</a></td>
                                 <td><a href="<?= base_url('/change_password'); ?>">Change Password</a></td>
                             </tr>
                         <?php endforeach; ?>

@@ -30,7 +30,7 @@ $routes->set404Override();
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index', ['filter' => 'authGuard']);
-$routes->get('/profile', 'Home::profile', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'profile', 'Home::profile', ['filter' => 'authGuard']);
 $routes->get('/change_password', 'Home::change_password', ['filter' => 'authGuard']);
 
 $routes->get('/login', 'Login::index', ['filter' => 'guestGuard']);
@@ -38,6 +38,9 @@ $routes->get('/logout', 'Login::logout', ['filter' => 'authGuard']);
 $routes->post('/login', 'Login::authenticate', ['filter' => 'guestGuard']);
 
 $routes->get('/brokers', 'Brokers::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'broker/create', 'Brokers::create', ['filter' => 'authGuard']);
+$routes->get('/broker/update/(:num)', 'Brokers::update/$1', ['filter' => 'authGuard']);
+$routes->post('/broker/update/(:num)', 'Brokers::update/$1', ['filter' => 'authGuard']);
 
 $routes->get('/settings/transaction_types', 'Settings::transaction_types', ['filter' => 'authGuard']);
 $routes->get('/settings/fire_codes', 'Settings::fire_codes', ['filter' => 'authGuard']);

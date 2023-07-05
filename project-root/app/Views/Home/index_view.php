@@ -32,7 +32,7 @@
                         <div class="text-center">
                             <h5>Brokers</h5>
                             <p><a href="<?= base_url('/brokers'); ?>" target="_blank">Broker List</a></p>
-                            <p><a href="<?= base_url('/register'); ?>" target="_blank">Add Broker</a></p>
+                            <p><a href="<?= base_url('/broker/create'); ?>" target="_blank">Add Broker</a></p>
                         </div>
                     </div>
                 </div>

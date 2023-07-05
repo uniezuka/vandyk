@@ -81,7 +81,7 @@
             <div class="row mb-3">
                 <label class="col-sm-2 col-form-label">Username</label>
                 <div class="col-sm-3">
-                    <input type="text" disabled class="form-control" name="username" value="<?= set_value('username') ?>">
+                    <input type="text" required class="form-control" name="username" value="<?= set_value('username') ?>">
                 </div>
             </div>
 
@@ -93,13 +93,42 @@
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-2 col-form-label">Email</label>
+                <label class="col-sm-2 col-form-label">Password</label>
                 <div class="col-sm-3">
-                    <input type="text" disabled class="form-control" name="email" value="<?= set_value('email') ?>">
+                    <input type="password" required class="form-control" name="password" value="<?= set_value('password') ?>">
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save</button>
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-3">
+                    <input type="text" required class="form-control" name="email" value="<?= set_value('email') ?>">
+                </div>
+            </div>
+
+            <?php if (is_admin()) { ?>
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label"></label>
+                    <div class="d-flex align-items-end col-sm-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" name="iianj" type="checkbox" value="true" <?= set_checkbox('iianj', 'true') ?>>
+                            <label class="form-check-label">Is IIANJ Member</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label"></label>
+                    <div class="d-flex align-items-end col-sm-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" name="isAdmin" type="checkbox" value="true" <?= set_checkbox('isAdmin', 'true') ?>>
+                            <label class="form-check-label">Is Administrator</label>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <button type="submit" class="btn btn-primary">Register</button>
         </form>
     </div>
 </div>

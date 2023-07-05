@@ -2,10 +2,25 @@
 
 namespace App\Controllers;
 
-use App\Models\UserModel;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
+use Exception;
 
 class Login extends BaseController
 {
+    protected $authenticationService;
+
+    public function initController(
+        RequestInterface $request,
+        ResponseInterface $response,
+        LoggerInterface $logger
+    ) {
+        parent::initController($request, $response, $logger);
+
+        $this->authenticationService = service('authenticationService');
+    }
+
     public function index()
     {
         $data['title'] = "Login";
@@ -14,34 +29,17 @@ class Login extends BaseController
 
     public function authenticate()
     {
-        $session = session();
-        
-        $userModel = new UserModel();
- 
         $username = $this->request->getVar('username');
         $password = $this->request->getVar('password');
 
-        $user = $userModel->where('username', $username)->first();
- 
-        if(is_null($user)) {
-            return redirect()->back()->withInput()->with('error', 'Invalid username or password.');
+        try {
+            if ($this->authenticationService->authenticate($username, $password))
+                return redirect()->to('/');
+            else
+                return redirect()->back()->withInput()->with('error', 'Invalid username or password.');
+        } catch(Exception $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
- 
-        $pwd_verify = password_verify($password, $user['password']);
- 
-        if(!$pwd_verify) {
-            return redirect()->back()->withInput()->with('error', 'Invalid username or password.');
-        }
- 
-        $session_data = [
-            'id' => $user['broker_id'],
-            'email' => $user['email'],
-            'username' => $user['username'],
-            'isLoggedIn' => TRUE
-        ];
- 
-        $session->set($session_data);
-        return redirect()->to('/');
     }
 
     public function logout() {

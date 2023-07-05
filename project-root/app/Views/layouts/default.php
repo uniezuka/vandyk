@@ -31,17 +31,21 @@
                             <a class="nav-link" href="<?= base_url('/clients'); ?>">Clients</a>
                         </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Settings
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/transaction_types'); ?>">Transaction Types</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/fire_codes'); ?>">Fire Codes</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/coverage_list'); ?>">Coverage List</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/insurer_naic_list'); ?>">Insurer NAIC List</a></li>
-                            </ul>
-                        </li>
+                            <?php if (is_admin()) { ?>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Settings
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="<?= base_url('/settings/transaction_types'); ?>">Transaction Types</a></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('/settings/fire_codes'); ?>">Fire Codes</a></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('/settings/coverage_list'); ?>">Coverage List</a></li>
+                                    <li><a class="dropdown-item" href="<?= base_url('/settings/insurer_naic_list'); ?>">Insurer NAIC List</a></li>
+                                </ul>
+                            </li>
+
+                            <?php } ?>
 
                         <?php } ?>
                     </ul>

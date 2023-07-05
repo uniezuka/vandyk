@@ -19,14 +19,30 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    public static function brokerService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('brokerService');
+        }
+
+        return new \App\Services\BrokerService();
+    }
+
+    public static function authenticationService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('authenticationService');
+        }
+
+        return new \App\Services\AuthenticationService();
+    }
+
+    public static function locationService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('locationService');
+        }
+
+        return new \App\Services\LocationService();
+    }
 }

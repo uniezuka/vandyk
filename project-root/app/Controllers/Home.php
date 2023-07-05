@@ -13,6 +13,8 @@ class Home extends BaseController
     public function profile()
     {
         $data['title'] = "Profile";
+        helper('form');
+        
         return view('Home/profile_view', ['data' => $data]);
     }
 
