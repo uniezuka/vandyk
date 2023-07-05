@@ -35,10 +35,10 @@ class BrokerService extends BaseService
 
         $id = $this->db->insertID();
         
-        return $this->findOne($id); // TODO
+        return $this->findOne($id);
     }
 
-    public function findOne($id)// TODO
+    public function findOne($id)
     {
         $builder = $this->db->table('broker');
         $builder->select('broker.broker_id, name, address, address2, city, state, zip, phone, fax, 

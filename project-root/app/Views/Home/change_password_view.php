@@ -1,9 +1,28 @@
 <?= $this->extend('layouts/default', ['data' => $data]) ?>
 
 <?= $this->section('content') ?>
+
+<?php
+helper('html');
+?>
+
+<?php if (session()->getFlashdata('error') || validation_errors()) : ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error') ?>
+        <?= validation_list_errors() ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('message')) : ?>
+    <div class="alert alert-success">
+        <?= session()->getFlashdata('message') ?>
+    </div>
+<?php endif; ?>
+
 <div class="col-md-6 col-sm-12">
     <div class="login-form">
-        <form>
+        <form method="post">
+            <?= csrf_field() ?>
             <div class="mb-3 row">
                 <label class="col-sm-2 col-form-label">New Password</label>
                 <div class="col-sm-5">

@@ -107,7 +107,7 @@ class Brokers extends BaseController
         ])) {
             try {
                 $post['broker_id'] = $id;
-                $post['broker_login_id'] =$data['broker']->broker_login_id;
+                $post['broker_login_id'] = $data['broker']->broker_login_id;
 
                 $this->brokerService->update((object) $post);
                 return redirect()->to('/brokers')->with('message', 'Broker was successfully updated.');

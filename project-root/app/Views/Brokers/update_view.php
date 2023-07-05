@@ -5,8 +5,6 @@
 <?php
     helper('html');
     $broker = $data['broker'];
-
-    
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>

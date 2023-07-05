@@ -31,7 +31,7 @@ $routes->set404Override();
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'profile', 'Home::profile', ['filter' => 'authGuard']);
-$routes->get('/change_password', 'Home::change_password', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'change_password', 'Home::change_password', ['filter' => 'authGuard']);
 
 $routes->get('/login', 'Login::index', ['filter' => 'guestGuard']);
 $routes->get('/logout', 'Login::logout', ['filter' => 'authGuard']);
