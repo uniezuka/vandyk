@@ -10,6 +10,7 @@ use Exception;
 class Home extends BaseController
 {
     protected $brokerService;
+    protected $authenticationService;
 
     public function initController(
         RequestInterface $request,
@@ -19,6 +20,7 @@ class Home extends BaseController
         parent::initController($request, $response, $logger);
 
         $this->brokerService = service('brokerService');
+        $this->authenticationService = service('authenticationService');
     }
 
     public function index()
@@ -75,6 +77,30 @@ class Home extends BaseController
     {
         helper('form');
         $data['title'] = "Password Management";
-        return view('Home/change_password_view', ['data' => $data]);
+        $id = session()->get('id');
+
+        if (!$this->request->is('post')) {
+            return view('Home/change_password_view', ['data' => $data]);
+        }
+
+        $post = $this->request->getPost([ 'newPassword', 'reEnterPassword' ]);
+
+        if ($this->validateData($post, [
+            'newPassword'          => 'required|max_length[250]|min_length[6]',
+            'reEnterPassword'      => 'matches[newPassword]',
+        ])) {
+            try {
+                $broker = $this->brokerService->findOne($id);
+                $post['broker_login_id'] = $broker->broker_login_id;
+                
+                $this->authenticationService->updatePassword((object) $post);
+                return redirect()->back()->withInput()->with('message', 'Password has been updated.');
+            } catch(Exception $e) {
+                return redirect()->back()->withInput()->with('error', $e->getMessage());
+            }
+        }
+        else {
+            return view('Home/change_password_view', ['data' => $data]);
+        }
     }
 }

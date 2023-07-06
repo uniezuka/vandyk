@@ -94,6 +94,16 @@ class AuthenticationService extends BaseService
         return true;
     }
 
+    public function updatePassword(object $message) {
+        $userModel = new UserModel();
+
+        $data = [
+            'password' => password_hash($message->newPassword, PASSWORD_DEFAULT)
+        ];
+
+        $userModel->update($message->broker_login_id, $data);
+    }
+
     private function insertBrokerRole($broker_id, $role_id) {
         $builder = $this->db->table('broker_role');
 

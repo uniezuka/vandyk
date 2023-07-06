@@ -41,6 +41,8 @@ $routes->get('/brokers', 'Brokers::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'broker/create', 'Brokers::create', ['filter' => 'authGuard']);
 $routes->get('/broker/update/(:num)', 'Brokers::update/$1', ['filter' => 'authGuard']);
 $routes->post('/broker/update/(:num)', 'Brokers::update/$1', ['filter' => 'authGuard']);
+$routes->get('/broker/change_password/(:num)', 'Brokers::change_password/$1', ['filter' => 'authGuard']);
+$routes->post('/broker/change_password/(:num)', 'Brokers::change_password/$1', ['filter' => 'authGuard']);
 
 $routes->get('/settings/transaction_types', 'Settings::transaction_types', ['filter' => 'authGuard']);
 $routes->get('/settings/fire_codes', 'Settings::fire_codes', ['filter' => 'authGuard']);

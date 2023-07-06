@@ -8,6 +8,13 @@
     $pager_links = $data['pager_links'];
 ?>
 
+<?php if (session()->getFlashdata('error') || validation_errors()) : ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error') ?>
+        <?= validation_list_errors() ?>
+    </div>
+<?php endif; ?>
+
 <?php if (session()->getFlashdata('message')) : ?>
     <div class="alert alert-success">
         <?= session()->getFlashdata('message') ?>
@@ -51,7 +58,7 @@
                                 </td>
                                 <td><?= $broker->username ?></td>
                                 <td><a href="<?= base_url('/broker/update/' . $broker->broker_id); ?>">Edit</a></td>
-                                <td><a href="<?= base_url('/change_password'); ?>">Change Password</a></td>
+                                <td><a href="<?= base_url('/broker/change_password/' . $broker->broker_id); ?>">Change Password</a></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

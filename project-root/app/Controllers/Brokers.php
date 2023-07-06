@@ -27,10 +27,10 @@ class Brokers extends BaseController
 
     public function index()
     {
+        helper('form');
+
         $page  = (int) ($this->request->getGet('page') ?? 1);
-
         $brokers = $this->brokerService->getAll($page);
-
         $pager_links = $this->pager->makeLinks($page, $brokers->limit, $brokers->total, 'bootstrap_full');
 
         $data['brokers'] = $brokers->data;
@@ -86,6 +86,10 @@ class Brokers extends BaseController
         $data['title'] = "Update Broker";
         $data['broker'] = $this->brokerService->findOne($id);
 
+        if (!$data['broker']) {
+            return redirect()->to('/brokers')->with('error', "Broker not found.");
+        }
+
         if (!$this->request->is('post')) {
             return view('Brokers/update_view', ['data' => $data]);
         }
@@ -117,7 +121,40 @@ class Brokers extends BaseController
         }
         else {
             return view('Brokers/create_view', ['data' => $data]);
+        }   
+    }
+
+    public function change_password($id = null) {
+        helper('form');
+
+        $data['title'] = "Broker Password Management";
+        $broker = $this->brokerService->findOne($id);
+
+        if (!$broker) {
+            return redirect()->to('/brokers')->with('error', "Broker not found.");
         }
-        
+
+        if (!$this->request->is('post')) {
+            return view('Brokers/change_password_view', ['data' => $data]);
+        }
+
+        $post = $this->request->getPost([ 'newPassword', 'reEnterPassword' ]);
+
+        if ($this->validateData($post, [
+            'newPassword'          => 'required|max_length[250]|min_length[6]',
+            'reEnterPassword'      => 'matches[newPassword]',
+        ])) {
+            try {
+                $post['broker_login_id'] = $broker->broker_login_id;
+                
+                $this->authenticationService->updatePassword((object) $post);
+                return redirect()->to('/brokers')->with('message', "Broker's password was successfully updated.");
+            } catch(Exception $e) {
+                return redirect()->back()->withInput()->with('error', $e->getMessage());
+            }
+        }
+        else {
+            return view('Brokers/change_password_view', ['data' => $data]);
+        }
     }
 }
