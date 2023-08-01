@@ -2,46 +2,58 @@
 
 <?= $this->section('content') ?>
 
+<?php
+    helper('html'); 
+    $client = $data['client'];
+    $broker = $data['broker'];
+
+    function clientDisplay($client) : string {
+        if ($client->entity_type == 1) {
+            return $client->first_name . ' ' . $client->last_name . '<br />' . $client->insured2_name;
+        }
+        else {
+            return $client->busines_name . '<br />' . $client->busines_name2;
+        }
+    }
+?>
+
 <div class="row mb-3">
     <div class="col-8">
         <div class="card">
             <div class="card-body">
                 <div class="row">
                     <div class="col col-6">
-                        <h4>113-115 Central Ave Condo Assn<br />c/o Larry Baruffi</h4>
+                        <h4><?= clientDisplay($client) ?></h4>
                     </div>
 
                     <div class="col col-6 text-end">
-                        <p><strong>Broker: Heist Insurance Agency</strong></p>
-                        <p>Client Code:</p>
+                        <p><strong>Broker: <?= $broker->name ?></strong></p>
+                        <p>Client Code: <?= $client->client_code ?></p>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col col-4">
-                        <p>
-                            Mailing Address:<br />
-                            2080 Frederick Court<br />
-                            Vineland,&nbsp;NJ&nbsp;&nbsp;&nbsp;08361
-                        </p>
+                        <span>Mailing Address:</span>
+                        <?= formatAddress($client->address, "", $client->city, $client->state, $client->zip) ?>
                     </div>
 
                     <div class="col col-4">
                         <p>
-                            Cell: <br />
-                            Home Ph:856 297 1679<br />
-                            Email:
+                            Cell: <?= $client->cell_phone ?><br />
+                            Home Ph: <?= $client->home_phone ?><br />
+                            Email: <?= $client->email ?>
                         </p>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col col-4">
-                        <a href="<?= base_url('/clients/update'); ?>" class="btn btn-primary">Update Client</a>
+                        <a href="<?= base_url('/client/update/') . $client->client_id; ?>" class="btn btn-primary">Update Client</a>
                     </div>
 
                     <div class="col col-4">
-                        <a href="<?= base_url('/flood_quote/create'); ?>" class="btn btn-primary">New Flood Quote</a>
+                        <a href="#" class="btn btn-primary">New Flood Quote</a>
                     </div>
                 </div>
             </div>
@@ -64,50 +76,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>
-                                <p><strong>NEW</strong>&nbsp; Quote ID: <a href="<?= base_url('/flood_quote/update'); ?>">14696</a>
-                                    <br>
-                                    Policy #: <br>
-                                    Flood&nbsp;Zone: AE
-                                </p>
-                                <p><strong>Property Address: </strong> <br>
-                                    113-115 Central Avenue<br>
-                                    Ocean City, NJ</p>
-                                <p>Entered: 6/10/2022&nbsp;&nbsp;&nbsp; </p>
-                                <p></p>
-                                <p>&nbsp;</p>
-                                <p><a href="#" target="_blank">Nat Flood Data Lookup</a></p>
-                                <p>&nbsp;</p>
-                                <p><a href="#"> Quote Hiscox Commercial</a></p>
-                            </td>
-                            <td>
-                                <p><a href="/Flood/editfloodrate.asp?QuoteID=14696" class="actionLink">Edit Quote Info</a></p>
-                                <p></p>
-                                <p><a href="#">View Current Rating</a></p>
-                                <p><strong>Sandbar Docs</strong><br>
-                                    <a href="#">Chubb App</a>
-                                </p>
-                                <p><a href="#">Chubb Quote</a></p>
-                                <p><a href="#">Chubb Invoice</a></p>
-                                <p><a href="#">No Loss Form</a></p>
-                            </td>
-                            <td>
-                                <p>
-                                    <a href="#">View Hiscox Quote</a><br><br>
-                                    <a href="#">Full Requote Hiscox</a>
-                                </p>
-                                <p>
-
-                                </p>
-                                <p><strong>Sandbar Docs</strong><br>
-                                    <a href="#">Hiscox Quote Doc</a><br><br>
-                                    <a href="#">Hiscox App</a><br><br>
-                                    <a href="#">Hiscox Invoice</a>
-                                </p>
-                            </td>
-                            <td>
-                                <a href="#">Bind Hiscox Policy</a>
+                        <tr> 
+                            <td colspan="4">
+                                To be implemented
                             </td>
                         </tr>
                     </tbody>

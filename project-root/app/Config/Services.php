@@ -45,4 +45,22 @@ class Services extends BaseService
 
         return new \App\Services\LocationService();
     }
+
+    public static function clientService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('clientService');
+        }
+
+        return new \App\Services\ClientService();
+    }
+
+    public static function entityService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('entityService');
+        }
+
+        return new \App\Services\EntityService();
+    }
 }

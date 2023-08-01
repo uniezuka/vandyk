@@ -7,16 +7,17 @@ class BrokerService extends BaseService
 {
     protected $limit = 20;
 
-    public function getAll($page = 1)
+    public function getPaged($page = 1)
     {
         $offset = ($page-1) * $this->limit;
 
         $builder = $this->db->table('broker');
         $builder->select('*');
         $builder->join('broker_login', 'broker.broker_id = broker_login.broker_id');
-        $query = $builder->get($this->limit, $offset);
 
         $total = $builder->countAllResults();
+
+        $query = $builder->get($this->limit, $offset);
 
         return (object) array(
             'data'   => $query->getResult(),
@@ -98,5 +99,16 @@ class BrokerService extends BaseService
         $builder->set($data);
         $builder->where('broker_id', $broker_id);
         $builder->update();
+    }
+
+    public function getAll()
+    {
+        $builder = $this->db->table('broker');
+        $builder->select('*');
+        $builder->join('broker_login', 'broker.broker_id = broker_login.broker_id');
+
+        $query = $builder->get();
+
+        return $query->getResult();
     }
 }

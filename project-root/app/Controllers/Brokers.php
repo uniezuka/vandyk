@@ -30,7 +30,7 @@ class Brokers extends BaseController
         helper('form');
 
         $page  = (int) ($this->request->getGet('page') ?? 1);
-        $brokers = $this->brokerService->getAll($page);
+        $brokers = $this->brokerService->getPaged($page);
         $pager_links = $this->pager->makeLinks($page, $brokers->limit, $brokers->total, 'bootstrap_full');
 
         $data['brokers'] = $brokers->data;
@@ -56,7 +56,7 @@ class Brokers extends BaseController
 
         if ($this->validateData($post, [
             'name' => 'required|max_length[250]|min_length[3]',
-            'address'  => 'required|max_length[1000]|min_length[10]',
+            'address'  => 'required|max_length[1000]',
             'address2'  => 'max_length[1000]',
             'city'  => 'required|max_length[250]',
             'zip'  => 'required',
@@ -120,7 +120,7 @@ class Brokers extends BaseController
             }
         }
         else {
-            return view('Brokers/create_view', ['data' => $data]);
+            return view('Brokers/update_view', ['data' => $data]);
         }   
     }
 

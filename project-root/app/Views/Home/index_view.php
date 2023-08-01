@@ -9,7 +9,7 @@
                 <h5>Clients</h5>
                 <div class="d-grid gap-2 col-12">
                     <a href="<?= base_url('/clients'); ?>" class="btn btn-primary">Client Search</a>
-                    <a href="<?= base_url('/clients/add'); ?>" class="btn btn-primary">Add New Client</a>
+                    <a href="<?= base_url('/client/create'); ?>" class="btn btn-primary">Add New Client</a>
                 </div>
 
             </div>
