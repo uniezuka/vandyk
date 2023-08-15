@@ -12,7 +12,7 @@
             return $client->first_name . ' ' . $client->last_name . '<br />' . $client->insured2_name;
         }
         else {
-            return $client->busines_name . '<br />' . $client->busines_name2;
+            return $client->business_name . '<br />' . $client->business_name2;
         }
     }
 ?>

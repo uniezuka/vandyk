@@ -69,6 +69,20 @@
                         <?= businessEntitySelect('businessEntityTypeId', set_value('businessEntityTypeId')) ?>
                     </div>
                 </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label">Doing Business As: </label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" placeholder="Trading Name" name="businessAs" value="<?= set_value('business_as') ?>" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label"></label>
+                    <div class="col-sm-10">
+                        <?= form_checkbox('isCommercial', 'true', (set_value('isCommercial') == "true" && set_value('entityType') == "2"), ['class' => "form-check-input"]); ?>&nbsp;<span>Is Commercial</span>
+                    </div>
+                </div>
             </div>
 
             <div class="row mb-3">

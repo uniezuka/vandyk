@@ -33,10 +33,18 @@ class Clients extends BaseController
         $search = $this->request->getGet('search') ?? "";
         $search = trim($search);
 
+        $nonCommercialOnly = $this->request->getGet('nonCommercialOnly') ?? "";
+        $nonCommercialOnly = trim($nonCommercialOnly);
+        $nonCommercialOnly = ($nonCommercialOnly === 'true');
+
+        $commercialOnly = $this->request->getGet('commercialOnly') ?? "";
+        $commercialOnly = trim($commercialOnly);
+        $commercialOnly = ($commercialOnly === 'true');
+
         if ($search)
-            $clients = $this->clientService->search($page, $search);
+            $clients = $this->clientService->search($page, $search, $commercialOnly, $nonCommercialOnly);
         else 
-            $clients = $this->clientService->getPaged($page);
+            $clients = $this->clientService->getPaged($page, $commercialOnly, $nonCommercialOnly);
 
         $pager_links = $this->pager->makeLinks($page, $clients->limit, $clients->total, 'bootstrap_full');
 
@@ -44,6 +52,8 @@ class Clients extends BaseController
         $data['title'] = "Clients List";
         $data['pager_links'] = $pager_links;
         $data['search'] = $this->request->getGet('search') ?? "";
+        $data['non_commercial_only'] = $nonCommercialOnly;
+        $data['commercial_only'] = $commercialOnly;
 
         return view('Clients/index_view', ['data' => $data]);
     }
@@ -60,7 +70,8 @@ class Clients extends BaseController
 
         $post = $this->request->getPost([
             'entityType', 'firstName', 'lastName', 'clientName2', 'companyName', 'companyName2', 'address', 'city', 
-            'zip', 'cellPhone', 'homePhone', 'email', 'clientCode', 'brokerId', 'businessEntityTypeId', 'state'    
+            'zip', 'cellPhone', 'homePhone', 'email', 'clientCode', 'brokerId', 'businessEntityTypeId', 'state', 
+            'businessAs', 'isCommercial'
         ]);
 
 
@@ -123,7 +134,8 @@ class Clients extends BaseController
 
         $post = $this->request->getPost([
             'entityType', 'firstName', 'lastName', 'clientName2', 'companyName', 'companyName2', 'address', 'city', 
-            'zip', 'cellPhone', 'homePhone', 'email', 'clientCode', 'brokerId', 'businessEntityTypeId', 'state'   
+            'zip', 'cellPhone', 'homePhone', 'email', 'clientCode', 'brokerId', 'businessEntityTypeId', 'state',
+            'businessAs', 'isCommercial'
         ]);
 
         if ($this->validateData($post, [

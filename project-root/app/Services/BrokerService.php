@@ -14,10 +14,9 @@ class BrokerService extends BaseService
         $builder = $this->db->table('broker');
         $builder->select('*');
         $builder->join('broker_login', 'broker.broker_id = broker_login.broker_id');
+        $query = $builder->get($this->limit, $offset);
 
         $total = $builder->countAllResults();
-
-        $query = $builder->get($this->limit, $offset);
 
         return (object) array(
             'data'   => $query->getResult(),
