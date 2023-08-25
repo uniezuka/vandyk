@@ -115,8 +115,6 @@ class ClientService extends BaseService
     {
         $builder = $this->db->table('client');
 
-        echo var_export($message, true);
-
         $data = [
             'first_name'                  => $message->firstName,
             'last_name'                   => $message->lastName,
@@ -144,5 +142,16 @@ class ClientService extends BaseService
         $builder->update();
         
         return $this->findOne($message->client_id);
+    }
+
+    public function getBuildings($client_id)
+    {
+        $builder = $this->db->table('client_building');
+        $builder->where('client_id', $client_id);
+        $builder->orderBy('build_index ', 'ASC');
+
+        $query = $builder->get();
+
+        return $query->getResult();
     }
 }

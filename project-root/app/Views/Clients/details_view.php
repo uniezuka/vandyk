@@ -6,6 +6,7 @@
     helper('html'); 
     $client = $data['client'];
     $broker = $data['broker'];
+    $buildings = $data['buildings'];
 
     function clientDisplay($client) : string {
         if ($client->entity_type == 1) {
@@ -55,6 +56,13 @@
                     <div class="col col-4">
                         <a href="#" class="btn btn-primary">New Flood Quote</a>
                     </div>
+
+                    <?php if ($client->is_commercial) { ?>
+                        <div class="col col-4">
+                            <a href="<?= base_url('/client/'. $client->client_id . '/building/create') ?>" class="btn btn-primary">Add Building Location</a>
+                            <span class="d-block">**Hiscox limit is 10 buildings per client quote</span>
+                        </div>
+                    <?php } ?>
                 </div>
             </div>
         </div>
@@ -62,7 +70,7 @@
 </div>
 
 <div class="row">
-    <div class="col-10">
+    <div class="col-5">
         <div class="card">
             <div class="card-body">
                 <h5>Flood Policies/Quotes</h5>
@@ -86,6 +94,30 @@
             </div>
         </div>
     </div>
+
+    <?php if ($client->is_commercial) { ?>
+        <div class="col-5">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Buildings</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($buildings as $building) : ?>
+                                <tr>
+                                    <td><?= '#' . $building->build_index . ' ' . $building->address . ', ' . $building->city ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <?php } ?>
 </div>
 
 <?= $this->endSection() ?>

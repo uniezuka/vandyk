@@ -54,6 +54,7 @@ $routes->get('/sla/add', 'SLA::add', ['filter' => 'authGuard']);
 $routes->get('/sla/edit', 'SLA::edit', ['filter' => 'authGuard']);
 
 $routes->get('/clients', 'Clients::index', ['filter' => 'authGuard']);
+$routes->get('/client/(:num)/building/create', 'ClientBuildings::create/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'client/create', 'Clients::create', ['filter' => 'authGuard']);
 $routes->get('/client/details/(:num)', 'Clients::details/$1', ['filter' => 'authGuard']);
 $routes->get('/client/update/(:num)', 'Clients::update/$1', ['filter' => 'authGuard']);
@@ -61,6 +62,21 @@ $routes->post('/client/update/(:num)', 'Clients::update/$1', ['filter' => 'authG
 
 $routes->get('/flood_quote/create', 'FloodQuote::Create', ['filter' => 'authGuard']);
 $routes->get('/flood_quote/update', 'FloodQuote::Update', ['filter' => 'authGuard']);
+
+$routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);
+$routes->get('/county/update/(:num)', 'Counties::update/$1', ['filter' => 'authGuard']);
+$routes->post('/county/update/(:num)', 'Counties::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/occupancies', 'Occupancies::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'occupancy/create', 'Occupancies::create', ['filter' => 'authGuard']);
+$routes->get('/occupancy/update/(:num)', 'Occupancies::update/$1', ['filter' => 'authGuard']);
+$routes->post('/occupancy/update/(:num)', 'Occupancies::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/constructions', 'Constructions::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'construction/create', 'Constructions::create', ['filter' => 'authGuard']);
+$routes->get('/construction/update/(:num)', 'Constructions::update/$1', ['filter' => 'authGuard']);
+$routes->post('/construction/update/(:num)', 'Constructions::update/$1', ['filter' => 'authGuard']);
 
 /*
  * --------------------------------------------------------------------

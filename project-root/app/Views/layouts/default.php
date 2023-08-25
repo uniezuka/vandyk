@@ -42,10 +42,9 @@
                                 Settings
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/transaction_types'); ?>">Transaction Types</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/fire_codes'); ?>">Fire Codes</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/coverage_list'); ?>">Coverage List</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/settings/insurer_naic_list'); ?>">Insurer NAIC List</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/counties'); ?>">Counties</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/occupancies'); ?>">Occupancies</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/constructions'); ?>">Constructions</a></li>
                             </ul>
                         </li>
 

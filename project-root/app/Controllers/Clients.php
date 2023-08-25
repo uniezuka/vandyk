@@ -114,6 +114,11 @@ class Clients extends BaseController
 
         $data['broker'] = $this->brokerService->findOne($data['client']->broker_id);
 
+        $data['buildings'] = [];
+
+        if ($data['client']->is_commercial)
+            $data['buildings'] = $this->clientService->getBuildings($data['client']->client_id);
+
         return view('Clients/details_view', ['data' => $data]);
     }
 

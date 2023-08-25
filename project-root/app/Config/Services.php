@@ -63,4 +63,31 @@ class Services extends BaseService
 
         return new \App\Services\EntityService();
     }
+
+    public static function countyService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('countyService');
+        }
+
+        return new \App\Services\CountyService();
+    }
+
+    public static function constructionService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('constructionService');
+        }
+
+        return new \App\Services\ConstructionService();
+    }
+
+    public static function occupancyService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('occupancyService');
+        }
+
+        return new \App\Services\OccupancyService();
+    }
 }

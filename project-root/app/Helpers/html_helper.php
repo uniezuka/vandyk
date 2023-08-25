@@ -77,3 +77,45 @@ function businessEntitySelect($name = "", $selectedItem = "") {
 
     return $str;
 }
+
+function occupancySelect($name = "", $selectedItem = "") {
+    $service = service('occupancyService');
+
+    $str = '<select class="form-select" name="' . $name . '">';
+
+    $str .= '<option';
+    $str .= $selectedItem == "" ? ' selected' : '';
+    $str .= '></option>';
+
+    foreach ($service->getAll() as $item) {
+        $str .= '<option';
+        $str .= ' value="' . $item->occupancy_id . '"';
+        $str .= $selectedItem == $item->occupancy_id ? ' selected' : '';
+        $str .= '>' . $item->value . '</option>';
+    }
+
+    $str .= '</select>';
+
+    return $str;
+}
+
+function constructionSelect($name = "", $selectedItem = "") {
+    $service = service('constructionService');
+
+    $str = '<select class="form-select" name="' . $name . '">';
+
+    $str .= '<option';
+    $str .= $selectedItem == "" ? ' selected' : '';
+    $str .= '></option>';
+
+    foreach ($service->getAll() as $item) {
+        $str .= '<option';
+        $str .= ' value="' . $item->construction_id  . '"';
+        $str .= $selectedItem == $item->construction_id ? ' selected' : '';
+        $str .= '>' . $item->name . '</option>';
+    }
+
+    $str .= '</select>';
+
+    return $str;
+}
