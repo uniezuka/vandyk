@@ -90,4 +90,13 @@ class Services extends BaseService
 
         return new \App\Services\OccupancyService();
     }
+
+    public static function foundationService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('foundationService');
+        }
+
+        return new \App\Services\FoundationService();
+    }
 }

@@ -105,6 +105,8 @@ class Clients extends BaseController
 
     public function details($id = null)
     {
+        helper('form');
+        
         $data['title'] = "Client Details";
         $data['client'] = $this->clientService->findOne($id);
 

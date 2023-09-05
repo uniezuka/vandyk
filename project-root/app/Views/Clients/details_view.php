@@ -18,6 +18,19 @@
     }
 ?>
 
+<?php if (session()->getFlashdata('error') || validation_errors()) : ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error') ?>
+        <?= validation_list_errors() ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('message')) : ?>
+    <div class="alert alert-success">
+        <?= session()->getFlashdata('message') ?>
+    </div>
+<?php endif; ?>
+
 <div class="row mb-3">
     <div class="col-8">
         <div class="card">
@@ -104,12 +117,14 @@
                         <thead>
                             <tr>
                                 <th scope="col"></th>
+                                <th scope="col"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($buildings as $building) : ?>
                                 <tr>
                                     <td><?= '#' . $building->build_index . ' ' . $building->address . ', ' . $building->city ?></td>
+                                    <td><a href="<?= base_url('/client/') . $client->client_id . '/building/delete/' . $building->client_building_id ?>">Delete</a></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

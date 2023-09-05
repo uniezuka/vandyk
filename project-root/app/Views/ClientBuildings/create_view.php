@@ -8,6 +8,15 @@ $client = $data['client'];
 
 $currentDate = new DateTime();
 $year = $currentDate->format("Y");
+
+$foundations = $data['foundations'];
+$elavatedFoundations = array_filter($foundations, function ($k) {
+    return $k->is_elevated;
+});
+
+$nonElavatedFoundations = array_filter($foundations, function ($k) {
+    return !$k->is_elevated;
+})
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -40,49 +49,57 @@ $year = $currentDate->format("Y");
             </div>
 
             <div class="row mb-3">
+                <div class="col-sm-12">
+                    <input type="text" id="location-address" class="form-control" name="location-address" readonly />
+                </div>
+            </div>
+
+            <div class="row mb-3">
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" placeholder="Number" name="number" value="<?= set_value('number') ?>" />
+                    <input type="text" class="form-control" id="street_number" placeholder="Number" name="streetNumber" value="<?= set_value('streetNumber') ?>" />
                 </div>
 
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" placeholder="Street" name="street" value="<?= set_value('street') ?>" />
+                    <input type="text" class="form-control" id="route" placeholder="Street" name="street" value="<?= set_value('street') ?>" />
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" placeholder="City" name="city" value="<?= set_value('city') ?>" />
+                    <input type="text" class="form-control" id="locality" placeholder="City" name="city" value="<?= set_value('city') ?>" />
                 </div>
 
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" name="state" value="<?= set_value('state') ?>" />
+                    <input type="text" class="form-control" id="administrative_area_level_1" name="state" value="<?= set_value('state') ?>" />
                 </div>
 
                 <div class="col-sm-2">
-                    <input type="text" class="form-control" name="zip_code" value="<?= set_value('zip_code') ?>" />
+                    <input type="text" class="form-control" id="postal_code" name="zipCode" value="<?= set_value('zipCode') ?>" />
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-sm-8">
-                    <input type="text" class="form-control" placeholder="County" name="county" value="<?= set_value('county') ?>" />
+                    <input type="text" class="form-control" placeholder="County" id="administrative_area_level_2" name="county" value="<?= set_value('county') ?>" />
                 </div>
             </div>
 
             <div class="row mb-3">
                 <div class="col-sm-3">
-                    <input type="text" class="form-control" placeholder="Latitude" name="latitude" value="<?= set_value('latitude') ?>" />
+                    <input type="text" class="form-control" placeholder="Latitude" id="latitude" name="latitude" value="<?= set_value('latitude') ?>" />
                 </div>
 
                 <div class="col-sm-3">
-                    <input type="text" class="form-control" placeholder="Longitude" name="longitude" value="<?= set_value('longitude') ?>" />
+                    <input type="text" class="form-control" placeholder="Longitude" id="longitude" name="longitude" value="<?= set_value('longitude') ?>" />
                 </div>
+
+                <input name="placeId" type="hidden" id="placeId" placeholder="Google ID" />
             </div>
 
             <div class="row mb-3">
                 <label class="col-sm-3 col-form-label">Building Description:</label>
                 <div class="col-sm-9">
-                    <input type="text" class="form-control" placeholder="Brief Description" name="address" value="<?= set_value('description') ?>" />
+                    <input type="text" class="form-control" placeholder="Brief Description" name="description" value="<?= set_value('description') ?>" />
                 </div>
             </div>
 
@@ -97,8 +114,8 @@ $year = $currentDate->format("Y");
                 <label class="col-sm-3 col-form-label">Building Purpose:</label>
                 <div class="col-sm-9">
                     <select class="form-select" name="purpose">
-                        <option selected="selected">Commercial</option>
-                        <option>Residential</option>
+                        <option selected="selected" value="commercial">Commercial</option>
+                        <option value="residential">Residential</option>
                     </select>
                 </div>
             </div>
@@ -153,7 +170,127 @@ $year = $currentDate->format("Y");
 
             <div class="row mb-3">
                 <strong>Foundation</strong>
+
+                <label class="col-sm-3 col-form-label">Elevated Choices:</label>
+                <div class="col-sm-9">
+                    <?php foreach ($elavatedFoundations as $foundation) : ?>
+                        <?= form_radio('foundationType', $foundation->foundation_id, (set_value('foundationType') == $foundation->foundation_id), ['class' => "form-check-input", 'data-is-elevated' => 'true']); ?>&nbsp;<span><?= $foundation->name ?></span>
+                        &nbsp;
+                    <?php endforeach; ?>
+                </div>
+
+                <label class="col-sm-3 col-form-label">Non-Elevated:</label>
+                <div class="col-sm-9">
+                    <?php foreach ($nonElavatedFoundations as $foundation) : ?>
+                        <?= form_radio('foundationType', $foundation->foundation_id, (set_value('foundationType') == $foundation->foundation_id), ['class' => "form-check-input", 'data-is-elevated' => 'false']); ?>&nbsp;<span><?= $foundation->name ?></span>
+                        &nbsp;
+                    <?php endforeach; ?>
+                </div>
             </div>
+
+            <div id="whenNotElevated" style="display: none;">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Has Basement?</label>
+                    <div class="col-sm-3">
+                        <?= form_radio('hasBasement', '1', set_value('hasBasement') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Yes</span>
+                        &nbsp;
+                        <?= form_radio('hasBasement', '0', (set_value('hasBasement') == "0" || set_value('hasBasement') == ""), ['class' => "form-check-input"]); ?>&nbsp;<span>No</span>
+                    </div>
+                </div>
+
+                <div id="basementCompletion" class="row mb-3" style="display: none;">
+                    <label class="col-sm-3 col-form-label">Is Basement Finished?</label>
+                    <div class="col-sm-3">
+                        <?= form_radio('basementFinished', '1', set_value('basementFinished') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Yes</span>
+                        &nbsp;
+                        <?= form_radio('basementFinished', '0', (set_value('basementFinished') == "0" || set_value('basementFinished') == ""), ['class' => "form-check-input"]); ?>&nbsp;<span>No</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="whenElevated" style="display: none;">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Elevation Height:</label>
+                    <div class="col-sm-3">
+                        <input type="number" placeholder="0" name="elevationHeight" value="<?= set_value('elevationHeight') ?>" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Is there a Below floor Enclosure?</label>
+                    <div class="col-sm-3">
+                        <?= form_radio('hasBelowFloorEnclosure', '1', set_value('hasBelowFloorEnclosure') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Yes</span>
+                        &nbsp;
+                        <?= form_radio('hasBelowFloorEnclosure', '0', (set_value('hasBelowFloorEnclosure') == "0" || set_value('basementFinished') == ""), ['class' => "form-check-input"]); ?>&nbsp;<span>No</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3 withEnclosure">
+                    <label class="col-sm-3 col-form-label">Enclosure Type</label>
+                    <div class="col-sm-3">
+                        <?= form_radio('enclosureType', '1', set_value('enclosureType') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Partial</span>
+                        &nbsp;
+                        <?= form_radio('enclosureType', '0', set_value('enclosureType') == "0", ['class' => "form-check-input"]); ?>&nbsp;<span>Fully</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3 withEnclosure">
+                    <label class="col-sm-3 col-form-label">Enclosure Completion Status</label>
+                    <div class="col-sm-3">
+                        <?= form_radio('completionStatus', '1', set_value('completionStatus') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Finished</span>
+                        &nbsp;
+                        <?= form_radio('completionStatus', '0', set_value('completionStatus') == "0", ['class' => "form-check-input"]); ?>&nbsp;<span>Unfinished</span>
+                    </div>
+                </div>
+
+                <div class="row mb-3 withEnclosure">
+                    <label class="col-sm-3 col-form-label">Enclosure Has Elevator</label>
+                    <div class="col-sm-3">
+                        <?= form_radio('hasElevator', '1', set_value('hasElevator') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Yes</span>
+                        &nbsp;
+                        <?= form_radio('hasElevator', '0', set_value('hasElevator') == "0", ['class' => "form-check-input"]); ?>&nbsp;<span>No</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="valuesForBasementEnclosure" style="display: none;">
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Equipment Value in Basement/Enclosure</label>
+                    <div class="col-sm-3">
+                        <input type="number" class="form-control" placeholder="Cost" name="equipmentValue" value="<?= set_value('equipmentValue') ?>" />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Other Personal Property Value in Basement/Enclosure</label>
+                    <div class="col-sm-3">
+                        <input type="number" class="form-control" placeholder="Cost" name="otherPersonalValue" value="<?= set_value('otherPersonalValue') ?>" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-3 col-form-label">Building Replacement Cost:</label>
+                <div class="col-sm-3">
+                    <input type="number" class="form-control" placeholder="Replacement Cost" name="replacementCost" required value="<?= set_value('replacementCost') ?>" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-3 col-form-label">Business Personal Property Value:</label>
+                <div class="col-sm-3">
+                    <input type="number" class="form-control" placeholder="Personal Value" name="personalValue" required value="<?= set_value('personalValue') ?>" />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label class="col-sm-3 col-form-label">Business Income and Extra Expenses Value:</label>
+                <div class="col-sm-3">
+                    <input type="number" class="form-control" placeholder="Income/Expense Total" name="incomeExpenseTotal" required value="<?= set_value('incomeExpenseTotal') ?>" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Building</button>
         </form>
     </div>
 </div>
@@ -256,32 +393,145 @@ $year = $currentDate->format("Y");
                 ].join(' ');
             }
 
-            // document.getElementById('location-address').innerHTML = place.name + ', ' + address;
-            // document.getElementById('buildingLat').value = place.geometry.location.lat();
-            // document.getElementById('buildingLat').disabled = false;
-            // document.getElementById('buildingLon').value = place.geometry.location.lng();
-            // document.getElementById('buildingLon').disabled = false;
-            // document.getElementById('placeID').value = place.place_id;
-            // document.getElementById('placeID').disabled = false;
+            document.getElementById('location-address').value = place.name + ', ' + address;
+            document.getElementById('latitude').value = place.geometry.location.lat();
+            document.getElementById('latitude').disabled = false;
+            document.getElementById('longitude').value = place.geometry.location.lng();
+            document.getElementById('longitude').disabled = false;
+            document.getElementById('placeId').value = place.place_id;
 
-            //Added to attempt smaller fields
-            // for (var component in componentForm) {
-            //     document.getElementById(component).value = '';
-            //     document.getElementById(component).disabled = false;
+            for (var component in componentForm) {
+                if (document.getElementById(component)) {
+                    document.getElementById(component).value = '';
+                    document.getElementById(component).disabled = false;
+                }
+            }
 
-            // }
-
-            // Get each component of the address from the place details,
-            // and then fill-in the corresponding field on the form.
             for (var i = 0; i < place.address_components.length; i++) {
                 var addressType = place.address_components[i].types[0];
                 if (componentForm[addressType]) {
                     var val = place.address_components[i][componentForm[addressType]];
-                    document.getElementById(addressType).value = val;
+
+                    if (document.getElementById(addressType)) {
+                        document.getElementById(addressType).value = val;
+                    }
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+
+        function toggleElevate(isElavated) {
+            $('#whenNotElevated').hide();
+            $('#whenElevated').hide();
+
+            isElavated ? $('#whenElevated').show() : $('#whenNotElevated').show();
+        }
+
+        function toggleHasBasement(hasBasement) {
+            $('#basementCompletion').hide();
+            $('#valuesForBasementEnclosure').hide();
+
+            $('input[name="basementFinished"][value="0"]').prop('checked', true);
+
+            if (hasBasement === '1') {
+                $('#basementCompletion').show();
+                $('#valuesForBasementEnclosure').show();
+            }
+        }
+
+        function toggleHasBelowFloorEnclosure(hasBelowFloorEnclosure) {
+            $('.withEnclosure').hide();
+
+            if (hasBelowFloorEnclosure === '1') {
+                $('.withEnclosure').show();
+                $('#valuesForBasementEnclosure').show();
+            }
+        }
+
+        $('input[name="foundationType"]').click(function() {
+            var isElavated = $(this).data('is-elevated');
+
+            toggleElevate(isElavated);
+        });
+
+        $('input[name="hasBasement"]').click(function() {
+            var val = $(this).val();
+
+            toggleHasBasement(val);
+        });
+
+        $('.withEnclosure').hide();
+
+        $('input[name="hasBelowFloorEnclosure"]').click(function() {
+            var val = $(this).val();
+
+            toggleHasBelowFloorEnclosure(vale);
+        });
+
+        $('input[type="number"]').on('keydown', function(event) {
+            if (event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 ||
+                (event.keyCode == 65 && event.ctrlKey === true) ||
+                (event.keyCode >= 35 && event.keyCode <= 39)) {
+                return;
+            } else {
+                if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105)) &&
+                    event.keyCode != 190 && event.keyCode != 110) {
+                    event.preventDefault();
                 }
             }
         });
 
+        var elevate = $('input[name="foundationType"]:checked').data('is-elevated');
+        var hasBasement = $('input[name="hasBasement"]:checked').val();
+        var hasBelowFloorEnclosure = $('input[name="hasBelowFloorEnclosure"]:checked').val();
+
+        toggleElevate(elevate);
+        toggleHasBasement(hasBasement);
+        toggleHasBelowFloorEnclosure(hasBelowFloorEnclosure);
+    });
+
+    function geocodePosition(pos) {
+        geocoder.geocode({
+            latLng: pos
+        }, function(responses) {
+            if (responses && responses.length > 0) {
+                marker.formatted_address = responses[0].formatted_address;
+                marker.locationLat = responses[0].geometry.location.lat();
+                marker.locationLon = responses[0].geometry.location.lng();
+                marker.place_id = responses[0].place_id;
+                marker.url = responses[0].url;
+                marker.name = responses[0].name;
+            } else {
+                marker.formatted_address = 'Cannot determine address at this location.';
+            }
+
+            document.getElementById('location-address').innerHTML = marker.formatted_address;
+            document.getElementById('latitude').value = marker.locationLat;
+            document.getElementById('latitude').disabled = false;
+            document.getElementById('longitude').value = marker.locationLon;
+            document.getElementById('longitude').disabled = false;
+            document.getElementById('placeId').value = marker.place_id;
+
+            for (var component in componentForm) {
+                if (document.getElementById(component)) {
+                    document.getElementById(component).value = '';
+                    document.getElementById(component).disabled = false;
+                }
+            }
+
+            for (var i = 0; i < responses[0].address_components.length; i++) {
+                var addressType = responses[0].address_components[i].types[0];
+                if (componentForm[addressType]) {
+                    var val = responses[0].address_components[i][componentForm[addressType]];
+
+                    if (document.getElementById(addressType)) {
+                        document.getElementById(addressType).value = val;
+                    }
+                }
+            }
+        });
     }
 </script>
 

@@ -53,8 +53,11 @@ $routes->get('/sla', 'SLA::index', ['filter' => 'authGuard']);
 $routes->get('/sla/add', 'SLA::add', ['filter' => 'authGuard']);
 $routes->get('/sla/edit', 'SLA::edit', ['filter' => 'authGuard']);
 
-$routes->get('/clients', 'Clients::index', ['filter' => 'authGuard']);
 $routes->get('/client/(:num)/building/create', 'ClientBuildings::create/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], '/client/(:num)/building/create', 'ClientBuildings::create/$1', ['filter' => 'authGuard']);
+$routes->get('/client/(:num)/building/delete/(:num)', 'ClientBuildings::delete/$1/$2', ['filter' => 'authGuard']);
+
+$routes->get('/clients', 'Clients::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'client/create', 'Clients::create', ['filter' => 'authGuard']);
 $routes->get('/client/details/(:num)', 'Clients::details/$1', ['filter' => 'authGuard']);
 $routes->get('/client/update/(:num)', 'Clients::update/$1', ['filter' => 'authGuard']);
