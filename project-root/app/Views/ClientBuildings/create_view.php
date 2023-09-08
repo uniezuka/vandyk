@@ -114,8 +114,8 @@ $nonElavatedFoundations = array_filter($foundations, function ($k) {
                 <label class="col-sm-3 col-form-label">Building Purpose:</label>
                 <div class="col-sm-9">
                     <select class="form-select" name="purpose">
-                        <option selected="selected" value="commercial">Commercial</option>
-                        <option value="residential">Residential</option>
+                        <option <?= (set_value('purpose') == "Commercial" || set_value('purpose') == "") ? 'selected="selected"' : '' ?> value="Commercial">Commercial</option>
+                        <option <?= (set_value('purpose') == "Residential") ? 'selected="selected"' : '' ?> value="Residential">Residential</option>
                     </select>
                 </div>
             </div>
@@ -221,7 +221,7 @@ $nonElavatedFoundations = array_filter($foundations, function ($k) {
                     <div class="col-sm-3">
                         <?= form_radio('hasBelowFloorEnclosure', '1', set_value('hasBelowFloorEnclosure') == "1", ['class' => "form-check-input"]); ?>&nbsp;<span>Yes</span>
                         &nbsp;
-                        <?= form_radio('hasBelowFloorEnclosure', '0', (set_value('hasBelowFloorEnclosure') == "0" || set_value('basementFinished') == ""), ['class' => "form-check-input"]); ?>&nbsp;<span>No</span>
+                        <?= form_radio('hasBelowFloorEnclosure', '0', (set_value('hasBelowFloorEnclosure') == "0" || set_value('hasBelowFloorEnclosure') == ""), ['class' => "form-check-input"]); ?>&nbsp;<span>No</span>
                     </div>
                 </div>
 
@@ -433,7 +433,10 @@ $nonElavatedFoundations = array_filter($foundations, function ($k) {
             $('#basementCompletion').hide();
             $('#valuesForBasementEnclosure').hide();
 
-            $('input[name="basementFinished"][value="0"]').prop('checked', true);
+            var hasSelectedBasementFinished = $('input[name="basementFinished"]:checked');
+            if (!hasSelectedBasementFinished) {
+                $('input[name="basementFinished"][value="0"]').prop('checked', true);
+            }
 
             if (hasBasement === '1') {
                 $('#basementCompletion').show();
@@ -467,19 +470,22 @@ $nonElavatedFoundations = array_filter($foundations, function ($k) {
         $('input[name="hasBelowFloorEnclosure"]').click(function() {
             var val = $(this).val();
 
-            toggleHasBelowFloorEnclosure(vale);
+            toggleHasBelowFloorEnclosure(val);
         });
 
         $('input[type="number"]').on('keydown', function(event) {
-            if (event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 ||
+            if (event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 || event.keyCode == 190 || event.keyCode == 110 || event.keyCode == 189 || event.keyCode == 109 ||
+                // Allow: Ctrl+A
                 (event.keyCode == 65 && event.ctrlKey === true) ||
-                (event.keyCode >= 35 && event.keyCode <= 39)) {
+                // Allow: home, end, left, right
+                (event.keyCode >= 35 && event.keyCode <= 39) ||
+                // Allow: numbers from the top row (0-9) and numeric keypad (0-9)
+                ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105))) {
+                // Let it happen, don't do anything
                 return;
             } else {
-                if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105)) &&
-                    event.keyCode != 190 && event.keyCode != 110) {
-                    event.preventDefault();
-                }
+                // Prevent any other keypress
+                event.preventDefault();
             }
         });
 
@@ -487,9 +493,11 @@ $nonElavatedFoundations = array_filter($foundations, function ($k) {
         var hasBasement = $('input[name="hasBasement"]:checked').val();
         var hasBelowFloorEnclosure = $('input[name="hasBelowFloorEnclosure"]:checked').val();
 
-        toggleElevate(elevate);
-        toggleHasBasement(hasBasement);
-        toggleHasBelowFloorEnclosure(hasBelowFloorEnclosure);
+        if (elevate !== undefined) {
+            toggleElevate(elevate);
+            toggleHasBasement(hasBasement);
+            toggleHasBelowFloorEnclosure(hasBelowFloorEnclosure);
+        }
     });
 
     function geocodePosition(pos) {

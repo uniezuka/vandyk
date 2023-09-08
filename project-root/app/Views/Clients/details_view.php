@@ -124,7 +124,10 @@
                             <?php foreach ($buildings as $building) : ?>
                                 <tr>
                                     <td><?= '#' . $building->build_index . ' ' . $building->address . ', ' . $building->city ?></td>
-                                    <td><a href="<?= base_url('/client/') . $client->client_id . '/building/delete/' . $building->client_building_id ?>">Delete</a></td>
+                                    <td>
+                                        <a href="<?= base_url('/client/') . $client->client_id . '/building/update/' . $building->client_building_id ?>">Update</a>&nbsp;
+                                        <a href="<?= base_url('/client/') . $client->client_id . '/building/delete/' . $building->client_building_id ?>">Delete</a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
