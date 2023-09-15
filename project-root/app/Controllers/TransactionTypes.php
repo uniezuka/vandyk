@@ -7,10 +7,10 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Exception;
 
-class Constructions extends BaseController
+class TransactionTypes extends BaseController
 {
     protected $pager;
-    protected $constructionService;
+    protected $transactionTypeService;
 
     public function initController(
         RequestInterface $request,
@@ -20,7 +20,7 @@ class Constructions extends BaseController
         parent::initController($request, $response, $logger);
 
         $this->pager = service('pager');
-        $this->constructionService = service('constructionService');
+        $this->transactionTypeService = service('transactionTypeService');
     }
 
     public function index()
@@ -28,23 +28,23 @@ class Constructions extends BaseController
         helper('form');
 
         $page  = (int) ($this->request->getGet('page') ?? 1);
-        $constructions = $this->constructionService->getPaged($page);
-        $pager_links = $this->pager->makeLinks($page, $constructions->limit, $constructions->total, 'bootstrap_full');
+        $transactionTypes = $this->transactionTypeService->getPaged($page);
+        $pager_links = $this->pager->makeLinks($page, $transactionTypes->limit, $transactionTypes->total, 'bootstrap_full');
 
-        $data['constructions'] = $constructions->data;
-        $data['title'] = "Constructions";
+        $data['transactionTypes'] = $transactionTypes->data;
+        $data['title'] = "Transaction Types";
         $data['pager_links'] = $pager_links;
-        return view('Constructions/index_view', ['data' => $data]);
+        return view('TransactionTypes/index_view', ['data' => $data]);
     }
 
     public function create()
     {
         helper('form');
 
-        $data['title'] = "Create New Construction";
+        $data['title'] = "Create New Transaction Type";
 
         if (!$this->request->is('post')) {
-            return view('Constructions/create_view', ['data' => $data]);
+            return view('TransactionTypes/create_view', ['data' => $data]);
         }
 
         $post = $this->request->getPost([
@@ -55,14 +55,14 @@ class Constructions extends BaseController
             'name' => 'required|max_length[250]'
         ])) {
             try {
-                $this->constructionService->create((object) $post);
-                return redirect()->to('/constructions')->with('message', 'Construction was successfully added.');
+                $this->transactionTypeService->create((object) $post);
+                return redirect()->to('/transaction_types')->with('message', 'Transaction Type was successfully added.');
             } catch(Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
         }
         else {
-            return view('Constructions/create_view', ['data' => $data]);
+            return view('TransactionTypes/create_view', ['data' => $data]);
         }
     }
 
@@ -70,15 +70,15 @@ class Constructions extends BaseController
     {
         helper('form');
 
-        $data['title'] = "Update Construction";
-        $data['construction'] = $this->constructionService->findOne($id);
+        $data['title'] = "Update Transaction Type";
+        $data['transactionType'] = $this->transactionTypeService->findOne($id);
 
-        if (!$data['construction']) {
-            return redirect()->to('/constructions')->with('error', "Construction not found.");
+        if (!$data['transactionType']) {
+            return redirect()->to('/transaction_types')->with('error', "Transaction Type not found.");
         }
 
         if (!$this->request->is('post')) {
-            return view('Constructions/update_view', ['data' => $data]);
+            return view('TransactionTypes/update_view', ['data' => $data]);
         }
 
         $post = $this->request->getPost([
@@ -89,16 +89,16 @@ class Constructions extends BaseController
             'name' => 'required|max_length[250]'
         ])) {
             try {
-                $post['construction_id'] = $id;
+                $post['transaction_type_id'] = $id;
 
-                $this->constructionService->update((object) $post);
-                return redirect()->back()->withInput()->with('message', 'Construction was successfully updated.');
+                $this->transactionTypeService->update((object) $post);
+                return redirect()->back()->withInput()->with('message', 'Transaction Type was successfully updated.');
             } catch(Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
         }
         else {
-            return view('Constructions/update_view', ['data' => $data]);
+            return view('TransactionTypes/update_view', ['data' => $data]);
         }          
     }
 }

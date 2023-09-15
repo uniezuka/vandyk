@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class ConstructionService extends BaseService
+class FireCodeService extends BaseService
 {
     protected $limit = 20;
 
@@ -10,7 +10,7 @@ class ConstructionService extends BaseService
     {
         $offset = ($page-1) * $this->limit;
 
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('fire_code');
         $builder->select('*');
         $query = $builder->get($this->limit, $offset);
 
@@ -27,7 +27,7 @@ class ConstructionService extends BaseService
 
     public function create(object $message)
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('fire_code');
 
         $data = [
             'name'                  => $message->name,
@@ -42,8 +42,8 @@ class ConstructionService extends BaseService
 
     public function findOne($id)
     {
-        $builder = $this->db->table('construction');
-        $builder->where('construction_id', $id);
+        $builder = $this->db->table('fire_code');
+        $builder->where('fire_code_id', $id);
 
         $query = $builder->get(1);
 
@@ -54,22 +54,22 @@ class ConstructionService extends BaseService
 
     public function update(object $message)
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('fire_code');
 
         $data = [
             'name'                  => $message->name,
         ];
 
         $builder->set($data);
-        $builder->where('construction_id', $message->construction_id);
+        $builder->where('fire_code_id', $message->fire_code_id);
         $builder->update();
         
-        return $this->findOne($message->construction_id);
+        return $this->findOne($message->fire_code_id);
     }
 
     public function getAll()
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('fire_code');
         $builder->select('*');
 
         $query = $builder->get();

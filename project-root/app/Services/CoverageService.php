@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class ConstructionService extends BaseService
+class CoverageService extends BaseService
 {
     protected $limit = 20;
 
@@ -10,7 +10,7 @@ class ConstructionService extends BaseService
     {
         $offset = ($page-1) * $this->limit;
 
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('coverage');
         $builder->select('*');
         $query = $builder->get($this->limit, $offset);
 
@@ -27,10 +27,12 @@ class ConstructionService extends BaseService
 
     public function create(object $message)
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('coverage');
 
         $data = [
+            'code'                  => $message->code,
             'name'                  => $message->name,
+            'has_fire_premium'      => $message->hasFirePremium === 'true',
         ];
 
         $builder->insert($data);
@@ -42,8 +44,8 @@ class ConstructionService extends BaseService
 
     public function findOne($id)
     {
-        $builder = $this->db->table('construction');
-        $builder->where('construction_id', $id);
+        $builder = $this->db->table('coverage');
+        $builder->where('coverage_id', $id);
 
         $query = $builder->get(1);
 
@@ -54,22 +56,24 @@ class ConstructionService extends BaseService
 
     public function update(object $message)
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('coverage');
 
         $data = [
+            'code'                  => $message->code,
             'name'                  => $message->name,
+            'has_fire_premium'      => $message->hasFirePremium === 'true',
         ];
 
         $builder->set($data);
-        $builder->where('construction_id', $message->construction_id);
+        $builder->where('coverage_id', $message->coverage_id);
         $builder->update();
         
-        return $this->findOne($message->construction_id);
+        return $this->findOne($message->coverage_id);
     }
 
     public function getAll()
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('coverage');
         $builder->select('*');
 
         $query = $builder->get();

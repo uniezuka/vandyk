@@ -25,7 +25,7 @@
     <div class="col-7">
         <div class="card">
             <div class="card-body">
-                <h5>Counties</h5>
+                <h5>Occupancies</h5>
 
                 <div class="clearfix">
                     <a type="button" class="btn btn-primary float-end" href="<?= base_url('/occupancy/create'); ?>">Create New Occupancy</a>

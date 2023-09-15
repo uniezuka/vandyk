@@ -4,7 +4,7 @@
 
 <?php 
     helper('html'); 
-    $constructions = $data['constructions'];
+    $transactionTypes = $data['transactionTypes'];
     $pager_links = $data['pager_links'];
 ?>
 
@@ -25,10 +25,10 @@
     <div class="col-7">
         <div class="card">
             <div class="card-body">
-                <h5>Constructions</h5>
+                <h5>Transaction Types</h5>
 
                 <div class="clearfix">
-                    <a type="button" class="btn btn-primary float-end" href="<?= base_url('/construction/create'); ?>">Create New Construction</a>
+                    <a type="button" class="btn btn-primary float-end" href="<?= base_url('/transaction_type/create'); ?>">Create New Transaction Type</a>
                 </div>
 
                 <table class="table">
@@ -40,12 +40,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($constructions as $construction): ?>
+                        <?php foreach ($transactionTypes as $transactionType): ?>
                             <tr>
-                                <td><?= $construction->construction_id ?></td>
-                                <td><strong><?= $construction->name ?></strong></td>
+                                <td><?= $transactionType->transaction_type_id ?></td>
+                                <td><strong><?= $transactionType->name ?></strong></td>
                                 <td>
-                                    <a href="<?= base_url('/construction/update/' . $construction->construction_id); ?>">Update</a>
+                                    <a href="<?= base_url('/transaction_type/update/' . $transactionType->transaction_type_id); ?>">Update</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

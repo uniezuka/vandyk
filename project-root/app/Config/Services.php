@@ -99,4 +99,40 @@ class Services extends BaseService
 
         return new \App\Services\FoundationService();
     }
+
+    public static function transactionTypeService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('transactionTypeService');
+        }
+
+        return new \App\Services\TransactionTypeService();
+    }
+
+    public static function fireCodeService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('fireCodeService');
+        }
+
+        return new \App\Services\FireCodeService();
+    }
+
+    public static function coverageService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('coverageService');
+        }
+
+        return new \App\Services\CoverageService();
+    }
+
+    public static function insurerService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('insurerService');
+        }
+
+        return new \App\Services\InsurerService();
+    }
 }

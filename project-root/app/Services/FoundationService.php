@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use CodeIgniter\CLI\Console;
-
 class FoundationService extends BaseService
 {
     protected $limit = 20;

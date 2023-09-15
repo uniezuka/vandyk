@@ -44,11 +44,6 @@ $routes->post('/broker/update/(:num)', 'Brokers::update/$1', ['filter' => 'authG
 $routes->get('/broker/change_password/(:num)', 'Brokers::change_password/$1', ['filter' => 'authGuard']);
 $routes->post('/broker/change_password/(:num)', 'Brokers::change_password/$1', ['filter' => 'authGuard']);
 
-$routes->get('/settings/transaction_types', 'Settings::transaction_types', ['filter' => 'authGuard']);
-$routes->get('/settings/fire_codes', 'Settings::fire_codes', ['filter' => 'authGuard']);
-$routes->get('/settings/coverage_list', 'Settings::coverage_list', ['filter' => 'authGuard']);
-$routes->get('/settings/insurer_naic_list', 'Settings::insurer_naic_list', ['filter' => 'authGuard']);
-
 $routes->get('/sla', 'SLA::index', ['filter' => 'authGuard']);
 $routes->get('/sla/add', 'SLA::add', ['filter' => 'authGuard']);
 $routes->get('/sla/edit', 'SLA::edit', ['filter' => 'authGuard']);
@@ -82,6 +77,28 @@ $routes->get('/constructions', 'Constructions::index', ['filter' => 'authGuard']
 $routes->match(['get', 'post'], 'construction/create', 'Constructions::create', ['filter' => 'authGuard']);
 $routes->get('/construction/update/(:num)', 'Constructions::update/$1', ['filter' => 'authGuard']);
 $routes->post('/construction/update/(:num)', 'Constructions::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/transaction_types', 'TransactionTypes::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'transaction_type/create', 'TransactionTypes::create', ['filter' => 'authGuard']);
+$routes->get('/transaction_type/update/(:num)', 'TransactionTypes::update/$1', ['filter' => 'authGuard']);
+$routes->post('/transaction_type/update/(:num)', 'TransactionTypes::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/fire_codes', 'FireCodes::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'fire_code/create', 'FireCodes::create', ['filter' => 'authGuard']);
+$routes->get('/fire_code/update/(:num)', 'FireCodes::update/$1', ['filter' => 'authGuard']);
+$routes->post('/fire_code/update/(:num)', 'FireCodes::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/coverages', 'Coverages::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'coverage/create', 'Coverages::create', ['filter' => 'authGuard']);
+$routes->get('/coverage/update/(:num)', 'Coverages::update/$1', ['filter' => 'authGuard']);
+$routes->post('/coverage/update/(:num)', 'Coverages::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/insurers', 'Insurers::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'insurer/create', 'Insurers::create', ['filter' => 'authGuard']);
+$routes->get('/insurer/update/(:num)', 'Insurers::update/$1', ['filter' => 'authGuard']);
+$routes->post('/insurer/update/(:num)', 'Insurers::update/$1', ['filter' => 'authGuard']);
+$routes->get('/insurer/activate/(:num)', 'Insurers::activate/$1', ['filter' => 'authGuard']);
+$routes->get('/insurer/deactivate/(:num)', 'Insurers::deactivate/$1', ['filter' => 'authGuard']);
 
 /*
  * --------------------------------------------------------------------

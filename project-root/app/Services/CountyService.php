@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use CodeIgniter\CLI\Console;
-
 class CountyService extends BaseService
 {
     protected $limit = 20;

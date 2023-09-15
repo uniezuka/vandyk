@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class ConstructionService extends BaseService
+class InsurerService extends BaseService
 {
     protected $limit = 20;
 
@@ -10,7 +10,7 @@ class ConstructionService extends BaseService
     {
         $offset = ($page-1) * $this->limit;
 
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('insurer');
         $builder->select('*');
         $query = $builder->get($this->limit, $offset);
 
@@ -27,9 +27,10 @@ class ConstructionService extends BaseService
 
     public function create(object $message)
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('insurer');
 
         $data = [
+            'naic'                  => $message->naic,
             'name'                  => $message->name,
         ];
 
@@ -42,8 +43,8 @@ class ConstructionService extends BaseService
 
     public function findOne($id)
     {
-        $builder = $this->db->table('construction');
-        $builder->where('construction_id', $id);
+        $builder = $this->db->table('insurer');
+        $builder->where('insurer_id', $id);
 
         $query = $builder->get(1);
 
@@ -54,26 +55,42 @@ class ConstructionService extends BaseService
 
     public function update(object $message)
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('insurer');
 
         $data = [
+            'naic'                  => $message->naic,
             'name'                  => $message->name,
         ];
 
         $builder->set($data);
-        $builder->where('construction_id', $message->construction_id);
+        $builder->where('insurer_id', $message->insurer_id);
         $builder->update();
         
-        return $this->findOne($message->construction_id);
+        return $this->findOne($message->insurer_id);
     }
 
     public function getAll()
     {
-        $builder = $this->db->table('construction');
+        $builder = $this->db->table('insurer');
         $builder->select('*');
 
         $query = $builder->get();
 
         return $query->getResult();
+    }
+
+    public function setActive($id, $isActive = true)
+    {
+        $builder = $this->db->table('insurer');
+
+        $data = [
+            'is_active' => $isActive,
+        ];
+
+        $builder->set($data);
+        $builder->where('insurer_id', $id);
+        $builder->update();
+        
+        return $this->findOne($id);
     }
 }

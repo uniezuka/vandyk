@@ -45,6 +45,10 @@
                                 <li><a class="dropdown-item" href="<?= base_url('/counties'); ?>">Counties</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url('/occupancies'); ?>">Occupancies</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url('/constructions'); ?>">Constructions</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/transaction_types'); ?>">Transaction Types</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/fire_codes'); ?>">Fire Codes</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/coverages'); ?>">Coverages</a></li>
+                                <li><a class="dropdown-item" href="<?= base_url('/insurers'); ?>">Insurers</a></li>
                             </ul>
                         </li>
 
