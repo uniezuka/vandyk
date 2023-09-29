@@ -39,7 +39,7 @@
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Settings
+                                References
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="<?= base_url('/counties'); ?>">Counties</a></li>
@@ -49,6 +49,15 @@
                                 <li><a class="dropdown-item" href="<?= base_url('/fire_codes'); ?>">Fire Codes</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url('/coverages'); ?>">Coverages</a></li>
                                 <li><a class="dropdown-item" href="<?= base_url('/insurers'); ?>">Insurers</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Settings
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="<?= base_url('/sla_settings'); ?>">SLA Generator Settings</a></li>
                             </ul>
                         </li>
 

@@ -2,6 +2,26 @@
 
 <?= $this->section('content') ?>
 
+<?php
+helper('html');
+$slaPolicies = $data['slaPolicies'];
+$pager_links = $data['pager_links'];
+$search = $data['search'];
+?>
+
+<?php if (session()->getFlashdata('error') || validation_errors()) : ?>
+    <div class="alert alert-danger">
+        <?= session()->getFlashdata('error') ?>
+        <?= validation_list_errors() ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('message')) : ?>
+    <div class="alert alert-success">
+        <?= session()->getFlashdata('message') ?>
+    </div>
+<?php endif; ?>
+
 <div class="modal fade" id="confirmModal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -9,14 +29,18 @@
                 <h5 class="modal-title" id="exampleModalLabel">Reclaim SLA Number</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>You are about to erase SLA# 22-00912 and make it available again.</p>
-                <h3>This is Not Reversible</h3>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Reclaim SLA #</button>
-            </div>
+            <form role="form" method="post" action="<?= base_url('/sla/reclaim'); ?>">
+                <?= csrf_field() ?>
+                <div class="modal-body">
+                    <?= form_input(['name' => 'sla_policy_id', 'id' => 'slaPolicyId', 'type' => 'hidden', 'value' => '']); ?>
+                    <p>You are about to erase SLA# <span id="transactionNumber"></span> and make it available again.</p>
+                    <h3>This is Not Reversible</h3>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Reclaim SLA #</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -25,13 +49,13 @@
     <div class="col-6">
         <h5>Used SLA Numbers</h5>
 
-        <form class="d-flex">
+        <form class="d-flex" method="get">
             <span class="d-flex form-text me-1 align-items-center">Search by Name or Policy Number</span>
-            <input class="d-flex form-control w-auto me-1" type="search" placeholder="Search" aria-label="Search">
+            <input class="d-flex form-control w-auto me-1" name="search" type="search" placeholder="Search" aria-label="Search" value="<?= $search ?>">
             <button class="btn btn-primary" type="submit">Search</button>
         </form>
 
-        <table class="table">
+        <table class="table sla_policies">
             <thead>
                 <tr>
                     <th scope="col">ID</th>
@@ -47,142 +71,24 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
-                <tr>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">10486</a></td>
-                    <td><a href="<?= base_url('/sla/edit'); ?>">23-00363</a></td>
-                    <td>5</td>
-                    <td>Eric &amp; Marissa Bluestone</td>
-                    <td>21FHI0016911</td>
-                    <td>3/25/2024</td>
-                    <td>0</td>
-                    <td>1500</td>
-                    <td>1500</td>
-                    <td><a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal">Erase</a></td>
-                </tr>
+                <?php foreach ($slaPolicies as $policy) : ?>
+                    <tr>
+                        <td><a href="<?= base_url('/sla/edit'); ?>"><?= $policy->sla_policy_id ?></a></td>
+                        <td><a href="<?= base_url('/sla/edit'); ?>"><?= $policy->transaction_number ?></a></td>
+                        <td><?= $policy->transaction_type_id ?></td>
+                        <td><?= $policy->insured_name ?></td>
+                        <td><?= $policy->policy_number ?></td>
+                        <td><?= $policy->expiry_date ?></td>
+                        <td><?= $policy->fire_premium ?></td>
+                        <td><?= $policy->other_premium ?></td>
+                        <td><?= $policy->total_premium ?></td>
+                        <td><a href="#" data-bs-toggle="modal" class="erase_button" data-bs-target="#confirmModal" data-transaction_number="<?= $policy->transaction_number ?>" data-sla_policy_id="<?= $policy->sla_policy_id ?>">Erase</a></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
 
-        <nav>
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
-                </li>
-            </ul>
-        </nav>
+        <?= $pager_links ?>
     </div>
 
     <div class="col-1"></div>
@@ -191,5 +97,15 @@
         <h5>2023 Available SLA Numbers</h5>
     </div>
 </div>
+
+
+<script type="text/javascript">
+    $(".table.sla_policies .erase_button").click(function() {
+        var transaction_number = $(this).data('transaction_number');
+        var sla_policy_id = $(this).data('sla_policy_id');
+        $(".modal-body #transactionNumber").html(transaction_number);
+        $(".modal-body #slaPolicyId").val(sla_policy_id);
+    });
+</script>
 
 <?= $this->endSection() ?>

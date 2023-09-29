@@ -135,4 +135,22 @@ class Services extends BaseService
 
         return new \App\Services\InsurerService();
     }
+
+    public static function slaPolicyService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('slaPolicyService');
+        }
+
+        return new \App\Services\SLAPolicyService();
+    }
+
+    public static function slaSettingService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('slaSettingService');
+        }
+
+        return new \App\Services\SLASettingService();
+    }
 }

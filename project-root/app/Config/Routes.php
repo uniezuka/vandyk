@@ -47,6 +47,7 @@ $routes->post('/broker/change_password/(:num)', 'Brokers::change_password/$1', [
 $routes->get('/sla', 'SLA::index', ['filter' => 'authGuard']);
 $routes->get('/sla/add', 'SLA::add', ['filter' => 'authGuard']);
 $routes->get('/sla/edit', 'SLA::edit', ['filter' => 'authGuard']);
+$routes->post('/sla/reclaim', 'SLA::reclaim', ['filter' => 'authGuard']);
 
 $routes->get('/client/(:num)/building/create', 'ClientBuildings::create/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], '/client/(:num)/building/create', 'ClientBuildings::create/$1', ['filter' => 'authGuard']);
@@ -99,6 +100,12 @@ $routes->get('/insurer/update/(:num)', 'Insurers::update/$1', ['filter' => 'auth
 $routes->post('/insurer/update/(:num)', 'Insurers::update/$1', ['filter' => 'authGuard']);
 $routes->get('/insurer/activate/(:num)', 'Insurers::activate/$1', ['filter' => 'authGuard']);
 $routes->get('/insurer/deactivate/(:num)', 'Insurers::deactivate/$1', ['filter' => 'authGuard']);
+
+$routes->get('/sla_settings', 'SLASettings::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'sla_setting/create', 'SLASettings::create', ['filter' => 'authGuard']);
+$routes->get('/sla_setting/update/(:num)', 'SLASettings::update/$1', ['filter' => 'authGuard']);
+$routes->post('/sla_setting/update/(:num)', 'SLASettings::update/$1', ['filter' => 'authGuard']);
+$routes->get('/sla_setting/set_current/(:num)', 'SLASettings::set_current/$1', ['filter' => 'authGuard']);
 
 /*
  * --------------------------------------------------------------------
