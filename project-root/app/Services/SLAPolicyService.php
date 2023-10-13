@@ -13,7 +13,7 @@ class SLAPolicyService extends BaseService
         $builder = $this->db->table('sla_policy');
         $builder->where('transaction_type_id !=', 0);
         $builder->orderBy('transaction_number', 'DESC');
-        
+
         $query = $builder->get($this->limit, $offset, false);
 
         $total = $builder->countAllResults(false);
@@ -80,7 +80,7 @@ class SLAPolicyService extends BaseService
         $builder->set($data);
         $builder->where('sla_policy_id', $sla_policy_id);
         $builder->update();
-        
+
         return $this->findOne($sla_policy_id);
     }
 
@@ -94,5 +94,83 @@ class SLAPolicyService extends BaseService
         $row = $query->getRow();
 
         return $row;
+    }
+
+    public function create(object $message)
+    {
+        $builder = $this->db->table('sla_policy');
+
+        $data = [
+            'transaction_number'           => $message->transactionNumber,
+            'transaction_type_id'          => $message->transactionTypeId,
+            'insured_name'                 => $message->insuredName,
+            'policy_number'                => $message->policyNumber,
+            'effectivity_date '            => $message->effectivityDate,
+            'expiry_date'                  => $message->expiryDate,
+            'insurer_naic'                 => $message->insurerNAIC,
+            'insurer_id'                   => $message->insurerId,
+            'fire_premium'                 => $message->firePremium,
+            'other_premium'                => $message->otherPremium,
+            'total_premium'                => $message->totalPremium,
+            'location'                     => $message->location,
+            'zip'                          => $message->zip,
+            'county'                       => $message->county,
+            'fire_code_id'                 => $message->fireCodeId,
+            'coverage_id'                  => $message->coverageId,
+            'transaction_date'             => $message->transactionDate,
+        ];
+
+        $builder->insert($data);
+
+        $id = $this->db->insertID();
+
+        return $this->findOne($id);
+    }
+
+    public function update(object $message)
+    {
+        $builder = $this->db->table('sla_policy');
+
+        $data = [
+            'transaction_type_id'          => $message->transactionTypeId,
+            'insured_name'                 => $message->insuredName,
+            'policy_number'                => $message->policyNumber,
+            'effectivity_date '            => $message->effectivityDate,
+            'expiry_date'                  => $message->expiryDate,
+            'insurer_naic'                 => $message->insurerNAIC,
+            'insurer_id'                   => $message->insurerId,
+            'fire_premium'                 => $message->firePremium,
+            'other_premium'                => $message->otherPremium,
+            'total_premium'                => $message->totalPremium,
+            'location'                     => $message->location,
+            'zip'                          => $message->zip,
+            'county'                       => $message->county,
+            'fire_code_id'                 => $message->fireCodeId,
+            'coverage_id'                  => $message->coverageId,
+            'transaction_date'             => $message->transactionDate,
+        ];
+
+        $builder->set($data);
+        $builder->where('sla_policy_id', $message->sla_policy_id);
+        $builder->update();
+
+        return $this->findOne($message->sla_policy_id);
+    }
+
+    public function getAvailableSLAPolicies($limit = 1, $startsWith = "")
+    {
+        $builder = $this->db->table('sla_policy');
+
+        $builder->groupStart();
+        $builder->where('policy_number', "");
+        $builder->orWhere('policy_number', null);
+        $builder->groupEnd();
+        $builder->like('transaction_number', $startsWith, 'after');
+
+        $builder->orderBy('transaction_number', 'ASC');
+
+        $query = $builder->get($limit, 0, false);
+
+        return $query->getResult();
     }
 }

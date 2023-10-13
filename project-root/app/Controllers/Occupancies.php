@@ -57,11 +57,10 @@ class Occupancies extends BaseController
             try {
                 $this->occupancyService->create((object) $post);
                 return redirect()->to('/occupancies')->with('message', 'Occupancy was successfully added.');
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
-        }
-        else {
+        } else {
             return view('Occupancies/create_view', ['data' => $data]);
         }
     }
@@ -93,12 +92,11 @@ class Occupancies extends BaseController
 
                 $this->occupancyService->update((object) $post);
                 return redirect()->back()->withInput()->with('message', 'Occupancy was successfully updated.');
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
+        } else {
+            return view('Occupancies/update_view', ['data' => $data]);
         }
-        else {
-            return view('occupancies/update_view', ['data' => $data]);
-        }          
     }
 }

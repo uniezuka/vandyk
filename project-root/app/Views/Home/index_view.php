@@ -24,7 +24,7 @@
                         <div class="text-center">
                             <h5>SLA Menu</h5>
                             <p><a href="<?= base_url('/sla'); ?>">SLA Numbers</a></p>
-                            <p><a href="<?= base_url('/sla/add'); ?>">Add Endorse/Cancel SLA</a></p>
+                            <p><a href="<?= base_url('/sla/create'); ?>">Add Endorse/Cancel SLA</a></p>
 
                         </div>
                     </div>

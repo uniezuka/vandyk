@@ -7,6 +7,10 @@ helper('html');
 $slaPolicies = $data['slaPolicies'];
 $pager_links = $data['pager_links'];
 $search = $data['search'];
+$currentSLASetting = $data['currentSLASetting'];
+
+$availableSLAPolicies = $data['availableSLAPolicies'];
+$prevAvailableSLAPolicies = $data['prevAvailableSLAPolicies'];
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -46,7 +50,7 @@ $search = $data['search'];
 </div>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-8">
         <h5>Used SLA Numbers</h5>
 
         <form class="d-flex" method="get">
@@ -73,8 +77,8 @@ $search = $data['search'];
             <tbody>
                 <?php foreach ($slaPolicies as $policy) : ?>
                     <tr>
-                        <td><a href="<?= base_url('/sla/edit'); ?>"><?= $policy->sla_policy_id ?></a></td>
-                        <td><a href="<?= base_url('/sla/edit'); ?>"><?= $policy->transaction_number ?></a></td>
+                        <td><a href="<?= base_url('/sla/update/' . $policy->sla_policy_id); ?>"><?= $policy->sla_policy_id ?></a></td>
+                        <td><a href="<?= base_url('/sla/update/' . $policy->sla_policy_id); ?>"><?= $policy->transaction_number ?></a></td>
                         <td><?= $policy->transaction_type_id ?></td>
                         <td><?= $policy->insured_name ?></td>
                         <td><?= $policy->policy_number ?></td>
@@ -93,8 +97,41 @@ $search = $data['search'];
 
     <div class="col-1"></div>
 
-    <div class="col-5">
-        <h5>2023 Available SLA Numbers</h5>
+    <div class="col-3">
+        <h5><?= $currentSLASetting->year ?> Available SLA Numbers</h5>
+        <table class="table sla_policies">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">SLA Num</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($availableSLAPolicies as $policy) : ?>
+                    <tr>
+                        <td><a href="<?= base_url('/sla/update/' . $policy->sla_policy_id); ?>">Use</a></td>
+                        <td><?= $policy->transaction_number ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <h5><?= $currentSLASetting->year - 1 ?> Available SLA Numbers</h5>
+        <table class="table sla_policies">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">SLA Num</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($prevAvailableSLAPolicies as $policy) : ?>
+                    <tr>
+                        <td><a href="<?= base_url('/sla/update/' . $policy->sla_policy_id); ?>">Use</a></td>
+                        <td><?= $policy->transaction_number ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 

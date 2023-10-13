@@ -93,4 +93,15 @@ class InsurerService extends BaseService
         
         return $this->findOne($id);
     }
+
+    public function getAllActive()
+    {
+        $builder = $this->db->table('insurer');
+        $builder->select('*');
+        $builder->where('is_active', 1);
+
+        $query = $builder->get();
+
+        return $query->getResult();
+    }
 }

@@ -8,7 +8,7 @@ class SLASettingService extends BaseService
 
     public function getPaged($page = 1)
     {
-        $offset = ($page-1) * $this->limit;
+        $offset = ($page - 1) * $this->limit;
 
         $builder = $this->db->table('sla_setting');
         $builder->select('*');
@@ -33,7 +33,7 @@ class SLASettingService extends BaseService
         $builder->insert($message);
 
         $id = $this->db->insertID();
-        
+
         return $this->findOne($id);
     }
 
@@ -57,11 +57,11 @@ class SLASettingService extends BaseService
             'year'          => $message->year,
             'prefix'        => $message->prefix,
         ];
-        
+
         $builder->set($data);
         $builder->where('sla_setting_id', $message->sla_setting_id);
         $builder->update();
-        
+
         return $this->findOne($message->sla_setting_id);
     }
 
@@ -72,7 +72,7 @@ class SLASettingService extends BaseService
         $data = [
             'is_current'          => false,
         ];
-        
+
         $builder->set($data);
         $builder->where('is_current', true);
         $builder->update();
@@ -80,9 +80,33 @@ class SLASettingService extends BaseService
         $data = [
             'is_current'          => true,
         ];
-        
+
         $builder->set($data);
         $builder->where('sla_setting_id', $id);
         $builder->update();
+    }
+
+    public function getCurrent()
+    {
+        $builder = $this->db->table('sla_setting');
+        $builder->where('is_current ', true);
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
+    }
+
+    public function getByYear($year)
+    {
+        $builder = $this->db->table('sla_setting');
+        $builder->where('year ', $year);
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
     }
 }

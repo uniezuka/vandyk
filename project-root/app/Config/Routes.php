@@ -45,8 +45,9 @@ $routes->get('/broker/change_password/(:num)', 'Brokers::change_password/$1', ['
 $routes->post('/broker/change_password/(:num)', 'Brokers::change_password/$1', ['filter' => 'authGuard']);
 
 $routes->get('/sla', 'SLA::index', ['filter' => 'authGuard']);
-$routes->get('/sla/add', 'SLA::add', ['filter' => 'authGuard']);
-$routes->get('/sla/edit', 'SLA::edit', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'sla/create', 'SLA::create', ['filter' => 'authGuard']);
+$routes->get('/sla/update/(:num)', 'SLA::update/$1', ['filter' => 'authGuard']);
+$routes->post('/sla/update/(:num)', 'SLA::update/$1', ['filter' => 'authGuard']);
 $routes->post('/sla/reclaim', 'SLA::reclaim', ['filter' => 'authGuard']);
 
 $routes->get('/client/(:num)/building/create', 'ClientBuildings::create/$1', ['filter' => 'authGuard']);

@@ -59,11 +59,10 @@ class SLASettings extends BaseController
                 $post['is_current'] = false;
                 $this->slaSettingService->create((object) $post);
                 return redirect()->to('/sla_settings')->with('message', 'SLA Setting was successfully added.');
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
-        }
-        else {
+        } else {
             return view('SLASettings/create_view', ['data' => $data]);
         }
     }
@@ -96,13 +95,12 @@ class SLASettings extends BaseController
 
                 $this->slaSettingService->update((object) $post);
                 return redirect()->back()->withInput()->with('message', 'SLA Setting was successfully updated.');
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
-        }
-        else {
+        } else {
             return view('SLASettings/update_view', ['data' => $data]);
-        }          
+        }
     }
 
     public function set_current($id = null)
@@ -117,6 +115,6 @@ class SLASettings extends BaseController
 
         $this->slaSettingService->setCurrent($id);
 
-        return redirect()->to('/sla_settings')->with('message', "Set a current SLA Setting.");      
+        return redirect()->to('/sla_settings')->with('message', "Set a current SLA Setting.");
     }
 }

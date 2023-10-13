@@ -119,3 +119,87 @@ function constructionSelect($name = "", $selectedItem = "") {
 
     return $str;
 }
+
+function transactionTypeSelect($name = "", $selectedItem = "") {
+    $service = service('transactionTypeService');
+
+    $str = '<select class="form-select" name="' . $name . '">';
+
+    $str .= '<option';
+    $str .= $selectedItem == "" ? ' selected' : '';
+    $str .= '></option>';
+
+    foreach ($service->getAll() as $item) {
+        $str .= '<option';
+        $str .= ' value="' . $item->transaction_type_id  . '"';
+        $str .= $selectedItem == $item->transaction_type_id ? ' selected' : '';
+        $str .= '>' . $item->name . '</option>';
+    }
+
+    $str .= '</select>';
+
+    return $str;
+}
+
+function fireCodeSelect($name = "", $selectedItem = "") {
+    $service = service('fireCodeService');
+
+    $str = '<select class="form-select" name="' . $name . '">';
+
+    $str .= '<option';
+    $str .= $selectedItem == "" ? ' selected' : '';
+    $str .= '></option>';
+
+    foreach ($service->getAll() as $item) {
+        $str .= '<option';
+        $str .= ' value="' . $item->fire_code_id  . '"';
+        $str .= $selectedItem == $item->fire_code_id ? ' selected' : '';
+        $str .= '>' . $item->name . '</option>';
+    }
+
+    $str .= '</select>';
+
+    return $str;
+}
+
+function coverageSelect($name = "", $selectedItem = "") {
+    $service = service('coverageService');
+
+    $str = '<select class="form-select" name="' . $name . '">';
+
+    $str .= '<option';
+    $str .= $selectedItem == "" ? ' selected' : '';
+    $str .= '></option>';
+
+    foreach ($service->getAll() as $item) {
+        $str .= '<option';
+        $str .= ' value="' . $item->coverage_id  . '"';
+        $str .= $selectedItem == $item->coverage_id ? ' selected' : '';
+        $str .= '>' . $item->name . '</option>';
+    }
+
+    $str .= '</select>';
+
+    return $str;
+}
+
+function insurerSelect($name = "", $selectedItem = "") {
+    $service = service('insurerService');
+
+    $str = '<select class="form-select" name="' . $name . '">';
+
+    $str .= '<option';
+    $str .= $selectedItem == "" ? ' selected' : '';
+    $str .= '></option>';
+
+    foreach ($service->getAllActive() as $item) {
+        $str .= '<option';
+        $str .= ' value="' . $item->insurer_id  . '"';
+        $str .= $selectedItem == $item->insurer_id ? ' selected' : '';
+        $str .= '>' . $item->name . '</option>';
+    }
+
+    $str .= '</select>';
+
+    return $str;
+}
