@@ -62,8 +62,9 @@ $routes->get('/client/details/(:num)', 'Clients::details/$1', ['filter' => 'auth
 $routes->get('/client/update/(:num)', 'Clients::update/$1', ['filter' => 'authGuard']);
 $routes->post('/client/update/(:num)', 'Clients::update/$1', ['filter' => 'authGuard']);
 
-$routes->get('/flood_quote/create', 'FloodQuote::Create', ['filter' => 'authGuard']);
-$routes->get('/flood_quote/update', 'FloodQuote::Update', ['filter' => 'authGuard']);
+$routes->get('/flood_quotes', 'FloodQuote::index', ['filter' => 'authGuard']);
+$routes->get('/flood_quote/create', 'FloodQuote::create', ['filter' => 'authGuard']);
+$routes->get('/flood_quote/update', 'FloodQuote::update', ['filter' => 'authGuard']);
 
 $routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);

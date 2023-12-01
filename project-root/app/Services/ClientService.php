@@ -13,7 +13,7 @@ class ClientService extends BaseService
         $offset = ($page - 1) * $this->limit;
 
         $builder = $this->db->table('client');
-        
+
         if ($commercialOnly)
             $query = $builder->getWhere(['is_commercial' => 1], $this->limit, $offset, false);
         else if ($nonCommercialOnly)
@@ -140,7 +140,7 @@ class ClientService extends BaseService
         $builder->set($data);
         $builder->where('client_id', $message->client_id);
         $builder->update();
-        
+
         return $this->findOne($message->client_id);
     }
 
@@ -148,21 +148,23 @@ class ClientService extends BaseService
     {
         $builder = $this->db->table('client_building');
         $builder->where('client_id', $client_id);
-        $builder->orderBy('build_index ', 'ASC');
+        $builder->orderBy('build_index', 'ASC');
 
         $query = $builder->get();
 
         return $query->getResult();
     }
 
-    private function getLatestBuildingIndex($client_id) {
+    private function getLatestBuildingIndex($client_id)
+    {
         $buildings = $this->getBuildings($client_id);
         $building = end($buildings);
 
         return ($building) ? ($building->build_index + 1) : 1;
     }
 
-    private function upsertBuildingMeta($client_building_id, $metaKey, $metaValue) {
+    private function upsertBuildingMeta($client_building_id, $metaKey, $metaValue)
+    {
         $builder = $this->db->table('building_meta');
 
         $builder->where(array('client_building_id' => $client_building_id, 'meta_key' => $metaKey));
@@ -178,8 +180,7 @@ class ClientService extends BaseService
             $builder->set($data);
             $builder->where(array('client_building_id' => $client_building_id, 'meta_key' => $metaKey));
             $builder->update();
-        }
-        else {
+        } else {
             $data = [
                 'client_building_id'    => $client_building_id,
                 'meta_key'              => $metaKey,
@@ -190,7 +191,8 @@ class ClientService extends BaseService
         }
     }
 
-    private function getBuildingMetas($client_building_id) {
+    private function getBuildingMetas($client_building_id)
+    {
         $builder = $this->db->table('building_meta');
 
         $builder->where('client_building_id', $client_building_id);
@@ -200,7 +202,8 @@ class ClientService extends BaseService
         return $query->getResult();
     }
 
-    private function getBuildingMortgages($client_building_id) {
+    private function getBuildingMortgages($client_building_id)
+    {
         $builder = $this->db->table('building_mortgage');
 
         $builder->where('client_building_id', $client_building_id);
@@ -211,7 +214,8 @@ class ClientService extends BaseService
         return $query->getResult();
     }
 
-    public function addBuilding($client_id, object $message) {
+    public function addBuilding($client_id, object $message)
+    {
         $builder = $this->db->table('client_building');
         $buildIndex = $this->getLatestBuildingIndex($client_id);
         $address = $message->streetNumber . " " . $message->street;
@@ -261,7 +265,8 @@ class ClientService extends BaseService
         $this->upsertBuildingMeta($building_id, 'bpp_other', $message->otherPersonalValue);
     }
 
-    public function removeBuilding($client_id, $building_id) {
+    public function removeBuilding($client_id, $building_id)
+    {
         $builder = $this->db->table('building_meta');
         $builder->delete(['client_building_id ' => $building_id]);
 
@@ -269,7 +274,8 @@ class ClientService extends BaseService
         $builder->delete(['client_id' => $client_id, 'client_building_id' => $building_id]);
     }
 
-    function getBuildingMetaValue($array, $metaKey, $defaultValue = "") {
+    function getBuildingMetaValue($array, $metaKey, $defaultValue = "")
+    {
         $filteredData = array_filter($array, function ($row) use ($metaKey) {
             return $row->meta_key == $metaKey;
         });
@@ -331,9 +337,10 @@ class ClientService extends BaseService
         return $row;
     }
 
-    public function updateBuilding(object $message) {
+    public function updateBuilding(object $message)
+    {
         $builder = $this->db->table('client_building');
-        
+
         $foundation = $this->getFoundation($message->foundationType); // TODO refer to foundationService
 
         $data = [
@@ -374,11 +381,12 @@ class ClientService extends BaseService
         $this->upsertBuildingMeta($message->client_building_id, 'basement_completion_status', $message->basementFinished);
         $this->upsertBuildingMeta($message->client_building_id, 'bpp_equipment_or_machinery', $message->equipmentValue);
         $this->upsertBuildingMeta($message->client_building_id, 'bpp_other', $message->otherPersonalValue);
-        
+
         return $this->getBuilding($message->client_building_id);
     }
 
-    public function updateMortgage(object $message) {
+    public function updateMortgage(object $message)
+    {
         $builder = $this->db->table('building_mortgage');
 
         $builder->where('client_building_id', $message->client_building_id);
@@ -399,7 +407,7 @@ class ClientService extends BaseService
                 'zip'                     => $message->mortgage1Zip,
                 'phone'                   => $message->mortgage1Phone,
             ];
-    
+
             $builder->set($data);
             $builder->where('building_mortgage_id', $result[0]->building_mortgage_id);
             $builder->update();
@@ -414,12 +422,11 @@ class ClientService extends BaseService
                 'zip'                     => $message->mortgage2Zip,
                 'phone'                   => $message->mortgage2Phone,
             ];
-    
+
             $builder->set($data);
             $builder->where('building_mortgage_id', $result[1]->building_mortgage_id);
             $builder->update();
-        }
-        else {
+        } else {
             $data = [
                 'client_building_id'      => $message->client_building_id,
                 'loan_index'              => 1,

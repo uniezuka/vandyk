@@ -153,4 +153,13 @@ class Services extends BaseService
 
         return new \App\Services\SLASettingService();
     }
+
+    public static function floodQuoteService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodQuoteService');
+        }
+
+        return new \App\Services\FloodQuoteService();
+    }
 }

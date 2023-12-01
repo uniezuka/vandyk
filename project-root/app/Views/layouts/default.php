@@ -27,43 +27,48 @@
 
                         <?php if (is_logged_in()) { ?>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url('/clients'); ?>">Clients</a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?= base_url('/clients'); ?>">Clients</a>
+                            </li>
 
-                        <?php if (is_admin()) { ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?= base_url('/flood_quotes'); ?>">Flood Policies</a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?= base_url('/brokers'); ?>">Brokers</a>
-                        </li>
+                            <?php if (is_admin()) { ?>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                References
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?= base_url('/counties'); ?>">Counties</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/occupancies'); ?>">Occupancies</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/constructions'); ?>">Constructions</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/transaction_types'); ?>">Transaction Types</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/fire_codes'); ?>">Fire Codes</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/coverages'); ?>">Coverages</a></li>
-                                <li><a class="dropdown-item" href="<?= base_url('/insurers'); ?>">Insurers</a></li>
-                            </ul>
-                        </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="<?= base_url('/brokers'); ?>">Brokers</a>
+                                </li>
 
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Settings
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="<?= base_url('/sla_settings'); ?>">SLA Generator Settings</a></li>
-                            </ul>
-                        </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        References
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="<?= base_url('/counties'); ?>">Counties</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/occupancies'); ?>">Occupancies</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/constructions'); ?>">Constructions</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/transaction_types'); ?>">Transaction Types</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/fire_codes'); ?>">Fire Codes</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/coverages'); ?>">Coverages</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/insurers'); ?>">Insurers</a></li>
+                                    </ul>
+                                </li>
 
-                        <?php } ?>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Settings
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="<?= base_url('/sla_settings'); ?>">SLA Generator Settings</a></li>
+                                    </ul>
+                                </li>
 
-                        <?php } ?>
+                        <?php
+                            }
+                        }
+                        ?>
                     </ul>
 
                     <div class="justify-content-end">
@@ -80,7 +85,7 @@
                                     <?php } else { ?>
                                         <li><a class="dropdown-item" href="<?= base_url('/login'); ?>">Login</a></li>
                                     <?php } ?>
-                                    
+
                                 </ul>
                             </li>
                         </ul>
