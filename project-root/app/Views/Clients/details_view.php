@@ -3,19 +3,19 @@
 <?= $this->section('content') ?>
 
 <?php
-    helper('html'); 
-    $client = $data['client'];
-    $broker = $data['broker'];
-    $buildings = $data['buildings'];
+helper('html');
+$client = $data['client'];
+$broker = $data['broker'];
+$buildings = $data['buildings'];
 
-    function clientDisplay($client) : string {
-        if ($client->entity_type == 1) {
-            return $client->first_name . ' ' . $client->last_name . '<br />' . $client->insured2_name;
-        }
-        else {
-            return $client->business_name . '<br />' . $client->business_name2;
-        }
+function clientDisplay($client): string
+{
+    if ($client->entity_type == 1) {
+        return $client->first_name . ' ' . $client->last_name . '<br />' . $client->insured2_name;
+    } else {
+        return $client->business_name . '<br />' . $client->business_name2;
     }
+}
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -67,12 +67,12 @@
                     </div>
 
                     <div class="col col-4">
-                        <a href="#" class="btn btn-primary">New Flood Quote</a>
+                        <a href="<?= base_url('/flood_quote/create?client_id=') . $client->client_id; ?>" class="btn btn-primary">New Flood Quote</a>
                     </div>
 
                     <?php if ($client->is_commercial) { ?>
                         <div class="col col-4">
-                            <a href="<?= base_url('/client/'. $client->client_id . '/building/create') ?>" class="btn btn-primary">Add Building Location</a>
+                            <a href="<?= base_url('/client/' . $client->client_id . '/building/create') ?>" class="btn btn-primary">Add Building Location</a>
                             <span class="d-block">**Hiscox limit is 10 buildings per client quote</span>
                         </div>
                     <?php } ?>
@@ -97,7 +97,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr> 
+                        <tr>
                             <td colspan="4">
                                 To be implemented
                             </td>

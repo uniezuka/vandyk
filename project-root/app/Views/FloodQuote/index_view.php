@@ -6,6 +6,7 @@
 helper(['html', 'service']);
 $flood_quotes = $data['flood_quotes'];
 $pager_links = $data['pager_links'];
+$search = $data['search'];
 
 function getMetaValue($metas, $meta_key)
 {
@@ -35,7 +36,19 @@ function getMetaValue($metas, $meta_key)
     <div class="col-10">
         <div class="card">
             <div class="card-body">
-                <h5>Flood Policies</h5>
+                <div class="clearfix">
+                    <h5>Flood Policies</h5>
+                    <div class="float-start">
+                        <p>Search by Customer <strong>Last Name, First Name, Policy Number or Property Address</strong></p>
+                        <form class="form" method="get">
+                            <div class="d-flex p-2">
+                                <input class="d-flex form-control w-75 me-1" name="search" type="search" placeholder="Search" value="<?= $search ?>">
+                                <button class="btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                    <a type="button" class="btn btn-primary float-end" href="<?= base_url('/client/create'); ?>">Create New Client</a>
+                </div>
 
                 <table class="table">
                     <thead>
@@ -64,13 +77,12 @@ function getMetaValue($metas, $meta_key)
                             });
 
                             $policy_type = getMetaValue($flood_quote_metas, 'policy_type');
-                            $date_entered = getMetaValue($flood_quote_metas, 'date_entered');
                             $has_excess_policy = getMetaValue($flood_quote_metas, 'has_excess_policy');
                         ?>
                             <tr>
                                 <td>
                                     <p>ID: <a href=""><?= $flood_quote->flood_quote_id ?></a></p>
-                                    <p>Entered: <?= $date_entered ?></p>
+                                    <p>Entered: <?= $flood_quote->date_entered; ?></p>
                                     <?php if ($has_excess_policy) { ?>
                                         <p><strong>EXCESS POLICY</strong></p>
                                     <?php } ?>

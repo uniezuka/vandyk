@@ -162,4 +162,76 @@ class Services extends BaseService
 
         return new \App\Services\FloodQuoteService();
     }
+
+    public static function floodZoneService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodZoneService');
+        }
+
+        return new \App\Services\FloodZoneService();
+    }
+
+    public static function floodFoundationService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodFoundationService');
+        }
+
+        return new \App\Services\FloodFoundationService();
+    }
+
+    public static function floodOccupancyService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodOccupancyService');
+        }
+
+        return new \App\Services\FloodOccupancyService();
+    }
+
+    public static function deductibleService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('deductibleService');
+        }
+
+        return new \App\Services\DeductibleService();
+    }
+
+    public static function bindAuthorityService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('bindAuthorityService');
+        }
+
+        return new \App\Services\BindAuthorityService();
+    }
+
+    public static function producerService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('producerService');
+        }
+
+        return new \App\Services\ProducerService();
+    }
+
+    public static function floodQuoteMortgageService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodQuoteMortgageService');
+        }
+
+        return new \App\Services\FloodQuoteMortgageService();
+    }
+
+    public static function commercialOccupancyService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('commercialOccupancyService');
+        }
+
+        return new \App\Services\CommercialOccupancyService();
+    }
 }

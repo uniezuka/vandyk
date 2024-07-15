@@ -49,11 +49,11 @@ function get_client_name($client)
 
                             <div class="d-block p-2">
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="nonCommercialOnly" name="nonCommercialOnly" value="true"<?= $non_commercial_only ? ' checked' : '' ?>>
+                                    <input class="form-check-input" type="checkbox" id="nonCommercialOnly" name="nonCommercialOnly" value="true" <?= $non_commercial_only ? ' checked' : '' ?>>
                                     <label class="form-check-label" for="nonCommercial">Non-commercial Clients Only</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" id="commercialOnly" name="commercialOnly" value="true"<?= $commercial_only ? ' checked' : '' ?>>
+                                    <input class="form-check-input" type="checkbox" id="commercialOnly" name="commercialOnly" value="true" <?= $commercial_only ? ' checked' : '' ?>>
                                     <label class="form-check-label" for="commercial">Commercial Clients Only</label>
                                 </div>
                             </div>
@@ -84,7 +84,9 @@ function get_client_name($client)
                                 <td><?= $client->client_code ?></td>
                                 <td><a href="<?= base_url('/client/details/') . $client->client_id; ?>" class="actionLink">View</a></td>
                                 <td>
-                                    <p><a href="#" class="actionLink">New Flood</a></p>
+                                    <p>
+                                        <a href="<?= base_url('/flood_quote/create?client_id=') . $client->client_id; ?>" class="actionLink">New Flood</a>
+                                    </p>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -100,11 +102,11 @@ function get_client_name($client)
 <script type="text/javascript">
     $(document).ready(function() {
         $('#nonCommercialOnly').change(function() {
-            if(this.checked) $( "#commercialOnly" ).prop( "checked", false );
+            if (this.checked) $("#commercialOnly").prop("checked", false);
         });
 
         $('#commercialOnly').change(function() {
-            if(this.checked) $( "#nonCommercialOnly" ).prop( "checked", false );
+            if (this.checked) $("#nonCommercialOnly").prop("checked", false);
         });
     });
 </script>
