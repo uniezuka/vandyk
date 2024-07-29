@@ -15,4 +15,16 @@ class FloodOccupancyService extends BaseService
 
         return $query->getResult();
     }
+
+    public function findOne($id)
+    {
+        $builder = $this->db->table('flood_occupancy');
+        $builder->where('flood_occupancy_id', $id);
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
+    }
 }

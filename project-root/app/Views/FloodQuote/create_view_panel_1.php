@@ -239,7 +239,7 @@
         <label class="form-label me-1">Condo</label>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" name="isCondo">
+            <input class="form-check-input" type="checkbox" value="1" name="isCondo">
         </div>
 
         <label class="form-label me-1"># of Units :</label>

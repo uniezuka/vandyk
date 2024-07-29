@@ -281,14 +281,14 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-5 col-form-label">RCE Ratio:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="rceRation" />
+        <input type="text" class="form-control" placeholder="" name="rceRatio" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-5 col-form-label">Underinsured Rate</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="underinsuredRate" />
+        <input type="text" class="form-control" placeholder="" name="underInsuredRate" />
     </div>
     <span class="col-sm-3">(ex. 0.01)</span>
 </div>
