@@ -32,7 +32,7 @@ class ClientService extends BaseService
         );
     }
 
-    public function search($page = 1, $search_text, $commercialOnly = false, $nonCommercialOnly = false)
+    public function search($page = 1, $search_text = "", $commercialOnly = false, $nonCommercialOnly = false)
     {
         $offset = ($page - 1) * $this->limit;
 

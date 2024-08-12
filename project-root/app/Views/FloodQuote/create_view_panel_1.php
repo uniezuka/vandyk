@@ -2,11 +2,11 @@
 
 <span class="me-3 form-text">Entity Type</span>
 <div class="form-check form-check-inline">
-    <input class="form-check-input insured_type" type="radio" value="Individual" checked name="entityType" />
+    <input class="form-check-input entity_type" type="radio" value="0" checked name="entityType" <?= set_radio('entityType', 'Individual', true); ?> />
     <label class="form-check-label">Individual</label>
 </div>
 <div class="form-check form-check-inline">
-    <input class="form-check-input insured_type" type="radio" value="Business" name="entityType" />
+    <input class="form-check-input entity_type" type="radio" value="1" name="entityType" <?= set_radio('entityType', 'Business') ?> />
     <label class="form-check-label">Business</label>
 </div>
 
@@ -78,7 +78,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Insured Cel:</label>
     <div class="col-sm-8">
-        <input type="text" class="form-control" placeholder="Insured Cel" name="cellPhone" value="<?= set_value('cellPhone', $client->zip) ?>" />
+        <input type="text" class="form-control" placeholder="Insured Cel" name="cellPhone" value="<?= set_value('cellPhone', $client->cell_phone) ?>" />
     </div>
 </div>
 
@@ -100,11 +100,11 @@
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Bill To</label>
     <div class="d-flex align-items-end col-sm-8">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="Insured" checked name="billTo" />
+            <input class="form-check-input" type="radio" value="1" checked name="billTo" <?= set_radio('billTo', '1', true); ?> />
             <label class="form-check-label">Insured</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1st Mortgage" name="billTo" />
+            <input class="form-check-input" type="radio" value="2" name="billTo" <?= set_radio('billTo', '2'); ?> />
             <label class="form-check-label">1st Mortgage</label>
         </div>
     </div>
@@ -113,7 +113,7 @@
 <div class="row">
     <div class="col-sm-12">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="isSameAddress" id="isSameAddress">
+            <input class="form-check-input" type="checkbox" value="1" name="isSameAddress" id="isSameAddress" <?= set_checkbox('isSameAddress', '1'); ?>>
             <label class="form-check-label">Check box if Mailing & Property Address are same</label>
         </div>
     </div>
@@ -202,19 +202,19 @@
 
 <div class="row mb-3">
     <label class="d-flex justify-content-center col-sm-12 col-form-label">Primary Residence</label>
-    <div class="col-sm-12 d-flex justify-content-center ">
+    <div class="col-sm-12 d-flex justify-content-center">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="Yes" checked name="isPrimaryResidence" />
+            <input class="form-check-input" type="radio" value="1" name="isPrimaryResidence" />
             <label class="form-check-label">Yes</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="No" checked name="isPrimaryResidence" />
+            <input class="form-check-input" type="radio" value="0" checked name="isPrimaryResidence" />
             <label class="form-check-label">No</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="Other" checked name="isPrimaryResidence" />
+            <input class="form-check-input" type="radio" value="2" name="isPrimaryResidence" />
             <label class="form-check-label">Other</label>
         </div>
     </div>
@@ -267,16 +267,16 @@
 </div>
 
 <div class="row mb-3">
-    <div class="col-sm-12 d-flex justify-content-center ">
+    <div class="col-sm-12 d-flex justify-content-center">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="hasBreakAway">
+            <input class="form-check-input" type="checkbox" value="1" name="hasBreakAwayWall">
             <label class="form-check-label">BreakAway Wall</label>
         </div>
     </div>
 </div>
 
 <div class="row mb-3">
-    <div class="col-sm-12 d-flex justify-content-center ">
+    <div class="col-sm-12 d-flex justify-content-center">
         <div class="form-check form-check-inline">
             <input class="form-check-input" type="checkbox" name="isLBINorth">
             <label class="form-check-label">LBI North</label>
@@ -290,22 +290,22 @@
 </div>
 
 <div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Current Company::</label>
+    <label class="d-flex justify-content-end col-sm-4 col-form-label">Current Company:</label>
     <div class="col-sm-6">
-        <input type="text" class="form-control" name="companyName" />
+        <input type="text" class="form-control" name="currentCompany" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Current Premium:</label>
     <div class="col-sm-6">
-        <input type="text" class="form-control" name="premium" />
+        <input type="text" class="form-control" name="currentPremium" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Exp Date:</label>
     <div class="col-sm-6">
-        <input type="text" class="form-control" name="expiryDate" />
+        <input type="date" class="form-control" name="currentExpiryDate" />
     </div>
 </div>

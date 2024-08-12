@@ -94,27 +94,28 @@ class FloodQuote extends BaseController
             $message->condoUnits = $post['condoUnits'] ?? 0;
             $message->rcbap = $post['rcbap'] ?? 0;
             $message->premium = $post['premium'] ?? 0;
-            $message->expiryDate = $post['expiryDate'] ?? 0;
+            $message->expiryDate = $post['expiryDate'] ?? "";
             $message->flood_zone = $post['flood_zone'] ?? 0;
-            $message->diagram_num = $post['diagram_num'] ?? "";
+            $message->diagramNumber = $post['diagramNumber'] ?? "";
             $message->flood_foundation = $post['flood_foundation'] ?? 0;
             $message->flood_occupancy = $post['flood_occupancy'] ?? 0;
-            $message->otherOccupancy = $post['otherOccupancy'] ?? 0;
-            $message->basementFinished = $post['basementFinished'] ?? 0;
+            $message->other_occupancy = $post['other_occupancy'] ?? 0;
+            $message->basement_finished = $post['basement_finished'] ?? 0;
             $message->isEnclosureFinished = $post['isEnclosureFinished'] ?? 0;
-            $message->garageAttached = $post['garageAttached'] ?? 0;
-            $message->overWater = $post['overWater'] ?? 0;
+            $message->garage_attached = $post['garage_attached'] ?? 0;
+            $message->over_water = $post['over_water'] ?? 0;
             $message->bfe = $post['bfe'] ?? 0;
             $message->flfe = $post['flfe'] ?? 0;
             $message->elevationDifference = $post['elevationDifference'] ?? 0;
             $message->lfe = $post['lfe'] ?? 0;
             $message->nhf = $post['nhf'] ?? 0;
             $message->lhsm = $post['lhsm'] ?? 0;
+            $message->lag = $post['lag'] ?? 0;
             $message->hag = $post['hag'] ?? 0;
             $message->mle = $post['mle'] ?? 0;
             $message->enclosure = $post['enclosure'] ?? 0;
-            $message->elevCertDate = $post['elevCertDate'] ?? 0;
-            $message->improvementDate = $post['improvementDate'] ?? 0;
+            $message->elevCertDate = $post['elevCertDate'] ?? "";
+            $message->improvementDate = $post['improvementDate'] ?? "";
             $message->covABuilding = $post['covABuilding'] ?? 0;
             $message->covCContent = $post['covCContent'] ?? 0;
             $message->covDLoss = $post['covDLoss'] ?? 0;
@@ -123,29 +124,37 @@ class FloodQuote extends BaseController
             $message->rceRatio = $post['rceRatio'] ?? 0;
             $message->underInsuredRate = $post['underInsuredRate'] ?? 0;
             $message->deductible_id = $post['deductible'] ?? 0;
-            $message->has_opprc = $post['has_opprc'] ?? 0;
-            $message->has_drc = $post['has_drc'] ?? 0;
-            $message->bindAuthority = $post['bindAuthority'] ?? 0;
-            $message->hiscox_id = $post['hiscox_id'] ?? "";
-            $message->syndicate1BindAuthority = $post['syndicate1BindAuthority'] ?? 0;
+            $message->hasOpprc = $post['hasOpprc'] ?? 0;
+            $message->hasDrc = $post['hasDrc'] ?? 0;
+            $message->bind_authority = $post['bind_authority'] ?? 0;
+            $message->hiscoxID = $post['hiscoxID'] ?? "";
+            $message->syndicate1_bind_authority = $post['syndicate1_bind_authority'] ?? 0;
             $message->sydicate1Risk = $post['sydicate1Risk'] ?? "";
-            $message->syndicate2BindAuthority = $post['syndicate2BindAuthority'] ?? 0;
+            $message->syndicate2_bind_authority = $post['syndicate2_bind_authority'] ?? 0;
             $message->sydicate2Risk = $post['sydicate2Risk'] ?? "";
-            $message->syndicate3BindAuthority = $post['syndicate3BindAuthority'] ?? 0;
+            $message->syndicate3_bind_authority = $post['syndicate3_bind_authority'] ?? 0;
             $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
             $message->broker = $post['broker'] ?? 0;
             $message->producer = $post['producer'] ?? 0;
-            $message->lossOccured = $post['lossOccured'] ?? 0;
+            $message->hasLossOccured = $post['hasLossOccured'] ?? 0;
             $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
             $message->lastLossValue = $post['lastLossValue'] ?? 0;
             $message->lossesIn10Years = $post['lossesIn10Years'] ?? 0;
-            $message->lastLossValueIn10Years = $post['lastLossValueIn10Years'] ?? 0;
+            $message->totalLossValueIn10Years = $post['totalLossValueIn10Years'] ?? 0;
             $message->sandyLossAmount = $post['sandyLossAmount'] ?? 0;
-            $message->elevatedSinceLastLoss = $post['elevatedSinceLastLoss'] ?? 0;
-            $message->effectiveDate = $post['effectiveDate'] ?? 0;
-            $message->expirationDate = $post['expirationDate'] ?? 0;
+            $message->hasElevatedSinceLastLoss = $post['hasElevatedSinceLastLoss'] ?? 0;
+            $message->effectiveDate = $post['effectiveDate'] ?? "";
+            $message->expirationDate = $post['expirationDate'] ?? "";
             $message->reason = $post['reason'] ?? "";
             $message->isCondo = $post['isCondo'] ?? 0;
+            $message->isSameAddress = $post['isSameAddress'] ?? 0;
+            $message->hasWaitPeriod = $post['hasWaitPeriod'] ?? 0;
+            $message->hasClosing = $post['hasClosing'] ?? 0;
+            $message->hasBreakAwayWall = $post['hasBreakAwayWall'] ?? 0;
+            $message->currentCompany = $post['currentCompany'] ?? "";
+            $message->currentPremium = $post['currentPremium'] ?? "";
+            $message->currentExpiryDate = $post['currentExpiryDate'] ?? "";
+            $message->policyType = "NEW";
             $message->client_id = $client_id;
 
             $flood_quote = $this->floodQuoteService->create($message);
@@ -186,11 +195,168 @@ class FloodQuote extends BaseController
         // }
     }
 
-    public function update()
+    public function update($id = null)
     {
         helper('form');
         $data['title'] = "Update Flood Quote";
-        return view('FloodQuote/update_view', ['data' => $data]);
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $client = $this->clientService->findOne($data['floodQuote']->client_id);
+        $data['client'] = $client;
+        $data['floodQuoteMetas'] = $this->floodQuoteService->getFloodQuoteMetas($data['floodQuote']->flood_quote_id);
+        $mortgages = $this->floodQuoteMortgageService->getByFloodQuoteId($data['floodQuote']->flood_quote_id);
+
+        $mortgage1 = null;
+        $mortgage2 = null;
+        foreach ($mortgages as $mortgagee) {
+            if ($mortgagee->loan_index === '1') {
+                $mortgage1 = $mortgagee;
+            } elseif ($mortgagee->loan_index === '2') {
+                $mortgage2 = $mortgagee;
+            }
+        }
+
+        $data['mortgage1'] = $mortgage1;
+        $data['mortgage2'] = $mortgage2;
+
+        if (!$this->request->is('post')) {
+            return view('FloodQuote/update_view', ['data' => $data]);
+        }
+
+        $post = $this->request->getPost();
+
+        // if ($this->validateData($post, [])) {
+        try {
+            $message = new \stdClass();
+            $message->flood_quote_id = $data['floodQuote']->flood_quote_id;
+            $message->entityType = $post['entityType'] ?? "";
+            $message->firstName = $post['firstName'] ?? "";
+            $message->lastName = $post['lastName'] ?? "";
+            $message->secondInsured = $post['secondInsured'] ?? "";
+            $message->companyName = $post['companyName'] ?? "";
+            $message->companyName2 = $post['companyName2'] ?? "";
+            $message->address = $post['address'] ?? "";
+            $message->city = $post['city'] ?? "";
+            $message->state = $post['state'] ?? "";
+            $message->zip = $post['zip'] ?? "";
+            $message->cellPhone = $post['cellPhone'] ?? "";
+            $message->homePhone = $post['homePhone'] ?? "";
+            $message->email = $post['email'] ?? "";
+            $message->billTo = $post['billTo'] ?? "";
+            $message->propertyAddress = $post['propertyAddress'] ?? "";
+            $message->propertyCity = $post['propertyCity'] ?? "";
+            $message->propertyState = $post['propertyState'] ?? "";
+            $message->propertyZip = $post['propertyZip'] ?? "";
+            $message->propertyCounty = $post['propertyCounty'] ?? "";
+            $message->numOfFloors = $post['numOfFloors'] ?? 0;
+            $message->squareFeet = $post['squareFeet'] ?? 0;
+            $message->yearBuilt = $post['yearBuilt'] ?? 0;
+            $message->construction_type = $post['construction_type'] ?? 0;
+            $message->isPrimaryResidence = $post['isPrimaryResidence'] ?? 0;
+            $message->isRented = $post['isRented'] ?? 0;
+            $message->condoUnits = $post['condoUnits'] ?? 0;
+            $message->rcbap = $post['rcbap'] ?? 0;
+            $message->premium = $post['premium'] ?? 0;
+            $message->expiryDate = $post['expiryDate'] ?? "";
+            $message->flood_zone = $post['flood_zone'] ?? 0;
+            $message->diagramNumber = $post['diagramNumber'] ?? "";
+            $message->flood_foundation = $post['flood_foundation'] ?? 0;
+            $message->flood_occupancy = $post['flood_occupancy'] ?? 0;
+            $message->other_occupancy = $post['other_occupancy'] ?? 0;
+            $message->basement_finished = $post['basement_finished'] ?? 0;
+            $message->isEnclosureFinished = $post['isEnclosureFinished'] ?? 0;
+            $message->garage_attached = $post['garage_attached'] ?? 0;
+            $message->over_water = $post['over_water'] ?? 0;
+            $message->bfe = $post['bfe'] ?? 0;
+            $message->flfe = $post['flfe'] ?? 0;
+            $message->elevationDifference = $post['elevationDifference'] ?? 0;
+            $message->lfe = $post['lfe'] ?? 0;
+            $message->nhf = $post['nhf'] ?? 0;
+            $message->lhsm = $post['lhsm'] ?? 0;
+            $message->lag = $post['lag'] ?? 0;
+            $message->hag = $post['hag'] ?? 0;
+            $message->mle = $post['mle'] ?? 0;
+            $message->enclosure = $post['enclosure'] ?? 0;
+            $message->elevCertDate = $post['elevCertDate'] ?? "";
+            $message->improvementDate = $post['improvementDate'] ?? "";
+            $message->covABuilding = $post['covABuilding'] ?? 0;
+            $message->covCContent = $post['covCContent'] ?? 0;
+            $message->covDLoss = $post['covDLoss'] ?? 0;
+            $message->buildingReplacementCost = $post['buildingReplacementCost'] ?? 0;
+            $message->contentReplacementCost = $post['contentReplacementCost'] ?? 0;
+            $message->rceRatio = $post['rceRatio'] ?? 0;
+            $message->underInsuredRate = $post['underInsuredRate'] ?? 0;
+            $message->deductible_id = $post['deductible'] ?? 0;
+            $message->hasOpprc = $post['hasOpprc'] ?? 0;
+            $message->hasDrc = $post['hasDrc'] ?? 0;
+            $message->bind_authority = $post['bind_authority'] ?? 0;
+            $message->hiscoxID = $post['hiscoxID'] ?? "";
+            $message->syndicate1_bind_authority = $post['syndicate1_bind_authority'] ?? 0;
+            $message->sydicate1Risk = $post['sydicate1Risk'] ?? "";
+            $message->syndicate2_bind_authority = $post['syndicate2_bind_authority'] ?? 0;
+            $message->sydicate2Risk = $post['sydicate2Risk'] ?? "";
+            $message->syndicate3_bind_authority = $post['syndicate3_bind_authority'] ?? 0;
+            $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
+            $message->broker = $post['broker'] ?? 0;
+            $message->producer = $post['producer'] ?? 0;
+            $message->hasLossOccured = $post['hasLossOccured'] ?? 0;
+            $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
+            $message->lastLossValue = $post['lastLossValue'] ?? 0;
+            $message->lossesIn10Years = $post['lossesIn10Years'] ?? 0;
+            $message->totalLossValueIn10Years = $post['totalLossValueIn10Years'] ?? 0;
+            $message->sandyLossAmount = $post['sandyLossAmount'] ?? 0;
+            $message->hasElevatedSinceLastLoss = $post['hasElevatedSinceLastLoss'] ?? 0;
+            $message->effectiveDate = $post['effectiveDate'] ?? "";
+            $message->expirationDate = $post['expirationDate'] ?? "";
+            $message->reason = $post['reason'] ?? "";
+            $message->isCondo = $post['isCondo'] ?? 0;
+            $message->isSameAddress = $post['isSameAddress'] ?? 0;
+            $message->hasWaitPeriod = $post['hasWaitPeriod'] ?? 0;
+            $message->hasClosing = $post['hasClosing'] ?? 0;
+            $message->hasBreakAwayWall = $post['hasBreakAwayWall'] ?? 0;
+            $message->currentCompany = $post['currentCompany'] ?? "";
+            $message->currentPremium = $post['currentPremium'] ?? "";
+            $message->currentExpiryDate = $post['currentExpiryDate'] ?? "";
+
+            $this->floodQuoteService->update($message);
+
+            $mortgageMessage = new \stdClass();
+            $mortgageMessage->flood_quote_mortgage_id = $post['mortgagee1Id'];
+            $mortgageMessage->flood_quote_id = $data['floodQuote']->flood_quote_id;
+            $mortgageMessage->loan_index = 1;
+            $mortgageMessage->name = $post['mortgagee1Name'] ?? null;
+            $mortgageMessage->name2 = $post['mortgagee1Name2'] ?? null;
+            $mortgageMessage->address = $post['mortgagee1Address'] ?? null;
+            $mortgageMessage->city = $post['mortgagee1City'] ?? null;
+            $mortgageMessage->state = $post['mortgagee1State'] ?? null;
+            $mortgageMessage->zip = $post['mortgagee1Zip'] ?? null;
+            $mortgageMessage->phone = $post['mortgagee1Phone'] ?? null;
+            $mortgageMessage->loan_number = $post['mortgagee1LoanNumber'] ?? null;
+            $this->floodQuoteMortgageService->update($mortgageMessage);
+
+            $mortgageMessage = new \stdClass();
+            $mortgageMessage->flood_quote_mortgage_id = $post['mortgagee2Id'];
+            $mortgageMessage->flood_quote_id = $data['floodQuote']->flood_quote_id;
+            $mortgageMessage->loan_index = 2;
+            $mortgageMessage->name = $post['mortgagee2Name'] ?? null;
+            $mortgageMessage->name2 = $post['mortgagee2Name2'] ?? null;
+            $mortgageMessage->address = $post['mortgagee2Address'] ?? null;
+            $mortgageMessage->city = $post['mortgagee2City'] ?? null;
+            $mortgageMessage->state = $post['mortgagee2State'] ?? null;
+            $mortgageMessage->zip = $post['mortgagee2Zip'] ?? null;
+            $mortgageMessage->phone = $post['mortgagee2Phone'] ?? null;
+            $mortgageMessage->loan_number = $post['mortgagee2LoanNumber'] ?? null;
+            $this->floodQuoteMortgageService->update($mortgageMessage);
+
+            return redirect()->to('/client/details/' . $data['floodQuote']->client_id)->with('message', 'Flood Quote was successfully updated.');
+            // return view('FloodQuote/update_view', ['data' => $data]);
+        } catch (Exception $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
     }
 
     public function intialDetails($id = null)

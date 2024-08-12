@@ -235,6 +235,22 @@ $deductibles = $calculations->getDeductibles();
                     <div class="d-flex col-sm-5 justify-content-end"><strong>Total Cost:</strong></div>
                     <div class="col-sm-7"><strong><?= $formatter->formatCurrency($calculations->finalCost, 'USD') ?></strong></div>
                 </div>
+                <div class="row mb-3">
+                    <ul>
+                        <li>
+                            <a href="<?= base_url('/flood_quote/update/') . $flood_quote->flood_quote_id; ?>">Edit Rate Info</a>
+                        </li>
+                        <li>
+                            <a href="#">App</a>
+                        </li>
+                        <li>
+                            <a href="#">Quote Page</a>
+                        </li>
+                        <li>
+                            <a href="<?= base_url('/flood_quotes'); ?>">Main Flood Page</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

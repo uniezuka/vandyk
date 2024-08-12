@@ -12,6 +12,7 @@ class Clients extends BaseController
     protected $pager;
     protected $clientService;
     protected $brokerService;
+    protected $floodQuoteService;
 
     public function initController(
         RequestInterface $request,
@@ -23,6 +24,7 @@ class Clients extends BaseController
         $this->pager = service('pager');
         $this->clientService = service('clientService');
         $this->brokerService = service('brokerService');
+        $this->floodQuoteService = service('floodQuoteService');
     }
 
     public function index()
@@ -41,9 +43,9 @@ class Clients extends BaseController
         $commercialOnly = trim($commercialOnly);
         $commercialOnly = ($commercialOnly === 'true');
 
-        if ($search)
+        if ($search != "")
             $clients = $this->clientService->search($page, $search, $commercialOnly, $nonCommercialOnly);
-        else 
+        else
             $clients = $this->clientService->getPaged($page, $commercialOnly, $nonCommercialOnly);
 
         $pager_links = $this->pager->makeLinks($page, $clients->limit, $clients->total, 'bootstrap_full');
@@ -69,9 +71,24 @@ class Clients extends BaseController
         }
 
         $post = $this->request->getPost([
-            'entityType', 'firstName', 'lastName', 'clientName2', 'companyName', 'companyName2', 'address', 'city', 
-            'zip', 'cellPhone', 'homePhone', 'email', 'clientCode', 'brokerId', 'businessEntityTypeId', 'state', 
-            'businessAs', 'isCommercial'
+            'entityType',
+            'firstName',
+            'lastName',
+            'clientName2',
+            'companyName',
+            'companyName2',
+            'address',
+            'city',
+            'zip',
+            'cellPhone',
+            'homePhone',
+            'email',
+            'clientCode',
+            'brokerId',
+            'businessEntityTypeId',
+            'state',
+            'businessAs',
+            'isCommercial'
         ]);
 
 
@@ -94,11 +111,10 @@ class Clients extends BaseController
             try {
                 $this->clientService->create((object) $post);
                 return redirect()->to('/clients')->with('message', 'Client was successfully added.');
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
-        }
-        else {
+        } else {
             return view('Clients/create_view', ['data' => $data]);
         }
     }
@@ -106,7 +122,7 @@ class Clients extends BaseController
     public function details($id = null)
     {
         helper('form');
-        
+
         $data['title'] = "Client Details";
         $data['client'] = $this->clientService->findOne($id);
 
@@ -115,7 +131,7 @@ class Clients extends BaseController
         }
 
         $data['broker'] = $this->brokerService->findOne($data['client']->broker_id);
-
+        $data['floodQuotes'] = $this->floodQuoteService->getByClient($data['client']->client_id);
         $data['buildings'] = [];
 
         if ($data['client']->is_commercial)
@@ -140,9 +156,24 @@ class Clients extends BaseController
         }
 
         $post = $this->request->getPost([
-            'entityType', 'firstName', 'lastName', 'clientName2', 'companyName', 'companyName2', 'address', 'city', 
-            'zip', 'cellPhone', 'homePhone', 'email', 'clientCode', 'brokerId', 'businessEntityTypeId', 'state',
-            'businessAs', 'isCommercial'
+            'entityType',
+            'firstName',
+            'lastName',
+            'clientName2',
+            'companyName',
+            'companyName2',
+            'address',
+            'city',
+            'zip',
+            'cellPhone',
+            'homePhone',
+            'email',
+            'clientCode',
+            'brokerId',
+            'businessEntityTypeId',
+            'state',
+            'businessAs',
+            'isCommercial'
         ]);
 
         if ($this->validateData($post, [
@@ -166,12 +197,11 @@ class Clients extends BaseController
 
                 $this->clientService->update((object) $post);
                 return redirect()->back()->withInput()->with('message', 'Client was successfully updated.');
-            } catch(Exception $e) {
+            } catch (Exception $e) {
                 return redirect()->back()->withInput()->with('error', $e->getMessage());
             }
-        }
-        else {
+        } else {
             return view('Clients/update_view', ['data' => $data]);
-        }          
+        }
     }
 }

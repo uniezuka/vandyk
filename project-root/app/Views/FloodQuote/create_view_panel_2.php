@@ -10,7 +10,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Building Diagram #:</label>
     <div class="col-sm-3">
-        <input type="text" class="form-control" placeholder="" name="diagram_num" />
+        <input type="text" class="form-control" placeholder="" name="diagramNumber" />
     </div>
 </div>
 
@@ -40,32 +40,32 @@
 <div class="row mb-3">
     <div class="col-sm-12">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="otherOccupancy" />
+            <input class="form-check-input" type="radio" value="0" checked name="other_occupancy" />
             <label class="form-check-label">N/A</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="otherOccupancy" />
+            <input class="form-check-input" type="radio" value="1" name="other_occupancy" />
             <label class="form-check-label">Seasonal</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="2" name="otherOccupancy" />
+            <input class="form-check-input" type="radio" value="2" name="other_occupancy" />
             <label class="form-check-label">Tenants Occupy</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="3" name="otherOccupancy" />
+            <input class="form-check-input" type="radio" value="3" name="other_occupancy" />
             <label class="form-check-label">Vacant</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="4" name="otherOccupancy" />
+            <input class="form-check-input" type="radio" value="4" name="other_occupancy" />
             <label class="form-check-label">CoC - Coarse Of Construction</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="5" name="otherOccupancy" />
+            <input class="form-check-input" type="radio" value="5" name="other_occupancy" />
             <label class="form-check-label">Vacant-Renovation</label>
         </div>
     </div>
@@ -76,17 +76,17 @@
 <div class="row mb-3">
     <div class="col-sm-12">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" checked name="basementFinished" />
+            <input class="form-check-input" type="radio" value="1" checked name="basement_finished" />
             <label class="form-check-label">Yes</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" name="basementFinished" />
+            <input class="form-check-input" type="radio" value="0" name="basement_finished" />
             <label class="form-check-label">No</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="2" name="basementFinished" />
+            <input class="form-check-input" type="radio" value="2" name="basement_finished" />
             <label class="form-check-label">No Basement</label>
         </div>
     </div>
@@ -110,19 +110,19 @@
     <label class="d-flex justify-content-start col-sm-5 col-form-label"><strong>Attached Garage:</strong></label>
     <div class="d-flex align-items-end col-sm-7">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="garageAttached" />
+            <input class="form-check-input" type="radio" value="0" checked name="garage_attached" />
             <label class="form-check-label">None</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="garageAttached" />
+            <input class="form-check-input" type="radio" value="1" name="garage_attached" />
             <label class="form-check-label">Attached</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="2" name="garageAttached" />
+            <input class="form-check-input" type="radio" value="2" name="garage_attached" />
             <label class="form-check-label">Built-In</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="3" name="garageAttached" />
+            <input class="form-check-input" type="radio" value="3" name="garage_attached" />
             <label class="form-check-label">Detached</label>
         </div>
     </div>
@@ -133,17 +133,17 @@
 <div class="row mb-3">
     <div class="col-sm-12">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="overWater" />
+            <input class="form-check-input" type="radio" value="0" checked name="over_water" />
             <label class="form-check-label">No</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="overWater" />
+            <input class="form-check-input" type="radio" value="1" name="over_water" />
             <label class="form-check-label">Partially</label>
         </div>
 
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="2" name="overWater" />
+            <input class="form-check-input" type="radio" value="2" name="over_water" />
             <label class="form-check-label">Entirely</label>
         </div>
     </div>
@@ -194,7 +194,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-8 col-form-label">LAG</label>
     <div class="col-sm-2">
-        <input type="text" class="form-control" placeholder="" />
+        <input type="text" class="form-control" placeholder="" name="lag" />
     </div>
 </div>
 
@@ -230,7 +230,7 @@
     <label class="d-flex justify-content-end col-sm-4 col-form-label">&nbsp;</label>
     <div class="col-sm-8">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="hasNoElevCert">
+            <input class="form-check-input" type="checkbox" value="1" name="hasNoElevCert">
             <label class="form-check-label">No Elev Cert</label>
         </div>
     </div>
@@ -304,11 +304,11 @@
     <label class="d-flex justify-content-end col-sm-6 col-form-label text-end">Optional Personal Property Replacement Cost:</label>
     <div class="d-flex align-items-end col-sm-6">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="has_opprc" />
+            <input class="form-check-input" type="radio" value="1" name="hasOpprc" />
             <label class="form-check-label">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="has_opprc" />
+            <input class="form-check-input" type="radio" value="0" checked name="hasOpprc" />
             <label class="form-check-label">No</label>
         </div>
     </div>
@@ -318,11 +318,11 @@
     <label class="d-flex justify-content-end col-sm-6 col-form-label text-end">Dwelling Replacement Cost(Secondary Home):</label>
     <div class="d-flex align-items-end col-sm-6">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="has_drc" />
+            <input class="form-check-input" type="radio" value="1" name="hasDrc" />
             <label class="form-check-label">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="has_drc" />
+            <input class="form-check-input" type="radio" value="0" checked name="hasDrc" />
             <label class="form-check-label">No</label>
         </div>
     </div>
@@ -331,21 +331,21 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Binding Auth</label>
     <div class="col-sm-5">
-        <?= activeBindAuthoritySelect('bindAuthority', set_value('bindAuthority')) ?>
+        <?= activeBindAuthoritySelect('bindAuthority', set_value('bind_authority')) ?>
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox QuoteID:</label>
     <div class="col-sm-5">
-        <input type="text" class="form-control" placeholder="" name="hiscox_id" />
+        <input type="text" class="form-control" placeholder="" name="hiscoxID" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-3 col-form-label">Syndicate 1</label>
     <div class="col-sm-3">
-        <?= activeBindAuthoritySelect('syndicate1BindAuthority', set_value('syndicate1BindAuthority')) ?>
+        <?= activeBindAuthoritySelect('syndicate1_bind_authority', set_value('syndicate1_bind_authority')) ?>
     </div>
 
     <label class="d-flex justify-content-end col-sm-3 col-form-label">Risk %</label>
@@ -357,7 +357,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-3 col-form-label">Syndicate 2</label>
     <div class="col-sm-3">
-        <?= activeBindAuthoritySelect('syndicate2BindAuthority', set_value('syndicate2BindAuthority')) ?>
+        <?= activeBindAuthoritySelect('syndicate2_bind_authority', set_value('syndicate2_bind_authority')) ?>
     </div>
 
     <label class="d-flex justify-content-end col-sm-3 col-form-label">Risk %</label>
@@ -369,7 +369,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-3 col-form-label">Syndicate 3</label>
     <div class="col-sm-3">
-        <?= activeBindAuthoritySelect('syndicate3BindAuthority', set_value('syndicate2BindAuthority')) ?>
+        <?= activeBindAuthoritySelect('syndicate3_bind_authority', set_value('syndicate3_bind_authority')) ?>
     </div>
 
     <label class="d-flex justify-content-end col-sm-3 col-form-label">Risk %</label>

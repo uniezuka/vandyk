@@ -17,6 +17,12 @@ function getMetaValue($metas, $meta_key)
     }
     return '';
 }
+
+$ids = array_map(function ($flood_quote) {
+    return $flood_quote->flood_quote_id;
+}, $flood_quotes);
+
+$metas = getBatchedFloodQuoteMetas($ids);
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -64,20 +70,14 @@ function getMetaValue($metas, $meta_key)
                     </thead>
                     <tbody>
                         <?php
-                        $ids = array_map(function ($flood_quote) {
-                            return $flood_quote->flood_quote_id;
-                        }, $flood_quotes);
-
-                        $metas = getBatchedFloodQuoteMetas($ids);
-
                         foreach ($flood_quotes as $flood_quote) {
                             $flood_quote_id = $flood_quote->flood_quote_id;
                             $flood_quote_metas = array_filter($metas, function ($meta) use ($flood_quote_id) {
                                 return $meta->flood_quote_id == $flood_quote_id;
                             });
 
-                            $policy_type = getMetaValue($flood_quote_metas, 'policy_type');
-                            $has_excess_policy = getMetaValue($flood_quote_metas, 'has_excess_policy');
+                            $policyType = getMetaValue($flood_quote_metas, 'policyType');
+                            $hasExcessPolicy = getMetaValue($flood_quote_metas, 'hasExcessPolicy');
                         ?>
                             <tr>
                                 <td>

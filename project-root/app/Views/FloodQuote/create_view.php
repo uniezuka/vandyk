@@ -46,14 +46,9 @@ $client = $data['client'];
 
 <script type="text/javascript">
     $(document).ready(function() {
-        $('.insured_type').click(function() {
+        $('.entity_type').click(function() {
             // var inputValue = $(this).attr("value");
             // $("." + inputValue).toggle();
-            $('#individual').toggle();
-            $('#business').toggle();
-        });
-
-        $('.isSameAddress').click(function() {
             $('#individual').toggle();
             $('#business').toggle();
         });

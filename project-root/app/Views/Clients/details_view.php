@@ -3,10 +3,11 @@
 <?= $this->section('content') ?>
 
 <?php
-helper('html');
+helper(['html', 'service']);
 $client = $data['client'];
 $broker = $data['broker'];
 $buildings = $data['buildings'];
+$floodQuotes = $data['floodQuotes'];
 
 function clientDisplay($client): string
 {
@@ -16,6 +17,22 @@ function clientDisplay($client): string
         return $client->business_name . '<br />' . $client->business_name2;
     }
 }
+
+function getMetaValue($metas, $meta_key, $default = '')
+{
+    foreach ($metas as $meta) {
+        if ($meta->meta_key === $meta_key) {
+            return $meta->meta_value;
+        }
+    }
+    return $default;
+}
+
+$ids = array_map(function ($flood_quote) {
+    return $flood_quote->flood_quote_id;
+}, $floodQuotes);
+
+$metas = getBatchedFloodQuoteMetas($ids);
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -97,11 +114,217 @@ function clientDisplay($client): string
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colspan="4">
-                                To be implemented
-                            </td>
-                        </tr>
+                        <?php
+                        foreach ($floodQuotes as $floodQuote) {
+                            $flood_quote_id = $floodQuote->flood_quote_id;
+                            $flood_quote_metas = array_filter($metas, function ($meta) use ($flood_quote_id) {
+                                return $meta->flood_quote_id == $flood_quote_id;
+                            });
+
+                            $policyType = getMetaValue($flood_quote_metas, 'policyType');
+                            $policyNumber = getMetaValue($flood_quote_metas, 'policyNumber');
+                            $flood_zone = getMetaValue($flood_quote_metas, 'flood_zone');
+                            $propertyAddress = getMetaValue($flood_quote_metas, 'propertyAddress');
+                            $propertyCity = getMetaValue($flood_quote_metas, 'propertyCity');
+                            $propertyState = getMetaValue($flood_quote_metas, 'propertyState');
+                            $hasExcessPolicy = (int)getMetaValue($flood_quote_metas, 'hasExcessPolicy', 0);
+                            $isBounded = (int)getMetaValue($flood_quote_metas, 'isBounded', 0);
+                            $boundDate = getMetaValue($flood_quote_metas, 'boundDate');
+                            $expirationDate = getMetaValue($flood_quote_metas, 'expirationDate');
+                            $inForce = (int)getMetaValue($flood_quote_metas, 'inForce', 0);
+                            $isPolicyDeclined = (int)getMetaValue($flood_quote_metas, 'isPolicyDeclined', 0);
+                            $isSandbarQuote = (int)getMetaValue($flood_quote_metas, 'isSandbarQuote', 0);
+                            $bindingAuthority = getMetaValue($flood_quote_metas, 'bindingAuthority');
+                            $hiscoxID = getMetaValue($flood_quote_metas, 'hiscoxID');
+                            $hiscoxPreviousBoundID = getMetaValue($flood_quote_metas, 'hiscoxPreviousBoundID');
+                            $flood_occupancy_id = (int)getMetaValue($flood_quote_metas, 'flood_occupancy_id', 0);
+                            $isCondo = (int)getMetaValue($flood_quote_metas, 'isCondo', 0);
+                        ?>
+                            <tr>
+                                <td>
+                                    <p>
+                                        <strong><?= $policyType ?></strong> Quote ID: <a href="<?= base_url('/flood_quote/update/') . $floodQuote->flood_quote_id; ?>"><?= $floodQuote->flood_quote_id; ?></a>
+                                        <br />
+                                        Policy # <?= $policyNumber ?>
+                                        <br />
+                                        Flood Zone: <?= $flood_zone ?>
+                                    </p>
+                                    <p>
+                                        <strong>Property Address: </strong>
+                                        <br />
+                                        <?= $propertyAddress ?>
+                                        <br />
+                                        <?= $propertyCity ?>, <?= $propertyState ?>
+                                    </p>
+                                    <p>
+                                        Entered: <?= $floodQuote->date_entered ?>
+                                    </p>
+                                    <?php if ($hasExcessPolicy) { ?>
+                                        <p><strong>EXCESS POLICY</strong></p>
+                                    <?php } ?>
+                                </td>
+
+                                <td>
+                                    <p><a href="<?= base_url('/flood_quote/update/') . $floodQuote->flood_quote_id; ?>" class="btn btn-primary btn-sm">Edit Quote Info</a></p>
+
+                                    <?php if ($isBounded) { ?>
+                                        <p>
+                                            <strong>Bound: <?= $boundDate ?></strong><br />
+                                            <strong>Exp: <?= $expirationDate ?></strong><br />
+                                            <strong>In Force: </strong><?= ($inForce) ? "Yes" : "No" ?>
+                                        </p>
+                                    <?php } ?>
+
+                                    <p>
+                                        <?php if ($isPolicyDeclined) { ?>
+                                            Inactive
+                                        <?php } else if ($isBounded) { ?>
+                                            <a href="#" class="btn btn-primary btn-sm" target="_blank">View Bound Rating</a>
+                                        <?php } else { ?>
+                                            <a href="#" class="btn btn-primary btn-sm" target="_blank">View Current Rating</a>
+                                        <?php } ?>
+                                    </p>
+
+                                    <?php
+                                    $appText = "";
+                                    $quoteText = "";
+                                    $invoiceText = "";
+                                    $docsTitle = ($isSandbarQuote) ? "Sandbar Docs" : "IAC Docs";
+
+                                    if (strpos($bindingAuthority, "230") !== false) {
+                                        $appText = "Brit App";
+                                        $quoteText = "Brit Quote";
+                                        $invoiceText = "Brit Invoice";
+                                    } else if (strpos($bindingAuthority, "240") !== false) {
+                                        $appText = "Canopius App";
+                                        $quoteText = "Canopius Quote";
+                                        $invoiceText = "Canopius Invoice";
+                                    } else if (strpos($bindingAuthority, "260") !== false) {
+                                        $appText = "QBE App";
+                                        $quoteText = "QBE Quote";
+                                        $invoiceText = "QBE Invoice";
+                                    } else if (strpos($bindingAuthority, "250") !== false) {
+                                        $appText = "Hiscox App";
+                                        $quoteText = "Hiscox Quote Doc";
+                                        $invoiceText = "Hiscox Invoice";
+                                    } else {
+                                        $appText = "Chubb App";
+                                        $quoteText = "Chubb Quote";
+                                        $invoiceText = "Chubb Invoice";
+                                    }
+                                    ?>
+                                    <p><strong><?= $docsTitle ?></strong></p>
+                                    <p><a href="#" class="btn btn-primary btn-sm" target="_blank"><?= $appText ?></a></p>
+                                    <p><a href="#" class="btn btn-primary btn-sm" target="_blank"><?= $quoteText ?></a></p>
+                                    <p><a href="#" class="btn btn-primary btn-sm" target="_blank"><?= $invoiceText ?></a></p>
+                                    <p><a href="#" class="btn btn-primary btn-sm" target="_blank">No Loss Form</a></p>
+                                    <!-- UPLOADED DOCS HERE -->
+                                </td>
+
+                                <td>
+                                    <?php
+                                    if (strpos($bindingAuthority, "250") !== false) {
+                                        if ($hiscoxID == "") {
+                                            if ($policyType == "REN" && $hiscoxPreviousBoundID != "") {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Hiscox Start Renewal Quote</a></p>";
+                                            } else if ($policyType == "END" && $hiscoxPreviousBoundID != "") {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Hiscox Start Endorsement Quote</a></p>";
+                                            } else if ($policyType == "CAN" && $hiscoxPreviousBoundID != "") {
+                                                if ($hiscoxID == "" && $hiscoxPreviousBoundID != "") {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Reinstate</a></p>";
+                                                } else {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Preview/Calculate Hiscox Cancellation</a></p>";
+                                                }
+                                            } else {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Start Hiscox Quote</a></p>";
+                                            }
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Link Hiscox</a></p>";
+                                        } else if ($isBounded) {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">View Hiscox Quote</a></p>";
+                                        } else {
+                                            if ($policyType == "REN") {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Requote Hiscox</a></p>";
+                                            } else if ($policyType == "END") {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";
+                                            } else {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Requote Hiscox</a></p>";
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                </td>
+
+                                <td>
+                                    <?php
+                                    if ($isPolicyDeclined) {
+                                        echo "<p>Inactive</p>";
+                                    } else if ($isBounded) {
+                                        if (strpos($bindingAuthority, "250") !== false) {
+                                            if ($isSandbarQuote) {
+                                                echo "<p><strong>Sandbar Docs</strong></p>";
+
+                                                if ($hasExcessPolicy) {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Hiscox Excess Dec Page</a></p>";
+                                                } else {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Hiscox Dec Page</a></p>";
+                                                }
+                                            } else {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Hiscox Dec Page</a></p>";
+                                            }
+                                        } else {
+                                            if ($isSandbarQuote) {
+                                                echo "<p><strong>Sandbar Docs</strong></p>";
+
+                                                if ($hasExcessPolicy) {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Excess Dec Page</a></p>";
+                                                } else {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Dec Page</a></p>";
+                                                }
+                                            } else {
+                                                echo "<p><strong>IAC Docs</strong></p>";
+
+                                                if ($hasExcessPolicy) {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Excess Dec Page</a></p>";
+                                                } else {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Dec Page</a></p>";
+                                                }
+                                            }
+
+                                            if ($flood_occupancy_id == 4) {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">General Policy</a></p>";
+                                            } else if ($isCondo) {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Condo Policy</a></p>";
+                                            } else if (strpos($bindingAuthority, "230") !== false) {
+                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Brit Policy</a></p>";
+                                            } else {
+                                                if ($propertyState == "CT") {
+                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Broker CT SL-8 Form</a></p>";
+                                                }
+                                            }
+                                        }
+                                    } else if ($policyType == "CAN" && $hiscoxPreviousBoundID != "") {
+                                        echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Cancel Hiscox Policy</a></p>";
+                                    } else {
+                                        if (strpos($bindingAuthority, "70") !== false) {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Chubb Policy</a></p>";
+                                        } else if (strpos($bindingAuthority, "260") !== false) {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind QBE Policy</a></p>";
+                                        } else if (strpos($bindingAuthority, "230") !== false) {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Brit Policy</a></p>";
+                                        } else if (strpos($bindingAuthority, "240") !== false) {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Canop Policy</a></p>";
+                                        } else if (strpos($bindingAuthority, "250") !== false) {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Hiscox Policy</a></p>";
+                                        } else {
+                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Chubb Policy</a></p>";
+                                        }
+                                    }
+                                    ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
                     </tbody>
                 </table>
             </div>

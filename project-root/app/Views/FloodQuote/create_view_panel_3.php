@@ -16,11 +16,11 @@
     <label class="d-flex justify-content-start col-sm-4 col-form-label"><strong>Has Loss occurred in Previous 10 Years:</strong></label>
     <div class="d-flex align-items-end col-sm-8">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="lossOccured" />
+            <input class="form-check-input" type="radio" value="1" name="hasLossOccured" />
             <label class="form-check-label">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="lossOccured" />
+            <input class="form-check-input" type="radio" value="0" checked name="hasLossOccured" />
             <label class="form-check-label">No</label>
         </div>
     </div>
@@ -29,28 +29,28 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Year of Last Loss:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="Year" name="yearLastLoss" />
+        <input type="text" class="form-control" placeholder="Year" name="yearLastLoss" value="<?= set_value('yearLastLoss') ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Value of Last Loss:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="Amount" name="lastLossValue" />
+        <input type="text" class="form-control" placeholder="Amount" name="lastLossValue" value="<?= set_value('lastLossValue') ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label"># of Losses last 10 Yrs:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="lossesIn10Years" />
+        <input type="text" class="form-control" placeholder="" name="lossesIn10Years" value="<?= set_value('lossesIn10Years') ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Total Value of Losses</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="lastLossValueIn10Years" />
+        <input type="text" class="form-control" placeholder="" name="totalLossValueIn10Years" value="<?= set_value('lastLossValueIn10Years') ?>" />
     </div>
 </div>
 
@@ -65,11 +65,11 @@
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Has Home been elevated since last loss:</label>
     <div class="d-flex align-items-end col-sm-8">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="elevatedSinceLastLoss" />
+            <input class="form-check-input" type="radio" value="1" name="hasElevatedSinceLastLoss" />
             <label class="form-check-label">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="elevatedSinceLastLoss" />
+            <input class="form-check-input" type="radio" value="0" checked name="hasElevatedSinceLastLoss" />
             <label class="form-check-label">No</label>
         </div>
     </div>
@@ -211,7 +211,7 @@
     <label class="d-flex justify-content-end col-sm-4 col-form-label">&nbsp;</label>
     <div class="col-sm-8">
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="isQuoteApproved">
+            <input class="form-check-input" type="checkbox" name="isQuoteApproved" value="1">
             <label class="form-check-label">Quote Approved</label>
         </div>
     </div>
