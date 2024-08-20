@@ -1,6 +1,3 @@
-<?php
-?>
-
 <strong>Insured Information</strong>
 
 <span class="me-3 form-text">Entity Type</span>

@@ -340,8 +340,8 @@ class FloodQuoteCalculations
 
     private function calculateMidLevelDebit($stateRate)
     {
-        $mle = $this->getMetaValue("mle", 0);
-        $bfe = $this->getMetaValue("bfe", 0);
+        $mle = (int)$this->getMetaValue("mle", 0);
+        $bfe = (int)$this->getMetaValue("bfe", 0);
         $midLevBFE = ($mle == 0) ? 99 : $mle - $bfe;
 
         if ($midLevBFE < 0.5) {

@@ -137,6 +137,12 @@ class Clients extends BaseController
         if ($data['client']->is_commercial)
             $data['buildings'] = $this->clientService->getBuildings($data['client']->client_id);
 
+        $ids = array_map(function ($flood_quote) {
+            return $flood_quote->flood_quote_id;
+        }, $data['floodQuotes']);
+
+        $data['metas'] = $this->floodQuoteService->getBatchedFloodQuoteMetas($ids);
+
         return view('Clients/details_view', ['data' => $data]);
     }
 

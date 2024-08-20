@@ -331,7 +331,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Binding Auth</label>
     <div class="col-sm-5">
-        <?= activeBindAuthoritySelect('bindAuthority', set_value('bind_authority')) ?>
+        <?= activeBindAuthoritySelect('bind_authority', set_value('bind_authority')) ?>
     </div>
 </div>
 

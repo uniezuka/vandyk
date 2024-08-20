@@ -8,6 +8,9 @@ $client = $data['client'];
 $broker = $data['broker'];
 $buildings = $data['buildings'];
 $floodQuotes = $data['floodQuotes'];
+$metas = $data['metas'];
+
+$bindAuthorityService = service('bindAuthorityService');
 
 function clientDisplay($client): string
 {
@@ -28,11 +31,6 @@ function getMetaValue($metas, $meta_key, $default = '')
     return $default;
 }
 
-$ids = array_map(function ($flood_quote) {
-    return $flood_quote->flood_quote_id;
-}, $floodQuotes);
-
-$metas = getBatchedFloodQuoteMetas($ids);
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -134,11 +132,15 @@ $metas = getBatchedFloodQuoteMetas($ids);
                             $inForce = (int)getMetaValue($flood_quote_metas, 'inForce', 0);
                             $isPolicyDeclined = (int)getMetaValue($flood_quote_metas, 'isPolicyDeclined', 0);
                             $isSandbarQuote = (int)getMetaValue($flood_quote_metas, 'isSandbarQuote', 0);
-                            $bindingAuthority = getMetaValue($flood_quote_metas, 'bindingAuthority');
+                            $bind_authority = getMetaValue($flood_quote_metas, 'bind_authority');
                             $hiscoxID = getMetaValue($flood_quote_metas, 'hiscoxID');
                             $hiscoxPreviousBoundID = getMetaValue($flood_quote_metas, 'hiscoxPreviousBoundID');
                             $flood_occupancy_id = (int)getMetaValue($flood_quote_metas, 'flood_occupancy_id', 0);
                             $isCondo = (int)getMetaValue($flood_quote_metas, 'isCondo', 0);
+
+
+                            $bindAuthority = $bindAuthorityService->findOne($bind_authority);
+                            $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
                         ?>
                             <tr>
                                 <td>
@@ -191,19 +193,19 @@ $metas = getBatchedFloodQuoteMetas($ids);
                                     $invoiceText = "";
                                     $docsTitle = ($isSandbarQuote) ? "Sandbar Docs" : "IAC Docs";
 
-                                    if (strpos($bindingAuthority, "230") !== false) {
+                                    if (strpos($bindAuthorityText, "230") !== false) {
                                         $appText = "Brit App";
                                         $quoteText = "Brit Quote";
                                         $invoiceText = "Brit Invoice";
-                                    } else if (strpos($bindingAuthority, "240") !== false) {
+                                    } else if (strpos($bindAuthorityText, "240") !== false) {
                                         $appText = "Canopius App";
                                         $quoteText = "Canopius Quote";
                                         $invoiceText = "Canopius Invoice";
-                                    } else if (strpos($bindingAuthority, "260") !== false) {
+                                    } else if (strpos($bindAuthorityText, "260") !== false) {
                                         $appText = "QBE App";
                                         $quoteText = "QBE Quote";
                                         $invoiceText = "QBE Invoice";
-                                    } else if (strpos($bindingAuthority, "250") !== false) {
+                                    } else if (strpos($bindAuthorityText, "250") !== false) {
                                         $appText = "Hiscox App";
                                         $quoteText = "Hiscox Quote Doc";
                                         $invoiceText = "Hiscox Invoice";
@@ -223,7 +225,8 @@ $metas = getBatchedFloodQuoteMetas($ids);
 
                                 <td>
                                     <?php
-                                    if (strpos($bindingAuthority, "250") !== false) {
+
+                                    if (strpos($bindAuthorityText, "250") !== false) {
                                         if ($hiscoxID == "") {
                                             if ($policyType == "REN" && $hiscoxPreviousBoundID != "") {
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Hiscox Start Renewal Quote</a></p>";
@@ -236,9 +239,9 @@ $metas = getBatchedFloodQuoteMetas($ids);
                                                     echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Preview/Calculate Hiscox Cancellation</a></p>";
                                                 }
                                             } else {
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Start Hiscox Quote</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/hiscox/create/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Start Hiscox Quote</a></p>";
                                             }
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Link Hiscox</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/hiscox/link/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Link Hiscox</a></p>";
                                         } else if ($isBounded) {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">View Hiscox Quote</a></p>";
                                         } else {
@@ -261,7 +264,7 @@ $metas = getBatchedFloodQuoteMetas($ids);
                                     if ($isPolicyDeclined) {
                                         echo "<p>Inactive</p>";
                                     } else if ($isBounded) {
-                                        if (strpos($bindingAuthority, "250") !== false) {
+                                        if (strpos($bindAuthorityText, "250") !== false) {
                                             if ($isSandbarQuote) {
                                                 echo "<p><strong>Sandbar Docs</strong></p>";
 
@@ -296,7 +299,7 @@ $metas = getBatchedFloodQuoteMetas($ids);
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">General Policy</a></p>";
                                             } else if ($isCondo) {
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Condo Policy</a></p>";
-                                            } else if (strpos($bindingAuthority, "230") !== false) {
+                                            } else if (strpos($bindAuthorityText, "230") !== false) {
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Brit Policy</a></p>";
                                             } else {
                                                 if ($propertyState == "CT") {
@@ -307,17 +310,17 @@ $metas = getBatchedFloodQuoteMetas($ids);
                                     } else if ($policyType == "CAN" && $hiscoxPreviousBoundID != "") {
                                         echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Cancel Hiscox Policy</a></p>";
                                     } else {
-                                        if (strpos($bindingAuthority, "70") !== false) {
+                                        if (strpos($bindAuthorityText, "70") !== false) {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Chubb Policy</a></p>";
-                                        } else if (strpos($bindingAuthority, "260") !== false) {
+                                        } else if (strpos($bindAuthorityText, "260") !== false) {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind QBE Policy</a></p>";
-                                        } else if (strpos($bindingAuthority, "230") !== false) {
+                                        } else if (strpos($bindAuthorityText, "230") !== false) {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Brit Policy</a></p>";
-                                        } else if (strpos($bindingAuthority, "240") !== false) {
+                                        } else if (strpos($bindAuthorityText, "240") !== false) {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Canop Policy</a></p>";
-                                        } else if (strpos($bindingAuthority, "250") !== false) {
+                                        } else if (strpos($bindAuthorityText, "250") !== false && $hiscoxID != "") {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Hiscox Policy</a></p>";
-                                        } else {
+                                        } else if ($bindAuthorityText == "") {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Chubb Policy</a></p>";
                                         }
                                     }

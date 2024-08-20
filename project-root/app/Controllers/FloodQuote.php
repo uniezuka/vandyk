@@ -46,6 +46,13 @@ class FloodQuote extends BaseController
         $data['title'] = "Flood Quotes";
         $data['pager_links'] = $pager_links;
         $data['search'] = $this->request->getGet('search') ?? "";
+
+        $ids = array_map(function ($flood_quote) {
+            return $flood_quote->flood_quote_id;
+        }, $data['flood_quotes']);
+
+        $data['metas'] = $this->floodQuoteService->getBatchedFloodQuoteMetas($ids);
+
         return view('FloodQuote/index_view', ['data' => $data]);
     }
 
@@ -154,6 +161,7 @@ class FloodQuote extends BaseController
             $message->currentCompany = $post['currentCompany'] ?? "";
             $message->currentPremium = $post['currentPremium'] ?? "";
             $message->currentExpiryDate = $post['currentExpiryDate'] ?? "";
+            $message->isQuoteApproved = $post['isQuoteApproved'] ?? 0;
             $message->policyType = "NEW";
             $message->client_id = $client_id;
 
@@ -321,6 +329,8 @@ class FloodQuote extends BaseController
             $message->currentCompany = $post['currentCompany'] ?? "";
             $message->currentPremium = $post['currentPremium'] ?? "";
             $message->currentExpiryDate = $post['currentExpiryDate'] ?? "";
+            $message->isQuoteApproved = $post['isQuoteApproved'] ?? 0;
+            $message->isQuoteDeclined = $post['isQuoteDeclined'] ?? 0;
 
             $this->floodQuoteService->update($message);
 

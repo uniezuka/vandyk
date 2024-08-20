@@ -15,4 +15,16 @@ class BindAuthorityService extends BaseService
 
         return $query->getResult();
     }
+
+    public function findOne($id)
+    {
+        $builder = $this->db->table('bind_authority');
+        $builder->where('bind_authority_id', $id);
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
+    }
 }

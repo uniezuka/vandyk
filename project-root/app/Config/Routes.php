@@ -67,6 +67,8 @@ $routes->match(['get', 'post'], 'flood_quote/create', 'FloodQuote::create', ['fi
 $routes->get('/flood_quote/update/(:num)', 'FloodQuote::update/$1', ['filter' => 'authGuard']);
 $routes->post('/flood_quote/update/(:num)', 'FloodQuote::update/$1', ['filter' => 'authGuard']);
 $routes->get('/flood_quote/initial_details/(:num)', 'FloodQuote::intialDetails/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_quote/hiscox/link/(:num)', 'Hiscox::link/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_quote/hiscox/create/(:num)', 'Hiscox::create/$1', ['filter' => 'authGuard']);
 
 $routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);
@@ -110,6 +112,8 @@ $routes->match(['get', 'post'], 'sla_setting/create', 'SLASettings::create', ['f
 $routes->get('/sla_setting/update/(:num)', 'SLASettings::update/$1', ['filter' => 'authGuard']);
 $routes->post('/sla_setting/update/(:num)', 'SLASettings::update/$1', ['filter' => 'authGuard']);
 $routes->get('/sla_setting/set_current/(:num)', 'SLASettings::set_current/$1', ['filter' => 'authGuard']);
+
+//
 
 /*
  * --------------------------------------------------------------------

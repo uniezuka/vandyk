@@ -7,6 +7,7 @@ helper(['html', 'service']);
 $flood_quotes = $data['flood_quotes'];
 $pager_links = $data['pager_links'];
 $search = $data['search'];
+$metas = $data['metas'];
 
 function getMetaValue($metas, $meta_key)
 {
@@ -17,12 +18,6 @@ function getMetaValue($metas, $meta_key)
     }
     return '';
 }
-
-$ids = array_map(function ($flood_quote) {
-    return $flood_quote->flood_quote_id;
-}, $flood_quotes);
-
-$metas = getBatchedFloodQuoteMetas($ids);
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -83,9 +78,11 @@ $metas = getBatchedFloodQuoteMetas($ids);
                                 <td>
                                     <p>ID: <a href=""><?= $flood_quote->flood_quote_id ?></a></p>
                                     <p>Entered: <?= $flood_quote->date_entered; ?></p>
-                                    <?php if ($has_excess_policy) { ?>
-                                        <p><strong>EXCESS POLICY</strong></p>
-                                    <?php } ?>
+                                    <?php // if ($has_excess_policy) { 
+                                    ?>
+                                    <!-- <p><strong>EXCESS POLICY</strong></p> -->
+                                    <?php // } 
+                                    ?>
                                 </td>
                                 <td>
                                     <p><a class="btn btn-primary btn-sm" href="<?= base_url('/client/update/') . $flood_quote->client_id; ?>">Update Client</a></p>

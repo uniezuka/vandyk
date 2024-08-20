@@ -234,4 +234,13 @@ class Services extends BaseService
 
         return new \App\Services\CommercialOccupancyService();
     }
+
+    public static function hiscoxQuoteService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('hiscoxQuoteService');
+        }
+
+        return new \App\Services\HiscoxQuoteService();
+    }
 }

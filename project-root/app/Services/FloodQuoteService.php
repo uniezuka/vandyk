@@ -219,18 +219,34 @@ class FloodQuoteService extends BaseService
         }
     }
 
-    public function getByClient($client_id, $is_policy_declined = false)
+    public function getByClient($client_id, $is_quote_declined = false)
     {
         $subQuery = $this->db->table('fq_flood_quote_meta')
             ->select('DISTINCT flood_quote_id', false) // false to prevent backticks
-            ->where('meta_key', 'isPolicyDeclined')
-            ->where('meta_value', $is_policy_declined)
+            ->groupStart()
+            ->where('meta_key', 'isQuoteDeclined')
+            ->where('meta_value', $is_quote_declined)
+            ->groupEnd()
+            ->orGroupStart()
+            ->where('meta_key IS NULL')
+            ->groupEnd()
             ->getCompiledSelect();
 
-        // Main query
+        // // Main query
+        // $builder = $this->db->table('fq_flood_quote fq')
+        //     ->select('fq.*')
+        //     ->join("($subQuery) fq_meta", 'fq.flood_quote_id = fq_meta.flood_quote_id', 'left')
+        //     ->where('fq.client_id', $client_id)
+        //     ->orderBy('fq.flood_quote_id', 'DESC')
+        //     ->orderBy('fq.date_entered', 'DESC');
+
         $builder = $this->db->table('fq_flood_quote fq')
             ->select('fq.*')
             ->join("($subQuery) fq_meta", 'fq.flood_quote_id = fq_meta.flood_quote_id', 'left')
+            ->groupStart()
+            ->where('fq_meta.flood_quote_id IS NOT NULL') // When isQuoteDeclined is false
+            ->orWhere('fq.flood_quote_id NOT IN (SELECT flood_quote_id FROM fq_flood_quote_meta WHERE meta_key = "isQuoteDeclined")') // When isQuoteDeclined doesn't exist
+            ->groupEnd()
             ->where('fq.client_id', $client_id)
             ->orderBy('fq.flood_quote_id', 'DESC')
             ->orderBy('fq.date_entered', 'DESC');
