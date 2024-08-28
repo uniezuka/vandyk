@@ -368,21 +368,17 @@ class Hiscox extends BaseController
                 $this->hiscoxQuoteService->addHiscoxId($id, $hiscoxID);
             }
         } else {
-            if (isset($_SESSION["hiscoxQuote"])) {
-                $hiscoxQuote = $_SESSION["hiscoxQuote"];
-            } else {
-                $getHiscoxQuote = $this->hiscoxQuoteService->findHiscoxQuote($id, $hiscoxID);
+            $getHiscoxQuote = $this->hiscoxQuoteService->findHiscoxQuote($id, $hiscoxID);
 
-                if ($getHiscoxQuote) {
-                    $rawQuotes = $getHiscoxQuote->raw_quotes;
-                    $hiscoxQuote = json_decode($rawQuotes);
-                } else {
-                    $getHiscoxQuote = $this->hixcoxAPI->getRequest($hiscoxID);
-                    $rawQuotes = $getHiscoxQuote["raw"];
-                }
-
+            if ($getHiscoxQuote) {
+                $rawQuotes = $getHiscoxQuote->raw_quotes;
                 $hiscoxQuote = json_decode($rawQuotes);
+            } else {
+                $getHiscoxQuote = $this->hixcoxAPI->getRequest($hiscoxID);
+                $rawQuotes = $getHiscoxQuote["raw"];
             }
+
+            $hiscoxQuote = json_decode($rawQuotes);
 
             if (isset($hiscoxQuote->response)) {
                 $quoteRequestDate = $hiscoxQuote->response->quoteRequestDate;
@@ -483,7 +479,6 @@ class Hiscox extends BaseController
         $data['title'] = "Select Hiscox Quote";
         $data['floodQuote'] = $this->floodQuoteService->findOne($id);
         $data['hiscoxFloodQuote'] = null;
-        $hiscoxID = null;
 
         if (!$data['floodQuote']) {
             return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
@@ -491,7 +486,7 @@ class Hiscox extends BaseController
 
         $floodQuote = $data['floodQuote'];
         $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
-        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID", $hiscoxID);
+        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID");
         $isRented = $this->getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
         $policyType = $this->getMetaValue($floodQuoteMetas, "policyType");
 
@@ -631,5 +626,317 @@ class Hiscox extends BaseController
         $data["hiscoxSelectedOptionIndex"] = $hiscoxSelectedOptionIndex;
 
         return view('Hiscox/select_view', ['data' => $data]);
+    }
+
+    public function requote($id = null)
+    {
+        helper('form');
+        $data['title'] = "Requote Hiscox Quote";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+        $data['hiscoxFloodQuote'] = null;
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID");
+
+        if ($hiscoxID == "") {
+            return redirect()->to('/flood_quotes')->with('error', "Missing Hiscox ID.");
+        }
+
+        $isRented = $this->getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
+        $policyType = $this->getMetaValue($floodQuoteMetas, "policyType");
+
+        $propertyAddress = $this->getMetaValue($floodQuoteMetas, "propertyAddress");
+        $propertyCity = $this->getMetaValue($floodQuoteMetas, "propertyCity");
+        $propertyState = $this->getMetaValue($floodQuoteMetas, "propertyState");
+        $propertyZip = $this->getMetaValue($floodQuoteMetas, "propertyZip");
+
+        $quoteRequestDate = '';
+        $quoteExpiryDate = '';
+        $productType = '';
+
+        $validations = [];
+        $underwriterDecisions = [];
+        $errors = [];
+
+        $primaryOptions = [];
+        $excessOptions = [];
+
+        $hiscoxSelectedOptionIndex = 0;
+
+        $address = $propertyAddress . ' ' . $propertyCity . ' ' . $propertyState . $propertyZip;
+
+        $contentsCostValueType = '';
+        $purpose = '';
+        $yearBuilt = 0;
+        $constructionType = '';
+        $numberOfStories = 0;
+        $squareFootage = 0;
+        $elevationHeight = 0;
+        $foundationType = '';
+        $basementType = '';
+        $buildingOverWaterType = '';
+        $policyType = '';
+        $yearOfLastLoss = '';
+        $lastLossValue = '';
+        $isRented = $this->getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
+        $isPerson = $floodQuote->entity_type == 0;
+        $construction_type = $this->getMetaValue($floodQuoteMetas, "construction_type", "0");
+        $commercial_occupancy = $this->getMetaValue($floodQuoteMetas, "commercial_occupancy", "0");
+        $isPrimaryResidence = $this->getMetaValue($floodQuoteMetas, "isPrimaryResidence", "0");
+        $other_occupancy = $this->getMetaValue($floodQuoteMetas, "other_occupancy", "0");
+        $occupancyType = HiscoxApiV2::getHiscoxOccupancyType($isPerson, $commercial_occupancy, $isPrimaryResidence, $other_occupancy);
+
+        $construction = $this->constructionService->findOne($construction_type);
+        $constructionType = ($construction) ? $construction->hiscox_name : "";
+
+        if (!$this->request->is('post')) {
+            $hasOpprc = $this->getMetaValue($floodQuoteMetas, "hasOpprc", 0);
+            $flood_foundation = $this->getMetaValue($floodQuoteMetas, "flood_foundation", "0");
+            $isEnclosureFinished = $this->getMetaValue($floodQuoteMetas, "isEnclosureFinished", "0");
+            $basement_finished = $this->getMetaValue($floodQuoteMetas, "basement_finished", "0");
+            $garage_attached = $this->getMetaValue($floodQuoteMetas, "garage_attached", "0");
+            $over_water = $this->getMetaValue($floodQuoteMetas, "over_water", "0");
+            $latitude = (float)$this->getMetaValue($floodQuoteMetas, "latitude", "0");
+            $longitude = (float)$this->getMetaValue($floodQuoteMetas, "longitude", "0");
+            $lfe = (float)$this->getMetaValue($floodQuoteMetas, "lfe", 0);
+            $hag = (float)$this->getMetaValue($floodQuoteMetas, "hag", 0);
+            $buildingReplacementCost = (int)$this->getMetaValue($floodQuoteMetas, "buildingReplacementCost", 0);
+            $contentReplacementCost = (int)$this->getMetaValue($floodQuoteMetas, "contentReplacementCost", 0);
+            $covABuilding = (int)$this->getMetaValue($floodQuoteMetas, "covABuilding", 0);
+            $covCContent = (int)$this->getMetaValue($floodQuoteMetas, "covCContent", 0);
+            $covDLoss = (int)$this->getMetaValue($floodQuoteMetas, "covDLoss", 0);
+            $yearLastLoss = $this->getMetaValue($floodQuoteMetas, "yearLastLoss");
+            $lastLossValue = $this->getMetaValue($floodQuoteMetas, "lastLossValue", 0);
+
+            $requestData = [
+                "contentsCostValueType" => $hasOpprc ? "ReplacementCostValue" : "ActualCashValue",
+                "foundation" => [
+                    "foundationType" => HiscoxApiV2::getHiscoxFoundationType($flood_foundation),
+                    "additionalFoundationType" => HiscoxApiV2::getHiscoxAdditionalFoundationType($isEnclosureFinished, $flood_foundation),
+                ],
+                "basementType" => HiscoxApiV2::getHiscoxBasementType($basement_finished),
+                "attachedGarageType" => HiscoxApiV2::getHiscoxAttachedGarageType($garage_attached),
+                "yearBuilt" => (int)$this->getMetaValue($floodQuoteMetas, "yearBuilt", 0),
+                "squareFootage" => (int)$this->getMetaValue($floodQuoteMetas, "squareFeet", 0),
+                "numberOfStories" => (int)$this->getMetaValue($floodQuoteMetas, "numOfFloors", 0),
+                "elevationHeight" => $lfe - $hag,
+                "buildingOverWaterType" => HiscoxApiV2::getHiscoxBuildingOverWaterType($over_water),
+                "productType" => ($isPerson) ? "Residential" : "Commercial",
+                "location" => [
+                    "addressLine1" => $propertyAddress,
+                    "county" => $propertyCity,
+                    "stateCode" => $propertyState,
+                    "zip" => $propertyZip,
+                    "latitude" => $latitude,
+                    "longitude" => $longitude,
+                ],
+                "hiscoxId" => $hiscoxID
+            ];
+
+            if ($isPerson) {
+                $requestData["residential"] = [
+                    "occupancyType" => $occupancyType,
+                    "constructionType" => ($construction) ? $construction->hiscox_name : "",
+                    "replacementCostValues" => ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost],
+                    "limits" => [
+                        ["building" => $covABuilding, "contents" => $covCContent],
+                        ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost]
+                    ],
+                ];
+            } else {
+                $requestData["commercial"] = [
+                    "occupancyType" => $occupancyType,
+                    "constructionType" => ($construction) ? $construction->hiscox_name : ""
+                ];
+
+                if ($isRented) {
+                    $requestData["commercial"]["tenanted"] = [
+                        "replacementCostValues" => ["improvementsAndBetterments" => $buildingReplacementCost, "contents" => $contentReplacementCost],
+                        "limits" => [
+                            ["improvementsAndBetterments" => $covABuilding, "contents" => $covCContent],
+                            ["improvementsAndBetterments" => $buildingReplacementCost, "contents" => $contentReplacementCost]
+                        ],
+                        "businessIncomeAndExtraExpenseAnnualValue" => $covDLoss
+                    ];
+                } else {
+                    $requestData["commercial"]["owned"] = [
+                        "replacementCostValues" => ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost],
+                        "limits" => [
+                            ["building" =>  $covABuilding, "contents" => $covCContent],
+                            ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost]
+                        ],
+                        "businessIncomeAndExtraExpenseAnnualValue" => $covDLoss
+                    ];
+                }
+            }
+
+            if ($yearLastLoss != "") {
+                $requestData["priorLosses"] = [
+                    ["year" => (int)$yearLastLoss, "value" => (float)$lastLossValue]
+                ];
+            }
+
+            $hiscox = $this->hixcoxAPI->update($requestData);
+            $hiscoxResponse = $hiscox['response'];
+            $hiscoxQuote = $hiscoxResponse;
+
+            $validations = $hiscoxQuote->messages->validation;
+            $underwriterDecisions = $hiscoxQuote->messages->underwriterDecisions;
+            $errors = $hiscoxQuote->messages->errors;
+
+            if (isset($hiscoxQuote->response)) {
+                $hiscoxID = $hiscoxQuote->response->hiscoxId;
+                $quoteRequestDate = $hiscoxQuote->response->quoteRequestDate;
+                $quoteExpiryDate = $hiscoxQuote->response->quoteExpiryDate;
+
+                $productResponseRequest = HiscoxApiV2::createProductResponseRequest($hiscoxQuote, $data['floodQuote'], $isRented);
+
+                $hiscoxProductResponse = $productResponseRequest["hiscoxProductResponse"];
+                $purpose = $productResponseRequest["purpose"];
+
+                $primaryOptions = $hiscoxProductResponse->primary;
+                $excessOptions = $hiscoxProductResponse->excess;
+
+                $contentsCostValueType = $hiscoxQuote->request->contentsCostValueType;
+                $yearBuilt = $hiscoxQuote->request->yearBuilt;
+                $numberOfStories = $hiscoxQuote->request->numberOfStories;
+                $squareFootage = $hiscoxQuote->request->squareFootage;
+                $elevationHeight = $hiscoxQuote->request->elevationHeight;
+                $foundationType = $hiscoxQuote->request->foundation->foundationType;
+                $basementType = $hiscoxQuote->request->basementType;
+                $buildingOverWaterType = $hiscoxQuote->request->buildingOverWaterType;
+
+                if (isset($hiscoxQuote->request->priorLosses) && count($hiscoxQuote->request->priorLosses) > 0) {
+                    $yearOfLastLoss = $hiscoxQuote->request->priorLosses[0]->year;
+                    $lastLossValue = $hiscoxQuote->request->priorLosses[0]->value;
+                }
+
+                $this->upsertHiscoxQuote([
+                    "hiscoxID" => $hiscoxID,
+                    "flood_quote_id" => $id,
+                    "client_id" => $data['floodQuote']->client_id,
+                    "quoteExpirationDate" => $quoteExpiryDate,
+                    "quoteRequestedDate" => $hiscoxQuote->response->quoteRequestDate,
+                    "selectedPolicyType" => "-1",
+                    "selectedDeductible" => -1,
+                    "selectedPolicyIndex" => -1,
+                    "rawQuotes" => json_encode($hiscoxQuote, JSON_PRETTY_PRINT),
+                ]);
+
+                $message = new \stdClass();
+                $message->flood_quote_id = $id;
+                $message->selectedPolicyType = "-1";
+                $message->selectedDeductible = -1;
+                $message->selectedPolicyIndex = -1;
+                $this->hiscoxQuoteService->updateSelectedHiscoxQuote($message);
+            }
+        } else {
+            $getHiscoxQuote = $this->hiscoxQuoteService->findHiscoxQuote($id, $hiscoxID);
+
+            if ($getHiscoxQuote) {
+                $rawQuotes = $getHiscoxQuote->raw_quotes;
+                $hiscoxQuote = json_decode($rawQuotes);
+            } else {
+                $getHiscoxQuote = $this->hixcoxAPI->getRequest($hiscoxID);
+                $rawQuotes = $getHiscoxQuote["raw"];
+            }
+
+            $hiscoxQuote = json_decode($rawQuotes);
+
+            $post = $this->request->getPost();
+
+            $postPolicyType = $post['policyType'] ?? "";
+            $postDeductible =  $post['deductible'] ?? "";
+            $postPolicyIndex = $post['policyIndex'] ?? "";
+
+            $isEndorsement = $policyType == "END";
+
+            $quoteRequestDate = $hiscoxQuote->response->quoteRequestDate;
+            $quoteExpiryDate = $hiscoxQuote->response->quoteExpiryDate;
+
+            $productResponseRequest = HiscoxApiV2::createProductResponseRequest($hiscoxQuote, $data['floodQuote'], $isRented);
+
+            $hiscoxProductResponse = $productResponseRequest["hiscoxProductResponse"];
+            $purpose = $productResponseRequest["purpose"];
+
+            $primaryOptions = $hiscoxProductResponse->primary;
+            $excessOptions = $hiscoxProductResponse->excess;
+
+            $hiscoxSelectedOption = HiscoxApiV2::getHiscoxSelectedOption($postPolicyType, $postPolicyIndex, $postDeductible, $primaryOptions, $excessOptions, $isEndorsement);
+            $hiscoxSelectedOptionIndex = $hiscoxSelectedOption['index'];
+            $hiscoxOptions = $hiscoxSelectedOption['options'];
+
+            $contentsCostValueType = $hiscoxQuote->request->contentsCostValueType;
+            $yearBuilt = $hiscoxQuote->request->yearBuilt;
+            $numberOfStories = $hiscoxQuote->request->numberOfStories;
+            $squareFootage = $hiscoxQuote->request->squareFootage;
+            $elevationHeight = $hiscoxQuote->request->elevationHeight;
+            $foundationType = $hiscoxQuote->request->foundation->foundationType;
+            $basementType = $hiscoxQuote->request->basementType;
+            $buildingOverWaterType = $hiscoxQuote->request->buildingOverWaterType;
+            $policyType = $postPolicyType;
+
+            if (isset($hiscoxQuote->request->priorLosses) && count($hiscoxQuote->request->priorLosses) > 0) {
+                $yearOfLastLoss = $hiscoxQuote->request->priorLosses[0]->year;
+                $lastLossValue = $hiscoxQuote->request->priorLosses[0]->value;
+            }
+
+            $this->upsertHiscoxQuote([
+                "hiscoxID" => $hiscoxID,
+                "flood_quote_id" => $id,
+                "client_id" => $floodQuote->client_id,
+                "quoteExpirationDate" => $quoteExpiryDate,
+                "quoteRequestedDate" => $quoteRequestDate,
+                "selectedPolicyType" => $postPolicyType,
+                "selectedDeductible" => (int)$postDeductible,
+                "selectedPolicyIndex" => (int)$postPolicyIndex,
+                "rawQuotes" => json_encode($hiscoxQuote, JSON_PRETTY_PRINT),
+            ]);
+
+            $this->updateQuoteWithHiscox($hiscoxOptions, [
+                "hiscoxID" => $hiscoxID,
+                "selectedPolicyType" => $postPolicyType,
+                "selectedDeductible" => (int)$postDeductible,
+                "selectedOptionIndex" => (int)$postPolicyIndex,
+                "floodQuoteId" => $id,
+                "isRented" => $isRented,
+            ]);
+        }
+
+        $data["quoteRequestDate"] = $quoteRequestDate;
+        $data["hiscoxID"] = $hiscoxID;
+        $data["quoteExpiryDate"] = $quoteExpiryDate;
+        $data["address"] = $address;
+        $data["contentsCostValueType"] = $contentsCostValueType;
+        $data["occupancyType"] = $occupancyType;
+        $data["purpose"] = $purpose;
+        $data["yearBuilt"] = $yearBuilt;
+        $data["constructionType"] = $constructionType;
+        $data["numberOfStories"] = $numberOfStories;
+        $data["squareFootage"] = $squareFootage;
+        $data["elevationHeight"] = $elevationHeight;
+        $data["foundationType"] = $foundationType;
+        $data["basementType"] = $basementType;
+        $data["buildingOverWaterType"] = $buildingOverWaterType;
+        $data["policyType"] = $policyType;
+        $data["yearOfLastLoss"] = $yearOfLastLoss;
+        $data["lastLossValue"] = $lastLossValue;
+        $data["isRented"] = $isRented;
+
+        $data["validations"] = $validations;
+        $data["underwriterDecisions"] = $underwriterDecisions;
+        $data["errors"] = $errors;
+
+        $data["primaryOptions"] = $primaryOptions;
+        $data["excessOptions"] = $excessOptions;
+
+        $data["hiscoxSelectedOptionIndex"] = $hiscoxSelectedOptionIndex;
+
+        return view('Hiscox/requote_view', ['data' => $data]);
     }
 }

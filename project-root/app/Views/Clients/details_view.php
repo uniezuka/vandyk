@@ -247,12 +247,12 @@ function getMetaValue($metas, $meta_key, $default = '')
                                         } else {
                                             if ($policyType == "REN") {
                                                 echo "<p><a href=\"" . base_url('/flood_quote/hiscox/select/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Requote Hiscox</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/hiscox/requote/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Requote Hiscox</a></p>";
                                             } else if ($policyType == "END") {
                                                 echo "<p><a href=\"" . base_url('/flood_quote/hiscox/select/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";
                                             } else {
                                                 echo "<p><a href=\"" . base_url('/flood_quote/hiscox/select/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Requote Hiscox</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/hiscox/requote/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Full Requote Hiscox</a></p>";
                                             }
                                         }
                                     }

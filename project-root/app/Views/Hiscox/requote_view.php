@@ -80,15 +80,13 @@ $hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
             <div class="card-body">
                 <?php if ($hiscoxSelectedOptionIndex > 0) { ?>
                     <h6>Option # <?= $hiscoxSelectedOptionIndex ?> Selected for Quoting</h6>
-                    <p><a href="#" target="_blank">Bind This Option #<?php echo $hiscoxSelectedOptionIndex; ?></a>
-                    <h3>Available Quote Options</h3>
-                    </p>
                 <?php } else { ?>
-                    <h5>Select an Option to Quote from Available Quote Options Below</h5>
+                    <h5>Select an Option to Requote from Available Quote Options Below</h5>
                 <?php } ?>
 
                 <form method="post" id="hiscoxForm">
                     <input type="hidden" name="hiscoxID" id="hiscoxID" value="<?= $hiscoxID ?>" />
+                    <input type="hidden" name="update" id="update" value="update" />
 
                     <?= csrf_field() ?>
 

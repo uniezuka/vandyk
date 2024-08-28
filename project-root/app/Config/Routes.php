@@ -70,7 +70,7 @@ $routes->get('/flood_quote/initial_details/(:num)', 'FloodQuote::intialDetails/$
 $routes->match(['get', 'post'], 'flood_quote/hiscox/link/(:num)', 'Hiscox::link/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/create/(:num)', 'Hiscox::create/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/select/(:num)', 'Hiscox::select/$1', ['filter' => 'authGuard']);
-$routes->match(['get', 'post'], 'flood_quote/hiscox/requote/(:num)', 'Hiscox::select/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_quote/hiscox/requote/(:num)', 'Hiscox::requote/$1', ['filter' => 'authGuard']);
 
 $routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);

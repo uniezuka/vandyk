@@ -108,6 +108,14 @@ $hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
 
                         foreach ($primaryOptions as $option) {
                             if (isset($option->deductibles) && count($option->deductibles)) {
+                                if (isset($option->errors) && count($option->errors)) {
+                                    echo view('Hiscox/_list_errors', ["alert" => "danger", "errors" => $option->errors]);
+                                }
+
+                                if (isset($option->warnings) && count($option->warnings)) {
+                                    echo view('Hiscox/_list_errors', ["alert" => "warning", "errors" => $option->warnings]);
+                                }
+
                                 foreach ($option->deductibles as $deductible) {
                                     echo view('Hiscox/display_quote', [
                                         "count" => $count,
@@ -131,6 +139,14 @@ $hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
                         $index = 0;
                         foreach ($excessOptions as $option) {
                             if (isset($option->deductibles) && count($option->deductibles)) {
+                                if (isset($option->errors) && count($option->errors)) {
+                                    echo view('Hiscox/_list_errors', ["alert" => "danger", "errors" => $option->errors]);
+                                }
+
+                                if (isset($option->warnings) && count($option->warnings)) {
+                                    echo view('Hiscox/_list_errors', ["alert" => "warning", "errors" => $option->warnings]);
+                                }
+
                                 foreach ($option->deductibles as $deductible) {
                                     echo view('Hiscox/display_quote', [
                                         "count" => $count,
