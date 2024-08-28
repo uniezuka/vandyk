@@ -324,10 +324,10 @@ class HiscoxApiV2
         return ['index' => 0, 'policyType' => '', 'options' => null];
     }
 
-    public static function getHiscoxAdditionalFoundationType($quote)
+    public static function getHiscoxAdditionalFoundationType($isEnclosureFinished, $foundationType)
     {
-        if ($quote['enclFinished'] == '1') { // Yes
-            switch ($quote['Foundation']) {
+        if ($isEnclosureFinished) {
+            switch ($foundationType) {
                 case '9':
                 case '2':
                 case '3':
@@ -343,7 +343,7 @@ class HiscoxApiV2
                     return 'None';
             }
         } else { // no
-            switch ($quote['Foundation']) {
+            switch ($foundationType) {
                 case '9':
                 case '2':
                 case '3':
@@ -361,9 +361,9 @@ class HiscoxApiV2
         }
     }
 
-    public static function getHiscoxFoundationType($quote)
+    public static function getHiscoxFoundationType($foundationType)
     {
-        switch ($quote['Foundation']) {
+        switch ($foundationType) {
             case '9':
             case '3':
             case '1':
@@ -386,9 +386,9 @@ class HiscoxApiV2
         }
     }
 
-    public static function getHiscoxBuildingOverWaterType($quote)
+    public static function getHiscoxBuildingOverWaterType($over_water)
     {
-        switch ($quote['overWater']) {
+        switch ($over_water) {
             case '0':
                 return 'No';
             case '1':
@@ -400,9 +400,9 @@ class HiscoxApiV2
         }
     }
 
-    public static function getHiscoxAttachedGarageType($quote)
+    public static function getHiscoxAttachedGarageType($garage_attached)
     {
-        switch ($quote['attachedGarage']) {
+        switch ($garage_attached) {
             case '1':
             case '2':
                 return 'Finished';
@@ -415,9 +415,9 @@ class HiscoxApiV2
         }
     }
 
-    public static function getHiscoxBasementType($quote)
+    public static function getHiscoxBasementType($basement_finished)
     {
-        switch ($quote['basementFinished']) {
+        switch ($basement_finished) {
             case '1':
                 return 'Finished';
             case '0':
@@ -429,27 +429,13 @@ class HiscoxApiV2
         }
     }
 
-    public static function getHiscoxConstructionType($quote)
+    public static function getHiscoxOccupancyType($isPerson, $commercial_occupancy, $isPrimaryResidence, $other_occupancy)
     {
-        switch ($quote['ConstructType']) {
-            case 'Frame':
-                return 'Frame';
-            case 'Brick Veneer':
-                return 'BrickVeneer';
-            case 'Joisted Masonry':
-                return 'Masonry';
-            default:
-                return '';
-        }
-    }
-
-    public static function getHiscoxOccupancyType($quote)
-    {
-        if ($quote['entityType'] == 'person') {
-            if ($quote['IsPrimary'] == '1') return 'Primary';
-            else if ($quote['IsPrimary'] == '0') return 'Secondary';
+        if ($isPerson) {
+            if ($isPrimaryResidence == '1') return 'Primary';
+            else if ($isPrimaryResidence == '0') return 'Secondary';
             else {
-                switch ($quote['occupancy2']) {
+                switch ($other_occupancy) {
                     case '1':
                         return 'Seasonal';
                     case '2':
@@ -465,7 +451,7 @@ class HiscoxApiV2
                 }
             }
         } else {
-            return $quote['occupancyComm'];
+            return $commercial_occupancy;
         }
     }
 
@@ -571,16 +557,32 @@ class HiscoxApiV2
         $purpose = "";
 
         if ($floodQuote->entity_type == 0) {
+            if (!isset($hiscoxQuote->response->residential)) {
+                throw new Exception("Flood Quote is Residential while Hiscox Quote is Commercial");
+            }
+
             $hiscoxProductResponse = $hiscoxQuote->response->residential;
             $hiscoxProductRequest = $hiscoxQuote->request->residential;
             $purpose = "Residential";
         } else {
+            if (!isset($hiscoxQuote->response->commercial)) {
+                throw new Exception("Flood Quote is Commercial while Hiscox Quote is Residential");
+            }
+
             $hiscoxProductRequest = $hiscoxQuote->request->commercial;
 
             if ($isRented) {
+                if (!isset($hiscoxQuote->response->commercialTenanted)) {
+                    throw new Exception("Flood Quote is Rented while Hiscox Quote is Commercially Owned");
+                }
+
                 $hiscoxProductResponse = $hiscoxQuote->response->commercialTenanted;
                 $purpose = "Commercial Tenanted";
             } else {
+                if (!isset($hiscoxQuote->response->commercialOwned)) {
+                    throw new Exception("Flood Quote is Commercially Owned while Hiscox Quote is Rented");
+                }
+
                 $hiscoxProductResponse = $hiscoxQuote->response->commercialOwned;
                 $purpose = "Commercial Owned";
             }

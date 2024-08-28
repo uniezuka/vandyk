@@ -247,6 +247,9 @@ $deductibles = $calculations->getDeductibles();
                             <a href="#">Quote Page</a>
                         </li>
                         <li>
+                            <a href="<?= base_url('/client/details/') . $flood_quote->client_id; ?>">Client Page</a>
+                        </li>
+                        <li>
                             <a href="<?= base_url('/flood_quotes'); ?>">Main Flood Page</a>
                         </li>
                     </ul>

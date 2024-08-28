@@ -100,6 +100,12 @@
                     </div>
                 </div>
             </div>
+
+            <?php if ($isSelectable) { ?>
+                <button class="quoteButton btn btn-primary" type="button" data-quote-expiration="<?= $quoteExpiryDate ?>" data-policy-index="<?= $index ?>" data-policy-type="<?= $policy_type ?>" data-deductible="<?= $deductible->deductible ?>">
+                    Quote this Option
+                </button>
+            <?php } ?>
         </div>
     </div>
 </div>

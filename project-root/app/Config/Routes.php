@@ -69,6 +69,8 @@ $routes->post('/flood_quote/update/(:num)', 'FloodQuote::update/$1', ['filter' =
 $routes->get('/flood_quote/initial_details/(:num)', 'FloodQuote::intialDetails/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/link/(:num)', 'Hiscox::link/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/create/(:num)', 'Hiscox::create/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_quote/hiscox/select/(:num)', 'Hiscox::select/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_quote/hiscox/requote/(:num)', 'Hiscox::select/$1', ['filter' => 'authGuard']);
 
 $routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);

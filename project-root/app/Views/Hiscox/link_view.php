@@ -123,7 +123,8 @@ if ($hiscoxFloodQuote != null) {
                                         "option" => $option,
                                         "deductible" => $deductible,
                                         "floodQuote" => $floodQuote,
-                                        "isRented" => $isRented
+                                        "isRented" => $isRented,
+                                        "isSelectable" => false
                                     ]);
                                     $count++;
                                 }
@@ -146,7 +147,8 @@ if ($hiscoxFloodQuote != null) {
                                         "option" => $option,
                                         "deductible" => $deductible,
                                         "floodQuote" => $floodQuote,
-                                        "isRented" => $isRented
+                                        "isRented" => $isRented,
+                                        "isSelectable" => false
                                     ]);
 
                                     $count++;

@@ -8,7 +8,7 @@ class ConstructionService extends BaseService
 
     public function getPaged($page = 1)
     {
-        $offset = ($page-1) * $this->limit;
+        $offset = ($page - 1) * $this->limit;
 
         $builder = $this->db->table('construction');
         $builder->select('*');
@@ -58,12 +58,13 @@ class ConstructionService extends BaseService
 
         $data = [
             'name'                  => $message->name,
+            'hiscox_name'                  => $message->hiscoxName,
         ];
 
         $builder->set($data);
         $builder->where('construction_id', $message->construction_id);
         $builder->update();
-        
+
         return $this->findOne($message->construction_id);
     }
 

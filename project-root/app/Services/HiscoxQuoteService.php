@@ -78,4 +78,16 @@ class HiscoxQuoteService extends BaseService
         $this->updateFloodQuoteMeta($floodQuoteId, "selectedDeductible", $hiscox->selectedDeductible);
         $this->updateFloodQuoteMeta($floodQuoteId, "selectedPolicyIndex", $hiscox->selectedPolicyIndex);
     }
+
+    public function findHiscoxQuote($flood_quote_id, $hiscoxID)
+    {
+        $builder = $this->db->table('hiscox_quote');
+        $builder->where(array('flood_quote_id' => $flood_quote_id, 'hiscoxID' => $hiscoxID));
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
+    }
 }
