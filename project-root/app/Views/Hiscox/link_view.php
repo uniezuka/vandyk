@@ -124,7 +124,8 @@ if ($hiscoxFloodQuote != null) {
                                         "deductible" => $deductible,
                                         "floodQuote" => $floodQuote,
                                         "isRented" => $isRented,
-                                        "isSelectable" => false
+                                        "isSelectable" => false,
+                                        "isEndorsement" => false,
                                     ]);
                                     $count++;
                                 }

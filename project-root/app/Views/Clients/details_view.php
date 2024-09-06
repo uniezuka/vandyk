@@ -238,7 +238,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                             }
                                             echo "<p><a href=\"" . base_url('/flood_quote/hiscox/link/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Link Hiscox</a></p>";
                                         } else if ($isBounded) {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">View Hiscox Quote</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/hiscox/view/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">View Hiscox Quote</a></p>";
                                         } else {
                                             if ($policyType == "REN") {
                                                 echo "<p><a href=\"" . base_url('/flood_quote/hiscox/select/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Select Hiscox Quote</a></p>";

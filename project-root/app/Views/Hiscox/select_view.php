@@ -4,37 +4,7 @@
 
 <?php
 helper(['html', 'service']);
-
-$quoteRequestDate = $data["quoteRequestDate"];
-$hiscoxID = $data["hiscoxID"];
-$quoteExpiryDate = $data["quoteExpiryDate"];
-$address = $data["address"];
-$contentsCostValueType = $data["contentsCostValueType"];
-$occupancyType = $data["occupancyType"];
-$purpose = $data["purpose"];
-$yearBuilt = $data["yearBuilt"];
-$construction_type = $data["constructionType"];
-$numberOfStories = $data["numberOfStories"];
-$squareFootage = $data["squareFootage"];
-$elevationHeight = $data["elevationHeight"];
-$foundationType = $data["foundationType"];
-$basementType = $data["basementType"];
-$buildingOverWaterType = $data["buildingOverWaterType"];
-$policyType = $data["policyType"];
-$yearOfLastLoss = $data["yearOfLastLoss"];
-$lastLossValue = $data["lastLossValue"];
-
-$validations = $data["validations"];
-$underwriterDecisions = $data["underwriterDecisions"];
-$errors = $data["errors"];
-
-$primaryOptions = $data["primaryOptions"];
-$excessOptions = $data["excessOptions"];
-
-$floodQuote = $data['floodQuote'];
-$isRented = $data['isRented'];
-
-$hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
+extract($data);
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -61,7 +31,7 @@ $hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
                 <p>Occupancy Type: <?= $occupancyType ?></p>
                 <p>Purpose: <?= $purpose ?></p>
                 <p>Year Built: <?= $yearBuilt ?></p>
-                <p>Construction Type: <?= $construction_type ?></p>
+                <p>Construction Type: <?= $constructionType ?></p>
                 <p>Number of Stories: <?= $numberOfStories ?></p>
                 <p>Square Footage: <?= $squareFootage ?></p>
                 <p>Elevation Height: <?= $elevationHeight ?></p>
@@ -128,6 +98,7 @@ $hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
                                         "index" => $index,
                                         "policy_type" => "primary",
                                         "deductible" => $deductible,
+                                        "isEndorsement" => false,
                                     ]);
                                     $count++;
                                 }
@@ -159,6 +130,7 @@ $hiscoxSelectedOptionIndex = $data['hiscoxSelectedOptionIndex'];
                                         "index" => $index,
                                         "policy_type" => "excess",
                                         "deductible" => $deductible,
+                                        "isEndorsement" => false,
                                     ]);
 
                                     $count++;

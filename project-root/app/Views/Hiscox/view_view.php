@@ -51,7 +51,7 @@ extract($data);
                 <?php if ($hiscoxSelectedOptionIndex > 0) { ?>
                     <h6>Option # <?= $hiscoxSelectedOptionIndex ?> Selected for Quoting</h6>
                 <?php } else { ?>
-                    <h5>Select an Option to Requote from Available Quote Options Below</h5>
+                    <h5>Select an Option to Quote from Available Quote Options Below</h5>
                 <?php } ?>
 
                 <form method="post" id="hiscoxForm">
@@ -78,7 +78,6 @@ extract($data);
 
                         foreach ($primaryOptions as $option) {
                             if (isset($option->deductibles) && count($option->deductibles)) {
-
                                 if (isset($option->errors) && count($option->errors)) {
                                     echo view('Hiscox/_list_errors', ["alert" => "danger", "errors" => $option->errors]);
                                 }
@@ -94,12 +93,12 @@ extract($data);
                                         "deductible" => $deductible,
                                         "floodQuote" => $floodQuote,
                                         "isRented" => $isRented,
-                                        "isSelectable" => true,
+                                        "isSelectable" => false,
                                         "quoteExpiryDate" => $quoteExpiryDate,
                                         "index" => $index,
                                         "policy_type" => "primary",
                                         "deductible" => $deductible,
-                                        "isEndorsement" => false,
+                                        "isEndorsement" => $isEndorsement,
                                     ]);
                                     $count++;
                                 }
@@ -111,7 +110,6 @@ extract($data);
                         $index = 0;
                         foreach ($excessOptions as $option) {
                             if (isset($option->deductibles) && count($option->deductibles)) {
-
                                 if (isset($option->errors) && count($option->errors)) {
                                     echo view('Hiscox/_list_errors', ["alert" => "danger", "errors" => $option->errors]);
                                 }
@@ -127,12 +125,12 @@ extract($data);
                                         "deductible" => $deductible,
                                         "floodQuote" => $floodQuote,
                                         "isRented" => $isRented,
-                                        "isSelectable" => true,
+                                        "isSelectable" => false,
                                         "quoteExpiryDate" => $quoteExpiryDate,
                                         "index" => $index,
                                         "policy_type" => "excess",
                                         "deductible" => $deductible,
-                                        "isEndorsement" => false,
+                                        "isEndorsement" => $isEndorsement,
                                     ]);
 
                                     $count++;

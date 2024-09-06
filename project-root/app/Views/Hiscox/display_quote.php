@@ -1,3 +1,7 @@
+<?php
+$isPerson = $floodQuote->entity_type == 0;
+?>
+
 <div class="card border-success mb-3" style="min-width: 98%;">
     <div class="card-body">
         <div class="row">
@@ -6,11 +10,11 @@
                 <br />
                 <strong><?= $option->policyType ?></strong>
                 <?php
-                if ($floodQuote->entity_type == 0) {
-                    $buildingPremium = $deductible->buildingPremium;
-                    $contentsPremium = $deductible->contentsPremium;
-                    $otherStructuresPremium = $deductible->otherStructuresPremium;
-                    $lossOfUsePremium = $deductible->lossOfUsePremium;
+                if ($isPerson) {
+                    $buildingPremium = $isEndorsement ? $deductible->buildingAdditionalPremium : $deductible->buildingPremium;
+                    $contentsPremium = $isEndorsement ? $deductible->includeContentsAdditionalPremium : $deductible->contentsPremium;
+                    $otherStructuresPremium = $isEndorsement ? $deductible->otherStructuresAdditionalPremium : $deductible->otherStructuresPremium;
+                    $lossOfUsePremium = $isEndorsement ? $deductible->includeLossOfUseAdditionalPremium : $deductible->lossOfUsePremium;
 
                     $buildingPremium = ceil($buildingPremium);
                     $contentsPremium = ceil($contentsPremium);
@@ -27,9 +31,9 @@
                     <?php
                 } else {
                     if ($isRented) {
-                        $improvementsAndBettermentsPremium = $deductible->improvementsAndBettermentsPremium;
-                        $contentsPremium = $deductible->contentsPremium;
-                        $businessIncomePremium = $deductible->businessIncomePremium;
+                        $improvementsAndBettermentsPremium = $isEndorsement ? $deductible->improvementsAndBettermentsAdditionalPremium : $deductible->improvementsAndBettermentsPremium;
+                        $businessIncomePremium = $isEndorsement ? $deductible->includeBusinessIncomeAdditionalPremium : $deductible->businessIncomePremium;
+                        $contentsPremium = $isEndorsement ? $deductible->includeContentsAdditionalPremium : $deductible->contentsPremium;
 
                         $improvementsAndBettermentsPremium = ceil($improvementsAndBettermentsPremium);
                         $contentsPremium = ceil($contentsPremium);
@@ -43,9 +47,9 @@
                         <br /><br /><strong>Total Premium: </strong><?= number_format($totalPremium) ?>
                     <?php
                     } else {
-                        $buildingPremium = $deductible->buildingPremium;
-                        $contentsPremium = $deductible->contentsPremium;
-                        $businessIncomePremium = $deductible->businessIncomePremium;
+                        $buildingPremium = $isEndorsement ? $deductible->buildingAdditionalPremium : $deductible->buildingPremium;
+                        $contentsPremium = $isEndorsement ? $deductible->includeContentsAdditionalPremium : $deductible->contentsPremium;
+                        $businessIncomePremium = $isEndorsement ? $deductible->includeBusinessIncomeAdditionalPremium : $deductible->businessIncomePremium;
 
                         $buildingPremium = ceil($buildingPremium);
                         $contentsPremium = ceil($contentsPremium);
