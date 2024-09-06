@@ -11,7 +11,9 @@ class SLAPolicyService extends BaseService
         $offset = ($page - 1) * $this->limit;
 
         $builder = $this->db->table('sla_policy');
-        $builder->where('transaction_type_id !=', 0);
+        $builder->select('sla_policy.*, transaction_type.name as transaction_name');
+        $builder->join('transaction_type', 'transaction_type.transaction_type_id = sla_policy.transaction_type_id', 'left');
+        $builder->where('sla_policy.transaction_type_id !=', 0);
         $builder->orderBy('transaction_number', 'DESC');
 
         $query = $builder->get($this->limit, $offset, false);
@@ -32,6 +34,8 @@ class SLAPolicyService extends BaseService
         $offset = ($page - 1) * $this->limit;
 
         $builder = $this->db->table('sla_policy');
+        $builder->select('sla_policy.*, transaction_type.name as transaction_name');
+        $builder->join('transaction_type', 'transaction_type.transaction_type_id = sla_policy.transaction_type_id', 'left');
 
         $builder->groupStart();
         $builder->like('insured_name', $search_text, 'both', null, true);
@@ -118,6 +122,8 @@ class SLAPolicyService extends BaseService
             'fire_code_id'                 => $message->fireCodeId,
             'coverage_id'                  => $message->coverageId,
             'transaction_date'             => $message->transactionDate,
+            'fire_tax'             => $message->fireTax,
+            'reg_tax'             => $message->regTax,
         ];
 
         $builder->insert($data);
@@ -148,6 +154,8 @@ class SLAPolicyService extends BaseService
             'fire_code_id'                 => $message->fireCodeId,
             'coverage_id'                  => $message->coverageId,
             'transaction_date'             => $message->transactionDate,
+            'fire_tax'             => $message->fireTax,
+            'reg_tax'             => $message->regTax,
         ];
 
         $builder->set($data);
@@ -161,6 +169,9 @@ class SLAPolicyService extends BaseService
     {
         $builder = $this->db->table('sla_policy');
 
+        $builder->select('sla_policy.*, transaction_type.name as transaction_name');
+        $builder->join('transaction_type', 'transaction_type.transaction_type_id = sla_policy.transaction_type_id', 'left');
+
         $builder->groupStart();
         $builder->where('policy_number', "");
         $builder->orWhere('policy_number', null);
@@ -172,5 +183,30 @@ class SLAPolicyService extends BaseService
         $query = $builder->get($limit, 0, false);
 
         return $query->getResult();
+    }
+
+    public function findByTransactionNumber($transaction_number)
+    {
+        $builder = $this->db->table('sla_policy');
+        $builder->where('transaction_number', $transaction_number);
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
+    }
+
+    public function getLatestPolicy($startsWith = "")
+    {
+        $builder = $this->db->table('sla_policy');
+        $builder->like('transaction_number', $startsWith, 'after');
+        $builder->orderBy('transaction_number', 'DESC');
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
     }
 }

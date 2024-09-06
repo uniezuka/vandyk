@@ -4,11 +4,7 @@
 
 <?php
 helper(['html', 'service']);
-$client = $data['client'];
-$broker = $data['broker'];
-$buildings = $data['buildings'];
-$floodQuotes = $data['floodQuotes'];
-$metas = $data['metas'];
+extract($data);
 
 $bindAuthorityService = service('bindAuthorityService');
 
@@ -135,9 +131,8 @@ function getMetaValue($metas, $meta_key, $default = '')
                             $bind_authority = getMetaValue($flood_quote_metas, 'bind_authority');
                             $hiscoxID = getMetaValue($flood_quote_metas, 'hiscoxID');
                             $hiscoxPreviousBoundID = getMetaValue($flood_quote_metas, 'hiscoxPreviousBoundID');
-                            $flood_occupancy_id = (int)getMetaValue($flood_quote_metas, 'flood_occupancy_id', 0);
+                            $flood_occupancy = (int)getMetaValue($flood_quote_metas, 'flood_occupancy', 0);
                             $isCondo = (int)getMetaValue($flood_quote_metas, 'isCondo', 0);
-
 
                             $bindAuthority = $bindAuthorityService->findOne($bind_authority);
                             $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
@@ -295,7 +290,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                                 }
                                             }
 
-                                            if ($flood_occupancy_id == 4) {
+                                            if ($flood_occupancy == 4) {
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">General Policy</a></p>";
                                             } else if ($isCondo) {
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Condo Policy</a></p>";
@@ -319,7 +314,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                         } else if (strpos($bindAuthorityText, "240") !== false) {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Canop Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "250") !== false && $hiscoxID != "") {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Hiscox Policy</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/hiscox/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Hiscox Policy</a></p>";
                                         } else if ($bindAuthorityText == "") {
                                             echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm\">Bind Chubb Policy</a></p>";
                                         }

@@ -14,6 +14,9 @@ class FloodQuote extends BaseController
     protected $floodQuoteService;
     protected $floodQuoteMortgageService;
     protected $clientService;
+    protected $slaPolicyService;
+    protected $slaSettingService;
+    protected $insurerService;
 
     public function initController(
         RequestInterface $request,
@@ -26,6 +29,26 @@ class FloodQuote extends BaseController
         $this->floodQuoteService = service('floodQuoteService');
         $this->clientService = service('clientService');
         $this->floodQuoteMortgageService = service('floodQuoteMortgageService');
+        $this->slaPolicyService = service('slaPolicyService');
+        $this->slaSettingService = service('slaSettingService');
+        $this->insurerService = service('insurerService');
+    }
+
+    private function getMetaValue($floodQuoteMetas, $meta_key, $default = '')
+    {
+        foreach ($floodQuoteMetas as $meta) {
+            if ($meta->meta_key === $meta_key) {
+                return $meta->meta_value;
+            }
+        }
+        return $default;
+    }
+
+    private function incrementNumber($reference)
+    {
+        list($prefix, $number) = explode('-', $reference);
+        $newNumber = str_pad((int)$number + 1, 5, '0', STR_PAD_LEFT);
+        return $prefix . '-' . $newNumber;
     }
 
     public function index()
@@ -331,6 +354,23 @@ class FloodQuote extends BaseController
             $message->currentExpiryDate = $post['currentExpiryDate'] ?? "";
             $message->isQuoteApproved = $post['isQuoteApproved'] ?? 0;
             $message->isQuoteDeclined = $post['isQuoteDeclined'] ?? 0;
+            $message->baseRateAdjustment = $post['baseRateAdjustment'] ?? 0;
+            $message->has10PercentAdjustment = $post['has10PercentAdjustment'] ?? 0;
+            $message->additionalPremium = $post['additionalPremium'] ?? 0;
+            $message->hiscoxPremiumOverride = $post['hiscoxPremiumOverride'] ?? 0;
+            $message->renewalAdditionalPremium = $post['renewalAdditionalPremium'] ?? 0;
+            $message->renewalPremiumIncrease = $post['renewalPremiumIncrease'] ?? 0;
+            $message->fullPremiumOverride = $post['fullPremiumOverride'] ?? 0;
+            $message->proratedDue = $post['proratedDue'] ?? 0;
+            $message->hiscoxDwellLimitOverride = $post['hiscoxDwellLimitOverride'] ?? 0;
+            $message->hiscoxContentLimitOverride = $post['hiscoxContentLimitOverride'] ?? 0;
+            $message->hiscoxLossUseLimitOverride = $post['hiscoxLossUseLimitOverride'] ?? 0;
+            $message->hiscoxOtherLimitOverride = $post['hiscoxOtherLimitOverride'] ?? 0;
+            $message->cancelPremium = $post['cancelPremium'] ?? 0;
+            $message->cancelTax = $post['cancelTax'] ?? 0;
+            $message->endorseDate = $post['endorseDate'] ?? "";
+            $message->previousPolicyNumber = $post['previousPolicyNumber'] ?? "";
+            $message->isBounded = $post['isBounded'] ?? 0;
 
             $this->floodQuoteService->update($message);
 
@@ -369,7 +409,7 @@ class FloodQuote extends BaseController
         }
     }
 
-    public function intialDetails($id = null)
+    public function initial_details($id = null)
     {
         helper('form');
         $data['title'] = "Initial Rating Details";
@@ -382,6 +422,170 @@ class FloodQuote extends BaseController
         $calculations = new FloodQuoteCalculations($data['flood_quote']);
         $data['calculations'] = $calculations;
 
-        return view('FloodQuote/initial_details', ['data' => $data]);
+        return view('FloodQuote/initial_details_view', ['data' => $data]);
+    }
+
+    public function choose_sla($id = null)
+    {
+        $minAvailablePolicies = 5;
+
+        helper('form');
+        $data['title'] = "Choose SLA Number";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $isPerson = $floodQuote->entity_type == 0;
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $currentSLASetting = $this->slaSettingService->getCurrent();
+        $prevYear = $currentSLASetting->year - 1;
+        $availableSLAPolicies = $this->slaPolicyService->getAvailableSLAPolicies($minAvailablePolicies, $currentSLASetting->prefix);
+        $prevSLASetting = $this->slaSettingService->getByYear($prevYear);
+
+        $latestPolicy = $this->slaPolicyService->getLatestPolicy($currentSLASetting->prefix);
+
+        if (count($availableSLAPolicies) < $minAvailablePolicies) {
+            $lastTransactionNumber = count($availableSLAPolicies) == 0
+                ? (($latestPolicy)
+                    ? $latestPolicy->transaction_number
+                    : $currentSLASetting->prefix . "-00000")
+                : $availableSLAPolicies[count($availableSLAPolicies) - 1]->transaction_number;
+
+            for ($i = count($availableSLAPolicies); $i < $minAvailablePolicies; $i++) {
+                $newTransactionNumber = $this->incrementNumber($lastTransactionNumber);
+
+                $newPolicy = (object) [
+                    'transaction_name' => '',
+                    'insured_name' => '',
+                    'transaction_number' => $newTransactionNumber
+                ];
+
+                $availableSLAPolicies[] = $newPolicy;
+                $lastTransactionNumber = $newTransactionNumber;
+            }
+        }
+
+        $data["propertyAddress"] = $this->getMetaValue($floodQuoteMetas, "propertyAddress");
+        $data["quoteName"] = $isPerson
+            ? $floodQuote->first_name . " " . $floodQuote->last_name
+            : $floodQuote->company_name;
+        $data["policyType"] = $this->getMetaValue($floodQuoteMetas, "policyType");
+        $data['currentSLASetting'] = $currentSLASetting;
+        $data['prevSLASetting'] = $prevSLASetting;
+        $data['prevAvailableSLAPolicies'] = ($data['prevSLASetting']) ?
+            $this->slaPolicyService->getAvailableSLAPolicies($minAvailablePolicies, $data['prevSLASetting']->prefix) : [];
+        $data['availableSLAPolicies'] = $availableSLAPolicies;
+
+        return view('FloodQuote/choose_sla_view', ['data' => $data]);
+    }
+
+    public function bind_sla($id = null)
+    {
+        helper('form');
+        $data['title'] = "Bind SLA Number";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $isPerson = $floodQuote->entity_type == 0;
+        $policyType = $this->getMetaValue($floodQuoteMetas, "policyType");
+
+        $transactionNumber = $this->request->getGet('transaction_number') ?? "";
+        $transactionNumber = trim($transactionNumber);
+        $policyTypeNumber = 0;
+        $slaPolicy = null;
+
+        if ($transactionNumber != "")
+            $slaPolicy = $this->slaPolicyService->findByTransactionNumber($transactionNumber);
+
+        // TODO ???
+        switch ($policyType) {
+            case "NEW":
+                $policyTypeNumber = 1;
+                break;
+
+            case "CAN":
+                $policyTypeNumber = 4;
+                break;
+
+            case "REN":
+                $policyTypeNumber = 5;
+                break;
+
+            default:
+                break;
+        }
+
+        $data["propertyAddress"] = $this->getMetaValue($floodQuoteMetas, "propertyAddress");
+        $data["quoteName"] = $isPerson
+            ? $floodQuote->first_name . " " . $floodQuote->last_name
+            : $floodQuote->company_name;
+        $data["boundFinalPremium"] = (float)$this->getMetaValue($floodQuoteMetas, "boundFinalPremium", 0);
+        $data["propertyCity"] = $this->getMetaValue($floodQuoteMetas, "propertyCity");
+        $data["propertyState"] = $this->getMetaValue($floodQuoteMetas, "propertyState");
+        $data["boundTaxAmount"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTaxAmount", 0);
+        $data["boundPolicyFee"] = (float)$this->getMetaValue($floodQuoteMetas, "boundPolicyFee", 0);
+        $data["boundTotalCost"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTotalCost", 0);
+        $data["transactionNumber"] = $transactionNumber;
+        $data["policyNumber"] = $this->getMetaValue($floodQuoteMetas, "policyNumber");
+        $data["propertyZip"] = $this->getMetaValue($floodQuoteMetas, "propertyZip");
+        $data["transactionDate"] = ($policyType == "REN" || $policyType == "NEW")
+            ? $floodQuote->effectivity_date
+            : $this->getMetaValue($floodQuoteMetas, "boundDate");
+        $data["policyTypeNumber"] = $policyTypeNumber;
+        $data["slaPolicyId"] = ($slaPolicy) ? $slaPolicy->sla_policy_id : "";
+
+        if (!$this->request->is('post')) {
+            return view('FloodQuote/bind_sla_view', ['data' => $data]);
+        }
+
+        $post = $this->request->getPost([
+            'transactionTypeId',
+            'insuredName',
+            'policyNumber',
+            'effectivityDate',
+            'expiryDate',
+            'insurerId',
+            'firePremium',
+            'otherPremium',
+            'totalPremium',
+            'county',
+            'fireCodeId',
+            'coverageId',
+            'transactionDate',
+            'location',
+            'zip',
+            'fireTax',
+            'regTax',
+            'slaNumber',
+            'slaPolicyId',
+        ]);
+
+        $insurer = $this->insurerService->findOne($post['insurerId']);
+        $post['insurerNAIC'] = ($insurer) ? $insurer->naic : "";
+
+        $post['transactionNumber'] = $post['slaNumber'];
+        $post['sla_policy_id'] = $post['slaPolicyId'];
+
+        try {
+            if ($post['sla_policy_id']) {
+                $this->slaPolicyService->update((object) $post);
+            } else {
+                $this->slaPolicyService->create((object) $post);
+            }
+
+            $this->floodQuoteService->updateSLANumber($post['slaNumber'], $id);
+        } catch (Exception $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+
+        return redirect()->to('/flood_quotes')->with('message', 'SLA successfully binded to a Quote!');
     }
 }

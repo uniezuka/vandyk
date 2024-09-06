@@ -4,13 +4,7 @@
 
 <?php
 helper('html');
-$slaPolicies = $data['slaPolicies'];
-$pager_links = $data['pager_links'];
-$search = $data['search'];
-$currentSLASetting = $data['currentSLASetting'];
-
-$availableSLAPolicies = $data['availableSLAPolicies'];
-$prevAvailableSLAPolicies = $data['prevAvailableSLAPolicies'];
+extract($data);
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -79,7 +73,7 @@ $prevAvailableSLAPolicies = $data['prevAvailableSLAPolicies'];
                     <tr>
                         <td><a href="<?= base_url('/sla/update/' . $policy->sla_policy_id); ?>"><?= $policy->sla_policy_id ?></a></td>
                         <td><a href="<?= base_url('/sla/update/' . $policy->sla_policy_id); ?>"><?= $policy->transaction_number ?></a></td>
-                        <td><?= $policy->transaction_type_id ?></td>
+                        <td><?= $policy->transaction_name ?></td>
                         <td><?= $policy->insured_name ?></td>
                         <td><?= $policy->policy_number ?></td>
                         <td><?= $policy->expiry_date ?></td>

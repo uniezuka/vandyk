@@ -14,4 +14,16 @@ class FloodZoneService extends BaseService
 
         return $query->getResult();
     }
+
+    public function findOne($id)
+    {
+        $builder = $this->db->table('flood_zone');
+        $builder->where('flood_zone_id ', $id);
+
+        $query = $builder->get(1);
+
+        $row = $query->getRow();
+
+        return $row;
+    }
 }

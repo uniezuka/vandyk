@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Exception;
+
 class FloodQuoteService extends BaseService
 {
     protected $limit = 20;
@@ -36,7 +38,6 @@ class FloodQuoteService extends BaseService
             ->like('meta_value', $search_text, 'after')
             ->getCompiledSelect();
 
-        // Main query
         $builder = $this->db->table('fq_flood_quote fq')
             ->select('fq.*')
             ->join("($subQuery) fq_meta", 'fq.flood_quote_id = fq_meta.flood_quote_id', 'left')
@@ -51,12 +52,7 @@ class FloodQuoteService extends BaseService
         $builder->limit($this->limit);
         $builder->offset($offset);
 
-        // $sql = $builder->getCompiledSelect();
-        // echo $sql;
-
         $query = $builder->get();
-
-        // return null;
 
         return (object) array(
             'data'   => $query->getResult(),
@@ -190,27 +186,6 @@ class FloodQuoteService extends BaseService
 
     private function upsertMetaValues($message, $flood_quote_id)
     {
-        // $builder = $this->db->table('flood_quote_meta');
-
-        // foreach ($message as $key => $value) {
-        //     $data = [
-        //         'meta_value' => $value
-        //     ];
-
-        //     $isUpdated = $builder->where('flood_quote_id', $flood_quote_id)
-        //         ->where('meta_key', $key)
-        //         ->update($data);
-
-        //     if (!$isUpdated) {
-        //         $data = [
-        //             'flood_quote_id' => $flood_quote_id,
-        //             'meta_key'       => $key,
-        //             'meta_value'     => $value
-        //         ];
-        //         $builder->insert($data);
-        //     }
-        // }
-
         foreach ($message as $key => $value) {
             $sql = "INSERT INTO fq_flood_quote_meta (flood_quote_id, meta_key, meta_value) 
                     VALUES (?, ?, ?)
@@ -232,14 +207,6 @@ class FloodQuoteService extends BaseService
             ->groupEnd()
             ->getCompiledSelect();
 
-        // // Main query
-        // $builder = $this->db->table('fq_flood_quote fq')
-        //     ->select('fq.*')
-        //     ->join("($subQuery) fq_meta", 'fq.flood_quote_id = fq_meta.flood_quote_id', 'left')
-        //     ->where('fq.client_id', $client_id)
-        //     ->orderBy('fq.flood_quote_id', 'DESC')
-        //     ->orderBy('fq.date_entered', 'DESC');
-
         $builder = $this->db->table('fq_flood_quote fq')
             ->select('fq.*')
             ->join("($subQuery) fq_meta", 'fq.flood_quote_id = fq_meta.flood_quote_id', 'left')
@@ -250,9 +217,6 @@ class FloodQuoteService extends BaseService
             ->where('fq.client_id', $client_id)
             ->orderBy('fq.flood_quote_id', 'DESC')
             ->orderBy('fq.date_entered', 'DESC');
-
-        // $sql = $builder->getCompiledSelect();
-        // echo $sql;
 
         $query = $builder->get();
 
@@ -316,5 +280,31 @@ class FloodQuoteService extends BaseService
         $this->upsertMetaValues($message, $flood_quote_id);
 
         return $this->findOne($flood_quote_id);
+    }
+
+    public function bind(object $message)
+    {
+        $isBounded = $this->getFloodQuoteMetaValue($message->flood_quote_id, "isBounded");
+
+        if ($isBounded == 1) throw new Exception("Flood Quote is already bounded!");
+
+        $flood_quote_id = $message->flood_quote_id;
+
+        $excluded_keys = [
+            'flood_quote_id',
+        ];
+
+        foreach ($excluded_keys as $key) {
+            unset($message->{$key});
+        }
+
+        $this->upsertMetaValues($message, $flood_quote_id);
+    }
+
+    public function updateSLANumber($slaNumber, $flood_quote_id)
+    {
+        $message = new \stdClass();
+        $message->slaNumber = $slaNumber;
+        $this->upsertMetaValues($message, $flood_quote_id);
     }
 }

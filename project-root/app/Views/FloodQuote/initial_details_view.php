@@ -23,7 +23,6 @@ $deductibles = $calculations->getDeductibles();
     </div>
 <?php endif; ?>
 
-<?= csrf_field() ?>
 <div class="row">
     <div class="col-4">
         <div class="card mb-3">
@@ -244,13 +243,13 @@ $deductibles = $calculations->getDeductibles();
                             <a href="#">App</a>
                         </li>
                         <li>
-                            <a href="#">Quote Page</a>
+                            <a href="<?= base_url('/flood_quotes'); ?>">Quotes Page</a>
                         </li>
                         <li>
                             <a href="<?= base_url('/client/details/') . $flood_quote->client_id; ?>">Client Page</a>
                         </li>
                         <li>
-                            <a href="<?= base_url('/flood_quotes'); ?>">Main Flood Page</a>
+                            <a href="<?= base_url(); ?>">Main Flood Page</a>
                         </li>
                     </ul>
                 </div>

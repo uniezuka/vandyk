@@ -50,10 +50,7 @@ class SLA extends BaseController
 
         $prevYear = $data['currentSLASetting']->year - 1;
         $data['prevSLASetting'] = $this->slaSettingService->getByYear($prevYear);
-
-
         $data['availableSLAPolicies'] = $this->slaPolicyService->getAvailableSLAPolicies(5, $data['currentSLASetting']->prefix);
-
         $data['prevAvailableSLAPolicies'] = ($data['prevSLASetting']) ?
             $this->slaPolicyService->getAvailableSLAPolicies(5, $data['prevSLASetting']->prefix) : [];
 
@@ -98,8 +95,22 @@ class SLA extends BaseController
         }
 
         $post = $this->request->getPost([
-            'transactionNumber', 'transactionTypeId', 'insuredName', 'policyNumber', 'effectivityDate', 'expiryDate', 'insurerId', 'firePremium',
-            'otherPremium', 'totalPremium', 'location', 'zip', 'county', 'fireCodeId', 'coverageId', 'transactionDate'
+            'transactionNumber',
+            'transactionTypeId',
+            'insuredName',
+            'policyNumber',
+            'effectivityDate',
+            'expiryDate',
+            'insurerId',
+            'firePremium',
+            'otherPremium',
+            'totalPremium',
+            'location',
+            'zip',
+            'county',
+            'fireCodeId',
+            'coverageId',
+            'transactionDate'
         ]);
 
         if ($this->validateData($post, [
@@ -146,8 +157,21 @@ class SLA extends BaseController
         }
 
         $post = $this->request->getPost([
-            'transactionTypeId', 'insuredName', 'policyNumber', 'effectivityDate', 'expiryDate', 'insurerId', 'firePremium',
-            'otherPremium', 'totalPremium', 'location', 'zip', 'county', 'fireCodeId', 'coverageId', 'transactionDate'
+            'transactionTypeId',
+            'insuredName',
+            'policyNumber',
+            'effectivityDate',
+            'expiryDate',
+            'insurerId',
+            'firePremium',
+            'otherPremium',
+            'totalPremium',
+            'location',
+            'zip',
+            'county',
+            'fireCodeId',
+            'coverageId',
+            'transactionDate'
         ]);
 
         if ($this->validateData($post, [

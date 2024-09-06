@@ -67,7 +67,7 @@ class HiscoxQuoteService extends BaseService
 
     public function updateQuoteWithHiscox($floodQuoteId, $hiscox)
     {
-        $this->updateFloodQuoteMeta($floodQuoteId, "hiscoxQuotedPrem", $hiscox->totalPremium);
+        $this->updateFloodQuoteMeta($floodQuoteId, "hiscoxQuotedPremium", $hiscox->totalPremium);
         $this->updateFloodQuoteMeta($floodQuoteId, "hiscoxQuotedDwellCov", $hiscox->coverageLimits->building);
         $this->updateFloodQuoteMeta($floodQuoteId, "hiscoxQuotedPersPropCov", $hiscox->coverageLimits->contents);
         $this->updateFloodQuoteMeta($floodQuoteId, "hiscoxQuotedOtherCov", $hiscox->coverageLimits->otherStructures);
@@ -89,5 +89,11 @@ class HiscoxQuoteService extends BaseService
         $row = $query->getRow();
 
         return $row;
+    }
+
+    public function bindQuoteWithHiscox($flood_quote_id, $hiscox)
+    {
+        $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundDate", $hiscox->boundDate);
+        $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundReference", $hiscox->boundReference);
     }
 }

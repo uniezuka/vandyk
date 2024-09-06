@@ -6,12 +6,17 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\HiscoxApiV2;
+use App\Libraries\FloodQuoteCalculations;
+use Exception;
 
 class Hiscox extends BaseController
 {
     protected $floodQuoteService;
     protected $hiscoxQuoteService;
     protected $constructionService;
+    protected $floodZoneService;
+    protected $floodOccupancyService;
+    protected $bindAuthorityService;
     protected $hixcoxAPI;
 
     public function initController(
@@ -24,6 +29,9 @@ class Hiscox extends BaseController
         $this->floodQuoteService = service('floodQuoteService');
         $this->hiscoxQuoteService = service('hiscoxQuoteService');
         $this->constructionService = service('constructionService');
+        $this->floodZoneService = service('floodZoneService');
+        $this->floodOccupancyService = service('floodOccupancyService');
+        $this->bindAuthorityService = service('bindAuthorityService');
         $this->hixcoxAPI = new HiscoxApiV2();
     }
 
@@ -76,6 +84,113 @@ class Hiscox extends BaseController
             }
         }
         return $default;
+    }
+
+    private function bindHiscox($policyType, $floodQuote)
+    {
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($floodQuote->flood_quote_id);
+        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID");
+        $policyNumber = $this->getMetaValue($floodQuoteMetas, "policyNumber");
+        $boundFinalPremium = (float)$this->getMetaValue($floodQuoteMetas, "boundFinalPremium", 0);
+        $selectedPolicyType = $this->getMetaValue($floodQuoteMetas, "selectedPolicyType");
+        $isPerson = $floodQuote->entity_type == 0;
+        $covDLossUse = (float)$this->getMetaValue($floodQuoteMetas, "covDLossUse", 0);
+        $hiscoxQuotedDwellCov = (int)$this->getMetaValue($floodQuoteMetas, "hiscoxQuotedDwellCov", 0);
+        $hiscoxQuotedPersPropCov = (int)$this->getMetaValue($floodQuoteMetas, "hiscoxQuotedPersPropCov", 0);
+        $hiscoxQuotedDeductible = (int)$this->getMetaValue($floodQuoteMetas, "hiscoxQuotedDeductible", 0);
+        $isRented = $this->getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
+        $covABuilding = (int)$this->getMetaValue($floodQuoteMetas, "covABuilding", 0);
+        $covCContent = (int)$this->getMetaValue($floodQuoteMetas, "covCContent", 0);
+
+        switch ($policyType) {
+            case "CAN":
+                break;
+
+            default:
+                if ($policyType == 'END') {
+                    $payload = [
+                        "hiscoxId" => $hiscoxID,
+                        "bindingReference" => $policyNumber,
+                        "chargedPremium" => $boundFinalPremium,
+                    ];
+                } else {
+                    $payload = [
+                        "hiscoxId" => $hiscoxID,
+                        "policyType" => ($selectedPolicyType == "primary") ? "Primary" : "Excess",
+                        "bindingReference" => $policyNumber,
+                        "effectiveDate" => $floodQuote->effectivity_date,
+                        "chargedPremium" => $boundFinalPremium,
+                    ];
+                }
+
+                if ($policyType == 'REN') {
+                    $payload["effectiveDate"] = null;
+                }
+
+                if ($isPerson) {
+                    $payload["namedInsured"] = $floodQuote->first_name . " " . $floodQuote->last_name;
+                    $payload["residential"] = [
+                        "includeLossOfUse" => ($covDLossUse > 0),
+                        "includeContents" => true,
+                        "buildingLimit" => $hiscoxQuotedDwellCov,
+                        "contentsLimit" => $hiscoxQuotedPersPropCov,
+                        "deductible" => $hiscoxQuotedDeductible,
+                    ];
+                } else {
+                    $payload["namedInsured"] = $floodQuote->company_name;
+
+                    $payload["commercial"] = [
+                        "includeBusinessIncomeAndExtraExpense" => true,
+                        "includeContents" => true,
+                        "deductible" => $hiscoxQuotedDeductible,
+                    ];
+
+                    if ($isRented) {
+                        $payload["commercial"]["tenanted"] =  [
+                            "improvementsAndBettermentsLimit" => $covABuilding,
+                            "contentsLimit" => $covCContent
+                        ];
+                    } else {
+                        $payload["commercial"]["owned"] = [
+                            "buildingLimit" => $covABuilding,
+                            "contentsLimit" => $covCContent
+                        ];
+                    }
+                }
+
+                if ($policyType == 'END') {
+                    $hiscox = $this->hixcoxAPI->bindEndorse($payload);
+                } else {
+                    $hiscox = $this->hixcoxAPI->bind($payload);
+                }
+
+                $hiscoxResponse = $hiscox['response'];
+
+                $errors = $hiscoxResponse->messages->errors;
+                $validation = $hiscoxResponse->messages->validation;
+
+                if (count($errors) && count($validation)) {
+                    $text = "";
+
+                    if (count($errors))
+                        $text .= "Errors: " . print_r($errors);
+
+                    if (count($validation))
+                        $text .= "Validations: " . print_r($validation);
+
+                    throw new Exception($text);
+                } else {
+                    $hiscoxMessage = new \stdClass();
+                    $hiscoxMessage->boundDate = $hiscoxResponse->response->effectiveDate;
+                    $hiscoxMessage->boundReference = $hiscoxResponse->response->bindingReference;
+
+                    $this->hiscoxQuoteService->bindQuoteWithHiscox($floodQuote->flood_quote_id, $hiscoxMessage);
+                }
+
+                break;
+        }
+
+        return $hiscox['response'];
     }
 
     public function link($id = null)
@@ -938,5 +1053,112 @@ class Hiscox extends BaseController
         $data["hiscoxSelectedOptionIndex"] = $hiscoxSelectedOptionIndex;
 
         return view('Hiscox/requote_view', ['data' => $data]);
+    }
+
+    public function bind($id = null)
+    {
+        helper('form');
+        $data['title'] = "HISCOX Binding Process";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+        $data['hiscoxFloodQuote'] = null;
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID");
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+        if ($hiscoxID == "") {
+            return redirect()->to('/flood_quotes')->with('error', "Missing Hiscox ID.");
+        } else if (strpos($bindAuthorityText, "250") === false) {
+            return redirect()->to('/flood_quotes')->with('error', "Invalid Binding Authority. Hiscox Only!");
+        }
+
+        $flood_zone = (int)$this->getMetaValue($floodQuoteMetas, "flood_zone", 0);
+        $floodZone = $this->floodZoneService->findOne($flood_zone);
+
+        $flood_occupancy = (int)$this->getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
+        $floodOccupancy = $this->floodOccupancyService->findOne($flood_occupancy);
+        $mle = (int)$this->getMetaValue($floodQuoteMetas, "mle", 0);
+
+        $data["hiscoxQuotedDwellCov"] = $this->getMetaValue($floodQuoteMetas, "hiscoxQuotedDwellCov");
+        $data["hiscoxQuotedPersPropCov"] = $this->getMetaValue($floodQuoteMetas, "hiscoxQuotedPersPropCov");
+        $data["hiscoxQuotedLossCov"] = $this->getMetaValue($floodQuoteMetas, "hiscoxQuotedLossCov");
+        $data["floodZone"] = ($floodZone) ? $floodZone->name : "";
+        $data["bfe"] = $this->getMetaValue($floodQuoteMetas, "bfe");
+        $data["lfe"] = $this->getMetaValue($floodQuoteMetas, "lfe");
+        $data["floodOccupancy"] = ($floodOccupancy) ? $floodOccupancy->name : "N/A";
+        $data["diagramNumber"] = $this->getMetaValue($floodQuoteMetas, "diagramNumber");
+        $data["mle"] = ($mle) ? $mle : "N/A";
+
+        $data["bindAuthority"] = $bindAuthority->name;
+        $data["policyType"] = $this->getMetaValue($floodQuoteMetas, "policyType");
+        $data["propertyAddress"] = $this->getMetaValue($floodQuoteMetas, "propertyAddress");
+        $data["propertyCity"] = $this->getMetaValue($floodQuoteMetas, "propertyCity");
+        $data["propertyState"] = $this->getMetaValue($floodQuoteMetas, "propertyState");
+        $data["propertyZip"] = $this->getMetaValue($floodQuoteMetas, "propertyZip");
+        $data["hiscoxID"] = $hiscoxID;
+        $data["hiscoxQuotedPremium"] = $this->getMetaValue($floodQuoteMetas, "hiscoxQuotedPremium");
+        $data["hiscoxPremiumOverride"] = $this->getMetaValue($floodQuoteMetas, "hiscoxPremiumOverride", 0);
+        $data["hiscoxQuotedDeductible"] = $this->getMetaValue($floodQuoteMetas, "hiscoxQuotedDeductible", 0);
+        $data["additionalPremium"] = $this->getMetaValue($floodQuoteMetas, "additionalPremium", 0);
+        $data["proratedDue"] = $this->getMetaValue($floodQuoteMetas, "proratedDue", 0);
+        $data["previousPolicyNumber"] = $this->getMetaValue($floodQuoteMetas, "previousPolicyNumber");
+
+        $calculations = new FloodQuoteCalculations($floodQuote);
+        $data['calculations'] = $calculations;
+
+        $policyType = $data["policyType"];
+
+        switch ($policyType) {
+            case "END":
+            case "CAN":
+                $data["policyNumber"] = $this->getMetaValue($floodQuoteMetas, "policyNumber");
+                break;
+
+            case "REN":
+                $data["policyNumber"] = substr(date("Y"), -2) . "FHI00" . $id;
+                break;
+
+            default:
+                $data["policyNumber"] = substr(date("Y"), -2) . "FHI00" . $id;
+                break;
+        }
+
+        // Bind to vandyk before to hiscox
+        if ($this->request->is('post')) {
+            $post = $this->request->getPost();
+            $message = new \stdClass();
+            $message->boundFinalPremium = $post['boundFinalPremium'];
+            $message->flood_quote_id = $id;
+            $message->boundBasePremium = $post['boundBasePremium'];
+            $message->boundLossUseCoverage = $post['boundLossUseCoverage'];
+            $message->boundTaxAmount = $post['boundTaxAmount'];
+            $message->boundPolicyFee = $post['boundPolicyFee'];
+            $message->boundTotalCost = $post['boundTotalCost'];
+            $message->policyNumber = $post['policyNumber'];
+            $message->previousPolicyNumber = $post['previousPolicyNumber'];
+            $message->inForce = ($policyType == "NEW") ? 0 : (int)$post['inForce'];
+            $message->boundDate = $post['boundDate'];
+            $message->isBounded = true;
+            $message->boundAdditionalPremium = $post['boundAdditionalPremium'];
+            $message->boundStampFee = $post['boundStampFee'];
+
+            try {
+                $this->floodQuoteService->bind($message);
+                $this->bindHiscox($policyType, $floodQuote);
+                return redirect()->to('/flood_quote/choose_sla/' . $id)->with('message', 'Binding was successful.');
+            } catch (Exception $e) {
+                return redirect()->back()->withInput()->with('error', $e->getMessage());
+            }
+        } else {
+            return view('Hiscox/bind_view', ['data' => $data]);
+        }
     }
 }

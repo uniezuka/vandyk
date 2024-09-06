@@ -60,6 +60,8 @@ class FloodQuoteCalculations
     public $stampFee;
     public $finalCost;
 
+    protected $bindAuthorityService;
+
     public function __construct($floodQuote)
     {
         helper(['service']);
@@ -70,6 +72,7 @@ class FloodQuoteCalculations
         $this->floodARateService = new FloodARateService();
         $this->floodVRateService = new FloodVRateService();
         $this->floodBCXRateService = new FloodBCXRateService();
+        $this->bindAuthorityService = service('bindAuthorityService');
 
         $this->setBaseValues();
     }
@@ -77,7 +80,7 @@ class FloodQuoteCalculations
     private function setBaseValues()
     {
         $covABuilding = (int)$this->getMetaValue("covABuilding", 0);
-        $covCContent = (int)$this->getMetaValue("covABuicovCContentlding", 0);
+        $covCContent = (int)$this->getMetaValue("covCContent", 0);
         $elevationDifference = (float)$this->getMetaValue("elevationDifference", 0);
         $floodZone = $this->getMetaValue("floodZone");
         $baseRateAdjustment = (float)$this->getMetaValue("baseRateAdjustment", 0);
@@ -98,7 +101,6 @@ class FloodQuoteCalculations
         $this->cancelTax = (float)$this->getMetaValue("endTax", 0);
         $this->cancelPremium = (float)$this->getMetaValue("endPremium", 0);
         $this->policyType = $this->getMetaValue("policyType");
-        $this->bindingAuthority = $this->getMetaValue("bindAuthority");
         $this->hiscoxPremiumOverride = (float)$this->getMetaValue("hiscoxPremiumOverride", 0);
         $this->hiscoxQuotedPremium = (float)$this->getMetaValue("hiscoxQuotedPremium", 0);
         $this->hiscoxQuotedRate = (float)$this->getMetaValue("hiscoxQuotedRate", 0);
@@ -133,6 +135,10 @@ class FloodQuoteCalculations
         $this->rentDwellingReplacementCost = 0;
         $this->stampFee = 0;
         $this->finalCost = 0;
+
+        $bind_authority = $this->getMetaValue('bind_authority');
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $this->bindingAuthority = ($bindAuthority) ? $bindAuthority->reference : "";
 
         if ($elevationDifference >= -0.5 && $elevationDifference < 0.5) {
             $this->baseFieldEnum = "0";
@@ -258,7 +264,7 @@ class FloodQuoteCalculations
                     $computedAdditionalPremium = $this->totalRenewalPremium * $additionalPremium * 0.01;
                     $this->finalPremium = $this->totalRenewalPremium + $computedAdditionalPremium;
                 } else {
-                    $computedAdditionalPremium = $this->basePremium
+                    $totalCosts = $this->basePremium
                         - $tenPercentAdjustment
                         - $this->dwellingValueCredit
                         - $this->deductibleCredit
@@ -270,9 +276,9 @@ class FloodQuoteCalculations
                         + $this->dwellingReplacementCost
                         + $this->lossRentPremium;
 
-                    $additionalPremiumPercentage = $computedAdditionalPremium * $additionalPremium * 0.01;
+                    $computedAdditionalPremium = $totalCosts * $additionalPremium * 0.01;
 
-                    $this->finalPremium = $computedAdditionalPremium + $additionalPremiumPercentage + $this->renewalAdditionalPremium;
+                    $this->finalPremium = $totalCosts + $computedAdditionalPremium + $this->renewalAdditionalPremium;
                 }
             }
 
