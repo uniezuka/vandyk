@@ -176,7 +176,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                         <?php if ($isPolicyDeclined) { ?>
                                             Inactive
                                         <?php } else if ($isBounded) { ?>
-                                            <a href="#" class="btn btn-primary btn-sm" target="_blank">View Bound Rating</a>
+                                            <a href="<?= base_url('/flood_quote/rate_detail/') . $floodQuote->flood_quote_id; ?>" class="btn btn-primary btn-sm" target="_blank">View Bound Rating</a>
                                         <?php } else { ?>
                                             <a href="#" class="btn btn-primary btn-sm" target="_blank">View Current Rating</a>
                                         <?php } ?>

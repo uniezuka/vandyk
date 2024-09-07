@@ -17,6 +17,7 @@ class FloodQuote extends BaseController
     protected $slaPolicyService;
     protected $slaSettingService;
     protected $insurerService;
+    protected $bindAuthorityService;
 
     public function initController(
         RequestInterface $request,
@@ -32,6 +33,7 @@ class FloodQuote extends BaseController
         $this->slaPolicyService = service('slaPolicyService');
         $this->slaSettingService = service('slaSettingService');
         $this->insurerService = service('insurerService');
+        $this->bindAuthorityService = service('bindAuthorityService');
     }
 
     private function getMetaValue($floodQuoteMetas, $meta_key, $default = '')
@@ -587,5 +589,63 @@ class FloodQuote extends BaseController
         }
 
         return redirect()->to('/flood_quotes')->with('message', 'SLA successfully binded to a Quote!');
+    }
+
+    public function rate_detail($id = null)
+    {
+        helper('form');
+        $data['title'] = "Quote Rate Details";
+        $data['flood_quote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['flood_quote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+        $calculations = new FloodQuoteCalculations($data['flood_quote']);
+        $data['calculations'] = $calculations;
+
+        $boundDeductibleSaving = 0;
+        $boundCoverageDiscount = 0;
+        $boundPrimaryDiscount = 0;
+        $boundLossSurcharge = 0;
+        $boundMidLevelSurcharge = 0;
+        $boundReplacementCostSurcharge = 0;
+        $boundPersonalPropertySurcharge = 0;
+        $boundDwellSurcharge = 0;
+
+        if (strpos($bindAuthorityText, '250') === false) {
+            $boundDeductibleSaving = (float)$this->getMetaValue($floodQuoteMetas, "boundDeductibleSaving", 0);
+            $boundCoverageDiscount = (float)$this->getMetaValue($floodQuoteMetas, "boundCoverageDiscount", 0);
+            $boundPrimaryDiscount = (float)$this->getMetaValue($floodQuoteMetas, "boundPrimaryDiscount", 0);
+            $boundLossSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundLossSurcharge", 0);
+            $boundMidLevelSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundMidLevelSurcharge", 0);
+            $boundReplacementCostSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundReplacementCostSurcharge", 0);
+            $boundPersonalPropertySurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundPersonalPropertySurcharge", 0);
+            $boundDwellSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundDwellSurcharge", 0);
+        }
+
+        $data["boundBaseRate"] = (float)$this->getMetaValue($floodQuoteMetas, "boundBaseRate", 0);
+        $data["boundBasePremium"] = (float)$this->getMetaValue($floodQuoteMetas, "boundBaseRate", 0);
+        $data["boundDeductibleSaving"] = $boundDeductibleSaving;
+        $data["boundCoverageDiscount"] = $boundCoverageDiscount;
+        $data["boundPrimaryDiscount"] = $boundPrimaryDiscount;
+        $data["boundLossSurcharge"] = $boundLossSurcharge;
+        $data["boundMidLevelSurcharge"] = $boundMidLevelSurcharge;
+        $data["boundReplacementCostSurcharge"] = $boundReplacementCostSurcharge;
+        $data["boundPersonalPropertySurcharge"] = $boundPersonalPropertySurcharge;
+        $data["boundDwellSurcharge"] = $boundDwellSurcharge;
+        $data["boundFinalPremium"] = (float)$this->getMetaValue($floodQuoteMetas, "boundFinalPremium", 0);
+        $data["boundTaxAmount"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTaxAmount", 0);
+        $data["boundPolicyFee"] = (float)$this->getMetaValue($floodQuoteMetas, "boundPolicyFee", 0);
+        $data["boundStampFee"] = (float)$this->getMetaValue($floodQuoteMetas, "boundStampFee", 0);
+        $data["boundTotalCost"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTotalCost", 0);
+
+        return view('FloodQuote/rate_detail_view', ['data' => $data]);
     }
 }
