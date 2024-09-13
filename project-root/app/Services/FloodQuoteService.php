@@ -307,4 +307,9 @@ class FloodQuoteService extends BaseService
         $message->slaNumber = $slaNumber;
         $this->upsertMetaValues($message, $flood_quote_id);
     }
+
+    public function cancelQuoteWithHiscox($message, $flood_quote_id)
+    {
+        $this->upsertMetaValues($message, $flood_quote_id);
+    }
 }

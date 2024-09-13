@@ -6,6 +6,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\FloodQuoteCalculations;
+use App\Libraries\HiscoxApiV2;
 use Exception;
 
 class FloodQuote extends BaseController
@@ -18,6 +19,7 @@ class FloodQuote extends BaseController
     protected $slaSettingService;
     protected $insurerService;
     protected $bindAuthorityService;
+    protected $hiscoxQuoteService;
 
     public function initController(
         RequestInterface $request,
@@ -34,6 +36,7 @@ class FloodQuote extends BaseController
         $this->slaSettingService = service('slaSettingService');
         $this->insurerService = service('insurerService');
         $this->bindAuthorityService = service('bindAuthorityService');
+        $this->hiscoxQuoteService = service('hiscoxQuoteService');
     }
 
     private function getMetaValue($floodQuoteMetas, $meta_key, $default = '')
@@ -51,6 +54,107 @@ class FloodQuote extends BaseController
         list($prefix, $number) = explode('-', $reference);
         $newNumber = str_pad((int)$number + 1, 5, '0', STR_PAD_LEFT);
         return $prefix . '-' . $newNumber;
+    }
+
+    private function cancelHiscoxQuote($prevFloodQuote, $newFloodQuote, $prevFloodQuoteMetas)
+    {
+        $policyType = $this->getMetaValue($prevFloodQuoteMetas, "policyType");
+        $selectedPolicyType = $this->getMetaValue($prevFloodQuoteMetas, "selectedPolicyType");
+        $selectedDeductible = $this->getMetaValue($prevFloodQuoteMetas, "selectedDeductible");
+        $selectedPolicyIndex = $this->getMetaValue($prevFloodQuoteMetas, "selectedPolicyIndex");
+        $hiscoxID = $this->getMetaValue($prevFloodQuoteMetas, "hiscoxID");;
+        $entityType = $this->getMetaValue($prevFloodQuoteMetas, "entityType");;
+        $isRented = $this->getMetaValue($prevFloodQuoteMetas, "isRented", 0) == "1";
+        $isEndorsement = $policyType == "END";
+        $hiscoxQuote = null;
+
+        $getHiscoxQuote = $this->hiscoxQuoteService->findHiscoxQuote($prevFloodQuote->flood_quote_id, $hiscoxID);
+        if ($getHiscoxQuote) {
+            $rawQuotes = $getHiscoxQuote->raw_quotes;
+            $hiscoxQuote = json_decode($rawQuotes);
+        } else {
+            throw new Exception("Flood Quote has no existing Hiscox Quotes");
+        }
+
+        $quoteRequestDate = $hiscoxQuote->response->quoteRequestDate;
+        $quoteExpiryDate = isset($hiscoxQuote->response->quoteExpiryDate) ? $hiscoxQuote->response->quoteExpiryDate : "";
+
+        $productResponseRequest = HiscoxApiV2::createProductResponseRequest($hiscoxQuote, $prevFloodQuote, $isRented);
+        $hiscoxProductResponse = $productResponseRequest["hiscoxProductResponse"];
+        $primaryOptions = $hiscoxProductResponse->primary;
+        $excessOptions = $hiscoxProductResponse->excess;
+
+        $hiscoxSelectedOption = HiscoxApiV2::getHiscoxSelectedOption($selectedPolicyType, $selectedPolicyIndex, $selectedDeductible, $primaryOptions, $excessOptions, $isEndorsement);
+        $hiscoxSelectedOptionIndex = $hiscoxSelectedOption['index'];
+        $hiscoxOptions = $hiscoxSelectedOption['options'];
+
+        $this->upsertHiscoxQuote([
+            "hiscoxID" => $hiscoxID,
+            "flood_quote_id" => $newFloodQuote->flood_quote_id,
+            "client_id" => $prevFloodQuote->client_id,
+            "quoteExpirationDate" => $quoteExpiryDate,
+            "quoteRequestedDate" => $quoteRequestDate,
+            "selectedPolicyType" => $selectedPolicyType,
+            "selectedDeductible" => (int)$selectedDeductible,
+            "selectedPolicyIndex" => (int)$selectedPolicyIndex,
+            "rawQuotes" => json_encode($hiscoxQuote, JSON_PRETTY_PRINT),
+        ]);
+
+        $this->updateQuoteWithHiscox($hiscoxOptions, [
+            "hiscoxID" => $hiscoxID,
+            "selectedPolicyType" => $selectedPolicyType,
+            "selectedDeductible" => (int)$selectedDeductible,
+            "selectedOptionIndex" => (int)$selectedPolicyIndex,
+            "floodQuoteId" => $newFloodQuote->flood_quote_id,
+            "isRented" => $isRented,
+            "isEndorsement" => $isEndorsement,
+        ]);
+
+        return true;
+    }
+
+    private function upsertHiscoxQuote(array $message)
+    {
+        $upsertMessage = new \stdClass();
+        $upsertMessage->hiscoxID = $message["hiscoxID"];
+        $upsertMessage->flood_quote_id = $message["flood_quote_id"];
+        $upsertMessage->client_id = $message["client_id"];
+        $upsertMessage->quoteExpirationDate = $message["quoteExpirationDate"];
+        $upsertMessage->quoteRequestedDate = $message["quoteRequestedDate"];
+        $upsertMessage->selectedPolicyType = $message["selectedPolicyType"];
+        $upsertMessage->selectedDeductible = $message["selectedDeductible"];
+        $upsertMessage->selectedPolicyIndex = $message["selectedPolicyIndex"];
+        $upsertMessage->rawQuotes = $message["rawQuotes"];
+        $this->hiscoxQuoteService->upsert($upsertMessage);
+    }
+
+    private function updateQuoteWithHiscox($hiscoxOptions, array $message)
+    {
+        $hiscox = new \stdClass();
+        $hiscox->hiscox_id = $message["hiscoxID"];
+        $hiscox->selectedPolicyType = $message["selectedPolicyType"];
+        $hiscox->selectedDeductible = $message["selectedDeductible"];
+        $hiscox->selectedPolicyIndex = $message["selectedOptionIndex"];
+        $hiscox->buildingPremium = $hiscoxOptions->building_premium;
+
+        $hiscox->totalPremium = $hiscoxOptions->building_premium +
+            $hiscoxOptions->contents_premium +
+            $hiscoxOptions->other_structures_premium +
+            $hiscoxOptions->loss_of_use_premium +
+            $hiscoxOptions->improvementsAndBettermentsPremium +
+            $hiscoxOptions->businessIncomePremium;
+
+        if ($message['isEndorsement'])
+            $hiscox->total_premium = $hiscoxOptions->building_premium;
+
+        $hiscox->deductible = $hiscoxOptions->deductible;
+        $hiscox->coverageLimits = new \stdClass();
+        $hiscox->coverageLimits->building = ($message["isRented"]) ? $hiscoxOptions->improvementsAndBettermentsLimit : $hiscoxOptions->building_coverage_limit;
+        $hiscox->coverageLimits->contents = $hiscoxOptions->contents_coverage_limit;
+        $hiscox->coverageLimits->otherStructures = $hiscoxOptions->other_structures_coverage_limit;
+        $hiscox->coverageLimits->lossOfUse = $hiscoxOptions->loss_of_use_coverage_limit;
+
+        $this->hiscoxQuoteService->updateQuoteWithHiscox($message["floodQuoteId"], $hiscox);
     }
 
     public function index()
@@ -168,7 +272,7 @@ class FloodQuote extends BaseController
             $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
             $message->broker = $post['broker'] ?? 0;
             $message->producer = $post['producer'] ?? 0;
-            $message->hasLossOccured = $post['hasLossOccured'] ?? 0;
+            $message->hasLossOccurred = $post['hasLossOccurred'] ?? 0;
             $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
             $message->lastLossValue = $post['lastLossValue'] ?? 0;
             $message->lossesIn10Years = $post['lossesIn10Years'] ?? 0;
@@ -336,7 +440,7 @@ class FloodQuote extends BaseController
             $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
             $message->broker = $post['broker'] ?? 0;
             $message->producer = $post['producer'] ?? 0;
-            $message->hasLossOccured = $post['hasLossOccured'] ?? 0;
+            $message->hasLossOccurred = $post['hasLossOccurred'] ?? 0;
             $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
             $message->lastLossValue = $post['lastLossValue'] ?? 0;
             $message->lossesIn10Years = $post['lossesIn10Years'] ?? 0;
@@ -373,6 +477,8 @@ class FloodQuote extends BaseController
             $message->endorseDate = $post['endorseDate'] ?? "";
             $message->previousPolicyNumber = $post['previousPolicyNumber'] ?? "";
             $message->isBounded = $post['isBounded'] ?? 0;
+            $message->inForce = $post['inForce'] ?? 0;
+            $message->isForRenewal = $post['isForRenewal'] ?? 0;
 
             $this->floodQuoteService->update($message);
 
@@ -647,5 +753,219 @@ class FloodQuote extends BaseController
         $data["boundTotalCost"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTotalCost", 0);
 
         return view('FloodQuote/rate_detail_view', ['data' => $data]);
+    }
+
+    public function process($id = null, $action = "")
+    {
+        helper('form');
+        $data['title'] = "";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        if ($action !== 'cancel' && $action !== 'renew') {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException();
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $mortgages = $this->floodQuoteMortgageService->getByFloodQuoteId($floodQuote->flood_quote_id);
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($floodQuote->flood_quote_id);
+        $client = $this->clientService->findOne($floodQuote->client_id);
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+        $mortgage1 = null;
+        $mortgage2 = null;
+        foreach ($mortgages as $mortgagee) {
+            if ($mortgagee->loan_index === '1') {
+                $mortgage1 = $mortgagee;
+            } elseif ($mortgagee->loan_index === '2') {
+                $mortgage2 = $mortgagee;
+            }
+        }
+
+        $data['client'] = $client;
+        $data['floodQuoteMetas'] = $floodQuoteMetas;
+        $data['mortgage1'] = $mortgage1;
+        $data['mortgage2'] = $mortgage2;
+        $data['bindAuthorityText'] = $bindAuthorityText;
+        $data['action'] = $action;
+
+        if (!$this->request->is('post')) {
+            return view('FloodQuote/process_view', ['data' => $data]);
+        }
+
+        $post = $this->request->getPost();
+
+        switch ($action) {
+            case "cancel":
+                $policyType = "CAN";
+                break;
+
+            case "renew":
+                $policyType = "REN";
+                break;
+
+            default:
+                break;
+        }
+
+        try {
+            $message = new \stdClass();
+            $message->entityType = $post['entityType'] ?? "";
+            $message->firstName = $post['firstName'] ?? "";
+            $message->lastName = $post['lastName'] ?? "";
+            $message->secondInsured = $post['secondInsured'] ?? "";
+            $message->companyName = $post['companyName'] ?? "";
+            $message->companyName2 = $post['companyName2'] ?? "";
+            $message->address = $post['address'] ?? "";
+            $message->city = $post['city'] ?? "";
+            $message->state = $post['state'] ?? "";
+            $message->zip = $post['zip'] ?? "";
+            $message->cellPhone = $post['cellPhone'] ?? "";
+            $message->homePhone = $post['homePhone'] ?? "";
+            $message->email = $post['email'] ?? "";
+            $message->billTo = $post['billTo'] ?? "";
+            $message->propertyAddress = $post['propertyAddress'] ?? "";
+            $message->propertyCity = $post['propertyCity'] ?? "";
+            $message->propertyState = $post['propertyState'] ?? "";
+            $message->propertyZip = $post['propertyZip'] ?? "";
+            $message->propertyCounty = $post['propertyCounty'] ?? "";
+            $message->numOfFloors = $post['numOfFloors'] ?? 0;
+            $message->squareFeet = $post['squareFeet'] ?? 0;
+            $message->yearBuilt = $post['yearBuilt'] ?? 0;
+            $message->construction_type = $post['construction_type'] ?? 0;
+            $message->isPrimaryResidence = $post['isPrimaryResidence'] ?? 0;
+            $message->isRented = $post['isRented'] ?? 0;
+            $message->condoUnits = $post['condoUnits'] ?? 0;
+            $message->rcbap = $post['rcbap'] ?? 0;
+            $message->premium = $post['premium'] ?? 0;
+            $message->expiryDate = $post['expiryDate'] ?? "";
+            $message->flood_zone = $post['flood_zone'] ?? 0;
+            $message->diagramNumber = $post['diagramNumber'] ?? "";
+            $message->flood_foundation = $post['flood_foundation'] ?? 0;
+            $message->flood_occupancy = $post['flood_occupancy'] ?? 0;
+            $message->other_occupancy = $post['other_occupancy'] ?? 0;
+            $message->basement_finished = $post['basement_finished'] ?? 0;
+            $message->isEnclosureFinished = $post['isEnclosureFinished'] ?? 0;
+            $message->garage_attached = $post['garage_attached'] ?? 0;
+            $message->over_water = $post['over_water'] ?? 0;
+            $message->bfe = $post['bfe'] ?? 0;
+            $message->flfe = $post['flfe'] ?? 0;
+            $message->elevationDifference = $post['elevationDifference'] ?? 0;
+            $message->lfe = $post['lfe'] ?? 0;
+            $message->nhf = $post['nhf'] ?? 0;
+            $message->lhsm = $post['lhsm'] ?? 0;
+            $message->lag = $post['lag'] ?? 0;
+            $message->hag = $post['hag'] ?? 0;
+            $message->mle = $post['mle'] ?? 0;
+            $message->enclosure = $post['enclosure'] ?? 0;
+            $message->elevCertDate = $post['elevCertDate'] ?? "";
+            $message->improvementDate = $post['improvementDate'] ?? "";
+            $message->covABuilding = $post['covABuilding'] ?? 0;
+            $message->covCContent = $post['covCContent'] ?? 0;
+            $message->covDLoss = $post['covDLoss'] ?? 0;
+            $message->buildingReplacementCost = $post['buildingReplacementCost'] ?? 0;
+            $message->contentReplacementCost = $post['contentReplacementCost'] ?? 0;
+            $message->rceRatio = $post['rceRatio'] ?? 0;
+            $message->underInsuredRate = $post['underInsuredRate'] ?? 0;
+            $message->deductible_id = $post['deductible'] ?? 0;
+            $message->hasOpprc = $post['hasOpprc'] ?? 0;
+            $message->hasDrc = $post['hasDrc'] ?? 0;
+            $message->bind_authority = $post['bind_authority'] ?? 0;
+            $message->syndicate1_bind_authority = $post['syndicate1_bind_authority'] ?? 0;
+            $message->sydicate1Risk = $post['sydicate1Risk'] ?? "";
+            $message->syndicate2_bind_authority = $post['syndicate2_bind_authority'] ?? 0;
+            $message->sydicate2Risk = $post['sydicate2Risk'] ?? "";
+            $message->syndicate3_bind_authority = $post['syndicate3_bind_authority'] ?? 0;
+            $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
+            $message->broker = $post['broker'] ?? 0;
+            $message->producer = $post['producer'] ?? 0;
+            $message->hasLossOccurred = $post['hasLossOccurred'] ?? 0;
+            $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
+            $message->lastLossValue = $post['lastLossValue'] ?? 0;
+            $message->lossesIn10Years = $post['lossesIn10Years'] ?? 0;
+            $message->totalLossValueIn10Years = $post['totalLossValueIn10Years'] ?? 0;
+            $message->sandyLossAmount = $post['sandyLossAmount'] ?? 0;
+            $message->hasElevatedSinceLastLoss = $post['hasElevatedSinceLastLoss'] ?? 0;
+            $message->effectiveDate = $post['effectiveDate'] ?? "";
+            $message->expirationDate = $post['expirationDate'] ?? "";
+            $message->reason = $post['reason'] ?? "";
+            $message->isCondo = $post['isCondo'] ?? 0;
+            $message->isSameAddress = $post['isSameAddress'] ?? 0;
+            $message->hasWaitPeriod = $post['hasWaitPeriod'] ?? 0;
+            $message->hasClosing = $post['hasClosing'] ?? 0;
+            $message->hasBreakAwayWall = $post['hasBreakAwayWall'] ?? 0;
+            $message->currentCompany = $post['currentCompany'] ?? "";
+            $message->currentPremium = $post['currentPremium'] ?? "";
+            $message->currentExpiryDate = $post['currentExpiryDate'] ?? "";
+            $message->baseRateAdjustment = $post['baseRateAdjustment'] ?? 0;
+            $message->has10PercentAdjustment = $post['has10PercentAdjustment'] ?? 0;
+            $message->additionalPremium = $post['additionalPremium'] ?? 0;
+            $message->renewalAdditionalPremium = $post['renewalAdditionalPremium'] ?? 0;
+            $message->renewalPremiumIncrease = $post['renewalPremiumIncrease'] ?? 0;
+            $message->proratedDue = $post['proratedDue'] ?? 0;
+            $message->hiscoxDwellLimitOverride = $post['hiscoxDwellLimitOverride'] ?? 0;
+            $message->hiscoxContentLimitOverride = $post['hiscoxContentLimitOverride'] ?? 0;
+            $message->hiscoxLossUseLimitOverride = $post['hiscoxLossUseLimitOverride'] ?? 0;
+            $message->hiscoxOtherLimitOverride = $post['hiscoxOtherLimitOverride'] ?? 0;
+            $message->cancelPremium = $post['cancelPremium'] ?? 0;
+            $message->cancelTax = $post['cancelTax'] ?? 0;
+            $message->policyNumber = $post['policyNumber'] ?? "";
+            $message->slaNumber = $post['slaNumber'] ?? "";
+            $message->endorseDate = $post['endorseDate'] ?? "";
+            $message->previousPolicyNumber = $post['previousPolicyNumber'] ?? "";
+            $message->policyType = $policyType;
+            $message->client_id = $floodQuote->client_id;
+            $message->prevHiscoxPremiumOverride = $post['prevHiscoxPremiumOverride'] ?? "";
+            $message->prevHiscoxBoundID = $post['prevHiscoxBoundID'] ?? "";
+            $message->prevHiscoxQuotedRate = $post['prevHiscoxQuotedRate'] ?? "";
+
+            $newFloodQuote = $this->floodQuoteService->create($message);
+
+            $mortgageMessage = new \stdClass();
+            $mortgageMessage->flood_quote_id = $newFloodQuote->flood_quote_id;
+            $mortgageMessage->loan_index = 1;
+            $mortgageMessage->name = $post['mortgagee1Name'] ?? null;
+            $mortgageMessage->name2 = $post['mortgagee1Name2'] ?? null;
+            $mortgageMessage->address = $post['mortgagee1Address'] ?? null;
+            $mortgageMessage->city = $post['mortgagee1City'] ?? null;
+            $mortgageMessage->state = $post['mortgagee1State'] ?? null;
+            $mortgageMessage->zip = $post['mortgagee1Zip'] ?? null;
+            $mortgageMessage->phone = $post['mortgagee1Phone'] ?? null;
+            $mortgageMessage->loan_number = $post['mortgagee1LoanNumber'] ?? null;
+            $this->floodQuoteMortgageService->create($mortgageMessage);
+
+            $mortgageMessage = new \stdClass();
+            $mortgageMessage->flood_quote_id = $newFloodQuote->flood_quote_id;
+            $mortgageMessage->loan_index = 2;
+            $mortgageMessage->name = $post['mortgagee2Name'] ?? null;
+            $mortgageMessage->name2 = $post['mortgagee2Name2'] ?? null;
+            $mortgageMessage->address = $post['mortgagee2Address'] ?? null;
+            $mortgageMessage->city = $post['mortgagee2City'] ?? null;
+            $mortgageMessage->state = $post['mortgagee2State'] ?? null;
+            $mortgageMessage->zip = $post['mortgagee2Zip'] ?? null;
+            $mortgageMessage->phone = $post['mortgagee2Phone'] ?? null;
+            $mortgageMessage->loan_number = $post['mortgagee2LoanNumber'] ?? null;
+            $this->floodQuoteMortgageService->create($mortgageMessage);
+
+            if (strpos($bindAuthorityText, "250") !== false) {
+                if ($action === 'cancel') {
+                    try {
+                        $this->cancelHiscoxQuote($floodQuote, $newFloodQuote, $floodQuoteMetas);
+                    } catch (Exception $e) {
+                        return redirect()->to('/flood_quote/initial_details/' . $newFloodQuote->flood_quote_id)->with('error', 'Flood Quote was successfully added but no Hiscox Quote');
+                    }
+                }
+            }
+            return redirect()->to('/flood_quote/initial_details/' . $newFloodQuote->flood_quote_id)->with('message', 'Flood Quote was successfully added.');
+            //return view('FloodQuote/create_view', ['data' => $data]);
+        } catch (Exception $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
     }
 }

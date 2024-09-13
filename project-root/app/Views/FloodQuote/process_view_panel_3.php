@@ -1,3 +1,16 @@
+<?php
+$policyNumber = "";
+
+if ($action == "cancel") {
+    $actionText = "Cancel";
+    $buttonText = "Submit Cancellation";
+
+    $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
+} else if ($action == "endorse") {
+    $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
+}
+?>
+
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Broker</label>
     <div class="col-sm-8">
@@ -103,7 +116,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Policy #:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="policyNumber" value="<?= set_value('policyNumber', getMetaValue($floodQuoteMetas, "policyNumber")) ?>" />
+        <input type="text" class="form-control" placeholder="" name="policyNumber" value="<?= set_value('policyNumber', $policyNumber) ?>" />
     </div>
 </div>
 
@@ -262,30 +275,30 @@
 </div>
 
 <div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Endorse/Cancel Premium:</label>
+    <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Premium:</label>
     <div class="col-sm-4">
         <input type="text" class="form-control" placeholder="" name="cancelPremium" value="<?= set_value('cancelPremium', getMetaValue($floodQuoteMetas, "cancelPremium", 0)) ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Endorse/Cancel Tax:</label>
+    <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Tax:</label>
     <div class="col-sm-4">
         <input type="text" class="form-control" placeholder="" name="cancelTax" value="<?= set_value('cancelTax', getMetaValue($floodQuoteMetas, "cancelTax", 0)) ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Prorated END/CAN Total Due:</label>
+    <label class="d-flex justify-content-end col-sm-4 col-form-label">Prorated <?= $actionText ?> Total Due:</label>
     <div class="col-sm-4">
         <input type="text" class="form-control" placeholder="" name="proratedDue" value="<?= set_value('proratedDue', getMetaValue($floodQuoteMetas, "proratedDue", 0)) ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Endorse/Cancel Effective Date:</label>
+    <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Effective Date:</label>
     <div class="col-sm-4">
-        <input type="date" class="form-control" placeholder="" name="endorseDate" value="<?= set_value('endorseDate', getMetaValue($floodQuoteMetas, "endorseDate")) ?>" />
+        <input type="date" class="form-control" required placeholder="" name="endorseDate" value="<?= set_value('endorseDate', getMetaValue($floodQuoteMetas, "endorseDate")) ?>" />
     </div>
 </div>
 
@@ -297,26 +310,6 @@
     </div>
 </div>
 
-<div class="row">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">&nbsp;</label>
-    <div class="col-sm-8">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="1" name="isQuoteDeclined" <?= set_checkbox('isQuoteDeclined', '1', getMetaValue($floodQuoteMetas, "isQuoteDeclined", "0") == "1"); ?>>
-            <label class="form-check-label">Quote Declined/Withdrawn</label>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">&nbsp;</label>
-    <div class="col-sm-8">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="1" name="isQuoteApproved" <?= set_checkbox('isQuoteApproved', '1', getMetaValue($floodQuoteMetas, "isQuoteApproved", "0") == "1"); ?>>
-            <label class="form-check-label">Quote Approved</label>
-        </div>
-    </div>
-</div>
-
 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-    <button type="submit" class="btn btn-primary">Update Quote</button>
+    <button type="submit" class="btn btn-primary"><?= $buttonText ?></button>
 </div>

@@ -95,5 +95,16 @@ class HiscoxQuoteService extends BaseService
     {
         $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundDate", $hiscox->boundDate);
         $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundReference", $hiscox->boundReference);
+        $this->updateFloodQuoteMeta($flood_quote_id, "boundHiscoxID", $hiscox->boundHiscoxID);
+    }
+
+    public function bindCancelHiscox($flood_quote_id, $hiscox)
+    {
+        $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxID", "");
+        $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundDate", $hiscox->boundDate);
+        $this->updateFloodQuoteMeta($flood_quote_id, "isBounded", 1);
+        $this->updateFloodQuoteMeta($flood_quote_id, "boundHiscoxID", $hiscox->boundHiscoxID);
+        $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxIssuedDate", $hiscox->hiscoxIssuedDate);
+        $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundReference", $hiscox->boundReference);
     }
 }

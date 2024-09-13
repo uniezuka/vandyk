@@ -70,12 +70,14 @@ $routes->get('/flood_quote/initial_details/(:num)', 'FloodQuote::initial_details
 $routes->get('/flood_quote/choose_sla/(:num)', 'FloodQuote::choose_sla/$1', ['filter' => 'authGuard']);
 $routes->get('/flood_quote/rate_detail/(:num)', 'FloodQuote::rate_detail/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/bind_sla/(:num)', 'FloodQuote::bind_sla/$1', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_quote/process/(:num)/(:alpha)', 'FloodQuote::process/$1/$2', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/link/(:num)', 'Hiscox::link/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/create/(:num)', 'Hiscox::create/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/select/(:num)', 'Hiscox::select/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/requote/(:num)', 'Hiscox::requote/$1', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'flood_quote/hiscox/bind/(:num)', 'Hiscox::bind/$1', ['filter' => 'authGuard']);
 $routes->get('/flood_quote/hiscox/view/(:num)', 'Hiscox::view/$1', ['filter' => 'authGuard']);
+$routes->get('/flood_quote/hiscox/cancel_preview/(:num)', 'Hiscox::cancel_preview/$1', ['filter' => 'authGuard']);
 
 $routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);

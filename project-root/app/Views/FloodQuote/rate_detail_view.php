@@ -229,7 +229,7 @@ $isProperlyVented = ($flood_foundation == 1 || $flood_foundation == 2 || $flood_
                 <div class="row mb-3">
                     <a href="#" class="btn btn-info mb-3" role="button">Endorse</a>
                     <a href="#" class="btn btn-info mb-3" role="button">Renew</a>
-                    <a href="#" class="btn btn-info mb-3" role="button">Cancel</a>
+                    <a href="<?= base_url('/flood_quote/process/') . $flood_quote->flood_quote_id . '/cancel'; ?>" class="btn btn-info mb-3" role="button">Cancel</a>
                     <a href="<?= base_url('/client/details/') . $flood_quote->client_id; ?>" class="btn btn-info mb-3" role="button">Client Page</a>
                     <a href="<?= base_url(); ?>" class="btn btn-info" role="button">Main Flood Page</a>
                 </div>

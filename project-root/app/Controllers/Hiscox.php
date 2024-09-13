@@ -101,9 +101,47 @@ class Hiscox extends BaseController
         $isRented = $this->getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
         $covABuilding = (int)$this->getMetaValue($floodQuoteMetas, "covABuilding", 0);
         $covCContent = (int)$this->getMetaValue($floodQuoteMetas, "covCContent", 0);
+        $prevHiscoxBoundID = $this->getMetaValue($floodQuoteMetas, "prevHiscoxBoundID");
+        $endorseDate = $this->getMetaValue($floodQuoteMetas, "endorseDate");
 
         switch ($policyType) {
             case "CAN":
+                $payload = [
+                    "hiscoxId" => $prevHiscoxBoundID,
+                    "cancellationDate" => $endorseDate,
+                    "premiumCalculation" => "ShortRate",
+                    "priorTerm" => true
+                ];
+
+                $hiscox = $this->hixcoxAPI->cancel($payload);
+                $hiscoxResponse = $hiscox['response'];
+
+                $errors = $hiscoxResponse->messages->errors;
+                $validation = $hiscoxResponse->messages->validation;
+
+                if (count($errors) && count($validation)) {
+                    $text = "";
+
+                    if (count($errors))
+                        $text .= "Errors: " . print_r($errors);
+
+                    if (count($validation))
+                        $text .= "Validations: " . print_r($validation);
+
+                    throw new Exception($text);
+                } else {
+
+                    $cancelReturnPremium = $hiscoxResponse->response->returnPremium;
+
+                    $hiscoxMessage = new \stdClass();
+                    $hiscoxMessage->boundDate = $hiscoxResponse->response->cancellationDate;;
+                    $hiscoxMessage->boundReference = $hiscoxResponse->response->hiscoxId;
+                    $hiscoxMessage->hiscoxIssuedDate = $hiscoxResponse->response->cancellationDate;
+                    $hiscoxMessage->boundHiscoxID = $hiscoxResponse->response->hiscoxId;
+
+                    $this->hiscoxQuoteService->bindCancelHiscox($floodQuote->flood_quote_id, $hiscoxMessage);
+                }
+
                 break;
 
             default:
@@ -183,6 +221,7 @@ class Hiscox extends BaseController
                     $hiscoxMessage = new \stdClass();
                     $hiscoxMessage->boundDate = $hiscoxResponse->response->effectiveDate;
                     $hiscoxMessage->boundReference = $hiscoxResponse->response->bindingReference;
+                    $hiscoxMessage->boundHiscoxID = $hiscoxID;
 
                     $this->hiscoxQuoteService->bindQuoteWithHiscox($floodQuote->flood_quote_id, $hiscoxMessage);
                 }
@@ -1074,9 +1113,7 @@ class Hiscox extends BaseController
         $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
         $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
 
-        if ($hiscoxID == "") {
-            return redirect()->to('/flood_quotes')->with('error', "Missing Hiscox ID.");
-        } else if (strpos($bindAuthorityText, "250") === false) {
+        if (strpos($bindAuthorityText, "250") === false) {
             return redirect()->to('/flood_quotes')->with('error', "Invalid Binding Authority. Hiscox Only!");
         }
 
@@ -1133,6 +1170,8 @@ class Hiscox extends BaseController
 
         // Bind to vandyk before to hiscox
         if ($this->request->is('post')) {
+            $inForce = isset($post['inForce']) ? (int)$post['inForce'] : 0;
+
             $post = $this->request->getPost();
             $message = new \stdClass();
             $message->boundFinalPremium = $post['boundFinalPremium'];
@@ -1144,7 +1183,7 @@ class Hiscox extends BaseController
             $message->boundTotalCost = $post['boundTotalCost'];
             $message->policyNumber = $post['policyNumber'];
             $message->previousPolicyNumber = $post['previousPolicyNumber'];
-            $message->inForce = ($policyType == "NEW") ? 0 : (int)$post['inForce'];
+            $message->inForce = ($policyType == "NEW") ? 0 : $inForce;
             $message->boundDate = $post['boundDate'];
             $message->isBounded = true;
             $message->boundAdditionalPremium = $post['boundAdditionalPremium'];
@@ -1279,5 +1318,53 @@ class Hiscox extends BaseController
         $data["isEndorsement"] = $isEndorsement;
 
         return view('Hiscox/view_view', ['data' => $data]);
+    }
+
+    public function cancel_preview($id = null)
+    {
+        helper('form');
+        $data['title'] = "View Hiscox Cancel Preview";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+        $data['hiscoxFloodQuote'] = null;
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($floodQuote->flood_quote_id);
+        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID");
+        $prevHiscoxBoundID = $this->getMetaValue($floodQuoteMetas, "prevHiscoxBoundID");
+        $endorseDate = $this->getMetaValue($floodQuoteMetas, "endorseDate");
+
+        $payload = [
+            "hiscoxId" => $prevHiscoxBoundID,
+            "cancellationDate" => $endorseDate,
+            "premiumCalculation" => "ShortRate",
+        ];
+
+        $hiscox = $this->hixcoxAPI->previewCancel($payload);
+        $hiscoxResponse = $hiscox['response'];
+
+        $validations = $hiscoxResponse->messages->validation;
+        $underwriterDecisions = $hiscoxResponse->messages->underwriterDecisions;
+        $errors = $hiscoxResponse->messages->errors;
+
+        $cancellationDate = $hiscoxResponse->response->cancellationDate;
+        $returnPremium = $hiscoxResponse->response->returnPremium;
+
+        $hiscox = new \stdClass();
+        $hiscox->cancelPremium = $returnPremium * -1;
+
+        $this->floodQuoteService->cancelQuoteWithHiscox($hiscox, $id);
+
+        $data['validations'] = $validations;
+        $data['underwriterDecisions'] = $underwriterDecisions;
+        $data['errors'] = $errors;
+        $data['prevHiscoxBoundID'] = $prevHiscoxBoundID;
+        $data['cancellationDate'] = $cancellationDate;
+        $data['returnPremium'] = $returnPremium;
+
+        return view('Hiscox/cancel_preview_view', ['data' => $data]);
     }
 }

@@ -99,7 +99,7 @@ class FloodQuoteCalculations
         $this->baseCoverages = $covABuilding + $covCContent;
         $this->taxAmount = 0;
         $this->cancelTax = (float)$this->getMetaValue("endTax", 0);
-        $this->cancelPremium = (float)$this->getMetaValue("endPremium", 0);
+        $this->cancelPremium = (float)$this->getMetaValue("cancelPremium", 0);
         $this->policyType = $this->getMetaValue("policyType");
         $this->hiscoxPremiumOverride = (float)$this->getMetaValue("hiscoxPremiumOverride", 0);
         $this->hiscoxQuotedPremium = (float)$this->getMetaValue("hiscoxQuotedPremium", 0);

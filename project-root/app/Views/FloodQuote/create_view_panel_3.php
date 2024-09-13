@@ -16,11 +16,11 @@
     <label class="d-flex justify-content-start col-sm-4 col-form-label"><strong>Has Loss occurred in Previous 10 Years:</strong></label>
     <div class="d-flex align-items-end col-sm-8">
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="1" name="hasLossOccured" />
+            <input class="form-check-input" type="radio" value="1" name="hasLossOccurred" />
             <label class="form-check-label">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="hasLossOccured" />
+            <input class="form-check-input" type="radio" value="0" checked name="hasLossOccurred" />
             <label class="form-check-label">No</label>
         </div>
     </div>
