@@ -124,7 +124,6 @@ function getMetaValue($metas, $meta_key, $default = '')
                             $hasExcessPolicy = (int)getMetaValue($flood_quote_metas, 'hasExcessPolicy', 0);
                             $isBounded = (int)getMetaValue($flood_quote_metas, 'isBounded', 0);
                             $boundDate = getMetaValue($flood_quote_metas, 'boundDate');
-                            $expirationDate = getMetaValue($flood_quote_metas, 'expirationDate');
                             $inForce = (int)getMetaValue($flood_quote_metas, 'inForce', 0);
                             $isPolicyDeclined = (int)getMetaValue($flood_quote_metas, 'isPolicyDeclined', 0);
                             $isSandbarQuote = (int)getMetaValue($flood_quote_metas, 'isSandbarQuote', 0);
@@ -168,7 +167,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     <?php if ($isBounded) { ?>
                                         <p>
                                             <strong>Bound: <?= $boundDate ?></strong><br />
-                                            <strong>Exp: <?= $expirationDate ?></strong><br />
+                                            <strong>Expiration: <?= $floodQuote->expiration_date ?></strong><br />
                                             <strong>In Force: </strong><?= ($inForce) ? "Yes" : "No" ?>
                                         </p>
                                     <?php } ?>

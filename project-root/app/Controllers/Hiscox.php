@@ -50,7 +50,7 @@ class Hiscox extends BaseController
         $this->hiscoxQuoteService->upsert($upsertMessage);
     }
 
-    private function updateQuoteWithHiscox($hiscoxOptions, array $message)
+    private function updateQuoteWithHiscox($hiscoxOptions, array $message, $isEndorsement = false)
     {
         $hiscox = new \stdClass();
         $hiscox->hiscox_id = $message["hiscoxID"];
@@ -65,6 +65,9 @@ class Hiscox extends BaseController
             $hiscoxOptions->loss_of_use_premium +
             $hiscoxOptions->improvementsAndBettermentsPremium +
             $hiscoxOptions->businessIncomePremium;
+
+        if ($isEndorsement)
+            $hiscox->totalPremium = $hiscoxOptions->building_premium;
 
         $hiscox->deductible = $hiscoxOptions->deductible;
         $hiscox->coverageLimits = new \stdClass();
@@ -207,14 +210,14 @@ class Hiscox extends BaseController
                 $errors = $hiscoxResponse->messages->errors;
                 $validation = $hiscoxResponse->messages->validation;
 
-                if (count($errors) && count($validation)) {
+                if (count($errors) || count($validation)) {
                     $text = "";
 
                     if (count($errors))
-                        $text .= "Errors: " . print_r($errors);
+                        $text .= "Errors: " . implode("; ", $errors);
 
                     if (count($validation))
-                        $text .= "Validations: " . print_r($validation);
+                        $text .= "Validations: " . implode("; ", $validation);
 
                     throw new Exception($text);
                 } else {
@@ -689,6 +692,8 @@ class Hiscox extends BaseController
             $lastLossValue = $hiscoxQuote->request->priorLosses[0]->value;
         }
 
+        $isEndorsement = $policyType == "END";
+
         if ($this->request->is('post')) {
             $post = $this->request->getPost();
 
@@ -699,8 +704,6 @@ class Hiscox extends BaseController
             $selectedPolicyType = $postPolicyType;
             $selectedDeductible = $postDeductible;
             $selectedPolicyIndex = $postPolicyIndex;
-
-            $isEndorsement = $policyType == "END";
 
             $hiscoxSelectedOption = HiscoxApiV2::getHiscoxSelectedOption($postPolicyType, $postPolicyIndex, $postDeductible, $primaryOptions, $excessOptions, $isEndorsement);
             $hiscoxSelectedOptionIndex = $hiscoxSelectedOption['index'];
@@ -725,7 +728,7 @@ class Hiscox extends BaseController
                 "selectedOptionIndex" => (int)$postPolicyIndex,
                 "floodQuoteId" => $id,
                 "isRented" => $isRented,
-            ]);
+            ], $isEndorsement);
         }
 
         $hiscoxSelectedOption = HiscoxApiV2::getHiscoxSelectedOption($selectedPolicyType, $selectedPolicyIndex, $selectedDeductible, $primaryOptions, $excessOptions);
@@ -778,6 +781,7 @@ class Hiscox extends BaseController
         $data["excessOptions"] = $excessOptions;
 
         $data["hiscoxSelectedOptionIndex"] = $hiscoxSelectedOptionIndex;
+        $data["isEndorsement"] = $isEndorsement;
 
         return view('Hiscox/select_view', ['data' => $data]);
     }
@@ -1059,7 +1063,7 @@ class Hiscox extends BaseController
                 "selectedOptionIndex" => (int)$postPolicyIndex,
                 "floodQuoteId" => $id,
                 "isRented" => $isRented,
-            ]);
+            ], $isEndorsement);
         }
 
         $data["quoteRequestDate"] = $quoteRequestDate;

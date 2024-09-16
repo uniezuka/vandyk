@@ -7,6 +7,9 @@ if ($action == "cancel") {
 
     $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
 } else if ($action == "endorse") {
+    $actionText = "Endorse";
+    $buttonText = "Submit Endorsement";
+
     $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
 }
 ?>

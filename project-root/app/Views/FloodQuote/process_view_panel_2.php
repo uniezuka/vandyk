@@ -371,6 +371,29 @@
     <span class="col-sm-3">(Use Whole # ex. 3)</span>
 </div>
 
+<?php if ($action == "endorse") { ?>
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-5 col-form-label">Set premium from renewal:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="totalRenewalPremium" value="<?= set_value('totalRenewalPremium', getMetaValue($floodQuoteMetas, "totalRenewalPremium", 0)) ?>" />
+        </div>
+    </div>
+<?php } else { ?>
+    <input type="hidden" class="form-control" placeholder="" name="totalRenewalPremium" value="0" />
+<?php } ?>
+
+<?php if ($action == "endorse") { ?>
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-5 col-form-label">Full Premium Override:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="fullPremiumOverride" value="<?= set_value('fullPremiumOverride', getMetaValue($floodQuoteMetas, "boundFinalPremium", 0)) ?>" />
+        </div>
+        <span class="col-sm-3">'0' for No Override</span>
+    </div>
+<?php } else { ?>
+    <input type="hidden" class="form-control" placeholder="" name="fullPremiumOverride" value="0" />
+<?php } ?>
+
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Binding Auth</label>
     <div class="col-sm-5">

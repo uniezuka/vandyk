@@ -98,7 +98,7 @@ extract($data);
                                         "index" => $index,
                                         "policy_type" => "primary",
                                         "deductible" => $deductible,
-                                        "isEndorsement" => false,
+                                        "isEndorsement" => $isEndorsement,
                                     ]);
                                     $count++;
                                 }
@@ -130,7 +130,7 @@ extract($data);
                                         "index" => $index,
                                         "policy_type" => "excess",
                                         "deductible" => $deductible,
-                                        "isEndorsement" => false,
+                                        "isEndorsement" => $isEndorsement,
                                     ]);
 
                                     $count++;

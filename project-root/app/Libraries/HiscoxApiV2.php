@@ -253,14 +253,15 @@ class HiscoxApiV2
                                 $contentsPremium = $deductible->includeContentsAdditionalPremium;
                                 $otherStructuresPremium = $deductible->otherStructuresAdditionalPremium;
                                 $lossOfUsePremium = $deductible->includeLossOfUseAdditionalPremium;
-                                $businessIncomePremium = $deductible->includeBusinessIncomeAdditionalPremium;
+                                $businessIncomePremium = isset($deductible->includeBusinessIncomeAdditionalPremium)
+                                    ? $deductible->includeBusinessIncomeAdditionalPremium : 0;
 
                                 $hiscoxOptions = new \stdClass();
                                 $hiscoxOptions->building_premium = ceil($buildingPremium);
                                 $hiscoxOptions->contents_premium = ceil($contentsPremium);
                                 $hiscoxOptions->other_structures_premium = ceil($otherStructuresPremium);
                                 $hiscoxOptions->loss_of_use_premium = ceil($lossOfUsePremium);
-                                // $hiscoxOptions->improvementsAndBettermentsPremium = ($deductible->improvementsAndBettermentsPremium) ? ceil($deductible->improvementsAndBettermentsPremium) : 0;
+                                $hiscoxOptions->improvementsAndBettermentsPremium = 0;
                                 $hiscoxOptions->businessIncomePremium = ceil($businessIncomePremium);
 
                                 $hiscoxOptions->building_coverage_limit = (isset($option->buildingLimit)) ? ceil($option->buildingLimit) : 0;
@@ -275,7 +276,7 @@ class HiscoxApiV2
                             } else {
                                 $hiscoxOptions = new \stdClass();
                                 $hiscoxOptions->building_premium = (isset($deductible->buildingPremium)) ? ceil($deductible->buildingPremium) : 0;
-                                $hiscoxOptions->contents_premium = ceil($deductible->contentsPremium);
+                                $hiscoxOptions->contents_premium = (isset($deductible->contentsPremium)) ? ceil($deductible->contentsPremium) : 0;
                                 $hiscoxOptions->other_structures_premium = (isset($deductible->otherStructuresPremium)) ? ceil($deductible->otherStructuresPremium) : 0;
                                 $hiscoxOptions->loss_of_use_premium = (isset($deductible->lossOfUsePremium)) ? ceil($deductible->lossOfUsePremium) : 0;
                                 $hiscoxOptions->improvementsAndBettermentsPremium = (isset($deductible->improvementsAndBettermentsPremium)) ? ceil($deductible->improvementsAndBettermentsPremium) : 0;
