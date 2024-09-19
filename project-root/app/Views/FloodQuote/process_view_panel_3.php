@@ -1,6 +1,9 @@
 <?php
 $policyNumber = "";
 
+$effectiveDate = date('Y-m-d', strtotime($floodQuote->effectivity_date));
+$expirationDate = date('Y-m-d', strtotime($floodQuote->expiration_date));
+
 if ($action == "cancel") {
     $actionText = "Cancel";
     $buttonText = "Submit Cancellation";
@@ -9,6 +12,17 @@ if ($action == "cancel") {
 } else if ($action == "endorse") {
     $actionText = "Endorse";
     $buttonText = "Submit Endorsement";
+
+    $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
+} else if ($action == "renew") {
+    $actionText = "Renew";
+    $buttonText = "Submit Renewal";
+
+    $date = date('Y-m-d', strtotime($floodQuote->effectivity_date));
+    $effectiveDate = date('Y-m-d', strtotime($date . ' +1 year'));
+
+    $date = date('Y-m-d', strtotime($floodQuote->expiration_date));
+    $expirationDate =  date('Y-m-d', strtotime($date . ' +1 year'));
 
     $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
 }
@@ -105,14 +119,14 @@ if ($action == "cancel") {
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Effective Date</label>
     <div class="col-sm-5">
-        <input type="date" class="form-control" placeholder="" name="effectiveDate" value="<?= set_value('effectiveDate', date('Y-m-d', strtotime($floodQuote->effectivity_date))) ?>" />
+        <input type="date" class="form-control" placeholder="" name="effectiveDate" value="<?= set_value('effectiveDate', $effectiveDate) ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Expiration Date</label>
     <div class="col-sm-5">
-        <input type="date" class="form-control" placeholder="" name="expirationDate" value="<?= set_value('expirationDate', date('Y-m-d', strtotime($floodQuote->expiration_date))) ?>" />
+        <input type="date" class="form-control" placeholder="" name="expirationDate" value="<?= set_value('expirationDate', $expirationDate) ?>" />
     </div>
 </div>
 

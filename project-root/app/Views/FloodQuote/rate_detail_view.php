@@ -24,7 +24,9 @@ $canRenew = true;
 
 if ($policyType == "CAN")
 {
-    
+    if (strpos($bindAuthorityText, '250') !== false && $isBounded) {
+        $canRenew = false;
+    }
 }
 
 ?>
@@ -240,7 +242,13 @@ if ($policyType == "CAN")
                     <?php } else { ?>
                         <a href="<?= base_url('/flood_quote/process/') . $flood_quote->flood_quote_id . '/endorse'; ?>" class="btn btn-info mb-3" role="button">Endorse</a>
                     <?php } ?>
-                    <a href="<?= base_url('/flood_quote/process/') . $flood_quote->flood_quote_id . '/renew'; ?>" class="btn btn-info mb-3" role="button">Renew</a>
+
+                    <?php if ($canRenew) { ?>
+                        <a href="<?= base_url('/flood_quote/process/') . $flood_quote->flood_quote_id . '/renew'; ?>" class="btn btn-info mb-3" role="button">Renew</a>
+                    <?php } else { ?>
+                        <a href="#" onclick="alert('Could not Renew a Canceled Quote!'); return false;" class="btn btn-info mb-3" role="button">Renew</a>
+                    <?php } ?>
+
                     <a href="<?= base_url('/flood_quote/process/') . $flood_quote->flood_quote_id . '/cancel'; ?>" class="btn btn-info mb-3" role="button">Cancel</a>
                     <a href="<?= base_url('/client/details/') . $flood_quote->client_id; ?>" class="btn btn-info mb-3" role="button">Client Page</a>
                     <a href="<?= base_url(); ?>" class="btn btn-info" role="button">Main Flood Page</a>

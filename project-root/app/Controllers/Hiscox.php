@@ -126,10 +126,10 @@ class Hiscox extends BaseController
                     $text = "";
 
                     if (count($errors))
-                        $text .= "Errors: " . print_r($errors);
+                        $text .= "Errors: " . implode($errors);
 
                     if (count($validation))
-                        $text .= "Validations: " . print_r($validation);
+                        $text .= "Validations: " . implode($validation);
 
                     throw new Exception($text);
                 } else {
@@ -1354,8 +1354,10 @@ class Hiscox extends BaseController
         $underwriterDecisions = $hiscoxResponse->messages->underwriterDecisions;
         $errors = $hiscoxResponse->messages->errors;
 
-        $cancellationDate = $hiscoxResponse->response->cancellationDate;
-        $returnPremium = $hiscoxResponse->response->returnPremium;
+        $cancellationDate = isset($hiscoxResponse->response) ? 
+            $hiscoxResponse->response->cancellationDate : "";
+        $returnPremium = isset($hiscoxResponse->response) ? 
+            $hiscoxResponse->response->returnPremium : 0;
 
         $hiscox = new \stdClass();
         $hiscox->cancelPremium = $returnPremium * -1;

@@ -247,6 +247,134 @@ class FloodQuote extends BaseController
         return true;
     }
 
+    private function renewHiscoxQuote($floodQuote) {
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($floodQuote->flood_quote_id);
+        $hasOpprc = $this->getMetaValue($floodQuoteMetas, "hasOpprc");
+        $flood_foundation = $this->getMetaValue($floodQuoteMetas, "flood_foundation", "0");
+        $isEnclosureFinished = $this->getMetaValue($floodQuoteMetas, "isEnclosureFinished", "0");
+        $basement_finished = $this->getMetaValue($floodQuoteMetas, "basement_finished", "0");
+        $garage_attached = $this->getMetaValue($floodQuoteMetas, "garage_attached", "0");
+        $lfe = (float)$this->getMetaValue($floodQuoteMetas, "lfe", 0);
+        $hag = (float)$this->getMetaValue($floodQuoteMetas, "hag", 0);
+        $over_water = $this->getMetaValue($floodQuoteMetas, "over_water", "0");
+        $endorseDate = $this->getMetaValue($floodQuoteMetas, "endorseDate");
+        $prevHiscoxBoundID = $this->getMetaValue($floodQuoteMetas, "prevHiscoxBoundID");
+        $isPerson = $floodQuote->entity_type == 0;
+        $commercial_occupancy = $this->getMetaValue($floodQuoteMetas, "commercial_occupancy", "0");
+        $isPrimaryResidence = $this->getMetaValue($floodQuoteMetas, "isPrimaryResidence", "0");
+        $other_occupancy = $this->getMetaValue($floodQuoteMetas, "other_occupancy", "0");
+        $occupancyType = HiscoxApiV2::getHiscoxOccupancyType($isPerson, $commercial_occupancy, $isPrimaryResidence, $other_occupancy);
+        $construction_type = $this->getMetaValue($floodQuoteMetas, "construction_type", "0");
+        $buildingReplacementCost = (int)$this->getMetaValue($floodQuoteMetas, "buildingReplacementCost", 0);
+        $contentReplacementCost = (int)$this->getMetaValue($floodQuoteMetas, "contentReplacementCost", 0);
+        $covABuilding = (int)$this->getMetaValue($floodQuoteMetas, "covABuilding", 0);
+        $covCContent = (int)$this->getMetaValue($floodQuoteMetas, "covCContent", 0);
+        $covDLoss = (int)$this->getMetaValue($floodQuoteMetas, "covDLoss", 0);
+        $isRented = $this->getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
+        $yearLastLoss = $this->getMetaValue($floodQuoteMetas, "yearLastLoss");
+        $lastLossValue = $this->getMetaValue($floodQuoteMetas, "lastLossValue", 0);
+
+        $construction = $this->constructionService->findOne($construction_type);
+        $constructionType = ($construction) ? $construction->hiscox_name : "";
+
+        $payload = [
+            "contentsCostValueType" => $hasOpprc ? "ReplacementCostValue" : "ActualCashValue",
+            "foundation" => [
+                "foundationType" => HiscoxApiV2::getHiscoxFoundationType($flood_foundation),
+                "additionalFoundationType" => HiscoxApiV2::getHiscoxAdditionalFoundationType($isEnclosureFinished, $flood_foundation),
+            ],
+            "basementType" => HiscoxApiV2::getHiscoxBasementType($basement_finished),
+            "attachedGarageType" => HiscoxApiV2::getHiscoxAttachedGarageType($garage_attached),
+            "yearBuilt" => (int)$this->getMetaValue($floodQuoteMetas, "yearBuilt", 0),
+            "squareFootage" => (int)$this->getMetaValue($floodQuoteMetas, "squareFeet", 0),
+            "numberOfStories" => (int)$this->getMetaValue($floodQuoteMetas, "numOfFloors", 0),
+            "elevationHeight" => $lfe - $hag,
+            "buildingOverWaterType" => HiscoxApiV2::getHiscoxBuildingOverWaterType($over_water),
+            "hiscoxId" => $prevHiscoxBoundID,
+        ];
+
+        if ($isPerson) {
+            $payload["residential"] = [
+                "occupancyType" => $occupancyType,
+                "constructionType" => ($construction) ? $construction->hiscox_name : "",
+                "replacementCostValues" => ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost],
+                "limits" => [
+                    ["building" => $covABuilding, "contents" => $covCContent],
+                    ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost]
+                ],
+            ];
+        } else {
+            $payload["commercial"] = [
+                "occupancyType" => $occupancyType,
+                "constructionType" => ($construction) ? $construction->hiscox_name : ""
+            ];
+
+            if ($isRented) {
+                $payload["commercial"]["tenanted"] = [
+                    "replacementCostValues" => ["improvementsAndBetterments" => $buildingReplacementCost, "contents" => $contentReplacementCost],
+                    "limits" => [
+                        ["improvementsAndBetterments" => $covABuilding, "contents" => $covCContent],
+                        ["improvementsAndBetterments" => $buildingReplacementCost, "contents" => $contentReplacementCost]
+                    ],
+                    "businessIncomeAndExtraExpenseAnnualValue" => $covDLoss
+                ];
+            } else {
+                $payload["commercial"]["owned"] = [
+                    "replacementCostValues" => ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost],
+                    "limits" => [
+                        ["building" =>  $covABuilding, "contents" => $covCContent],
+                        ["building" => $buildingReplacementCost, "contents" => $contentReplacementCost]
+                    ],
+                    "businessIncomeAndExtraExpenseAnnualValue" => $covDLoss
+                ];
+            }
+        }
+
+        if ($yearLastLoss != "") {
+            $requestData["priorLosses"] = [
+                ["year" => (int)$yearLastLoss, "value" => (float)$lastLossValue]
+            ];
+        }
+
+        $hiscox = $this->hixcoxAPI->renew($payload);
+        $hiscoxResponse = $hiscox['response'];
+
+        $errors = $hiscoxResponse->messages->errors;
+        $validation = $hiscoxResponse->messages->validation;
+
+        if (count($errors) && count($validation)) {
+            $text = "";
+
+            if (count($errors))
+                $text .= "Errors: " . implode($errors);
+
+            if (count($validation))
+                $text .= "Validations: " . implode($validation);
+
+            throw new Exception($text);
+        } else {
+            $hiscoxID = $hiscoxResponse->response->hiscoxId;
+            $quoteRequestDate = $hiscoxResponse->response->quoteRequestDate;
+            $quoteExpiryDate = $hiscoxResponse->response->quoteExpiryDate;
+            $hiscoxString = json_encode($hiscoxResponse, JSON_PRETTY_PRINT);
+
+            $this->hiscoxQuoteService->addHiscoxId($floodQuote->flood_quote_id, $hiscoxID);
+            $this->upsertHiscoxQuote([
+                "hiscoxID" => $hiscoxID,
+                "flood_quote_id" => $floodQuote->flood_quote_id,
+                "client_id" => $floodQuote->client_id,
+                "quoteExpirationDate" => $quoteExpiryDate,
+                "quoteRequestedDate" => $quoteRequestDate,
+                "selectedPolicyType" => -1,
+                "selectedDeductible" => -1,
+                "selectedPolicyIndex" => -1,
+                "rawQuotes" => $hiscoxString,
+            ]);
+        }
+
+        return true;
+    }
+
     private function upsertHiscoxQuote(array $message)
     {
         $upsertMessage = new \stdClass();
@@ -886,6 +1014,8 @@ class FloodQuote extends BaseController
         $data["boundStampFee"] = (float)$this->getMetaValue($floodQuoteMetas, "boundStampFee", 0);
         $data["boundTotalCost"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTotalCost", 0);
         $data["policyType"] = $this->getMetaValue($floodQuoteMetas, "policyType");
+        $data["bindAuthorityText"] = $bindAuthorityText;
+        $data["isBounded"] = (bool)$this->getMetaValue($floodQuoteMetas, "isBounded", 0);
 
         return view('FloodQuote/rate_detail_view', ['data' => $data]);
     }
@@ -1101,6 +1231,14 @@ class FloodQuote extends BaseController
                             $this->endorseHiscoxQuote($newFloodQuote);
                         } catch (Exception $e) {
                             return redirect()->to('/flood_quote/initial_details/' . $newFloodQuote->flood_quote_id)->with('error', 'Flood Quote was successfully added but was not endorsed to Hiscox');
+                        }
+                        break;
+
+                    case "renew":
+                        try {
+                            $this->renewHiscoxQuote($newFloodQuote);
+                        } catch (Exception $e) {
+                            return redirect()->to('/flood_quote/initial_details/' . $newFloodQuote->flood_quote_id)->with('error', 'Flood Quote was successfully added but was not renewed to Hiscox');
                         }
                         break;
 
