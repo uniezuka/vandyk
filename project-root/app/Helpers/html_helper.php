@@ -329,7 +329,7 @@ function deductibleSelect($name = "", $selectedItem = "")
         $str .= '<option';
         $str .= ' value="' . $item->deductible_id . '"';
         $str .= $selectedItem == $item->deductible_id ? ' selected' : '';
-        $str .= '>' . $item->value . '</option>';
+        $str .= '>' . $item->name . '</option>';
     }
 
     $str .= '</select>';

@@ -53,6 +53,7 @@
                                         <li><a class="dropdown-item" href="<?= base_url('/fire_codes'); ?>">Fire Codes</a></li>
                                         <li><a class="dropdown-item" href="<?= base_url('/coverages'); ?>">Coverages</a></li>
                                         <li><a class="dropdown-item" href="<?= base_url('/insurers'); ?>">Insurers</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/deductibles'); ?>">Deductibles</a></li>
                                     </ul>
                                 </li>
 

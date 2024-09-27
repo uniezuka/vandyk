@@ -105,6 +105,11 @@ $routes->match(['get', 'post'], 'fire_code/create', 'FireCodes::create', ['filte
 $routes->get('/fire_code/update/(:num)', 'FireCodes::update/$1', ['filter' => 'authGuard']);
 $routes->post('/fire_code/update/(:num)', 'FireCodes::update/$1', ['filter' => 'authGuard']);
 
+$routes->get('/deductibles', 'Deductibles::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'deductible/create', 'Deductibles::create', ['filter' => 'authGuard']);
+$routes->get('/deductible/update/(:num)', 'Deductibles::update/$1', ['filter' => 'authGuard']);
+$routes->post('/deductible/update/(:num)', 'Deductibles::update/$1', ['filter' => 'authGuard']);
+
 $routes->get('/coverages', 'Coverages::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'coverage/create', 'Coverages::create', ['filter' => 'authGuard']);
 $routes->get('/coverage/update/(:num)', 'Coverages::update/$1', ['filter' => 'authGuard']);
