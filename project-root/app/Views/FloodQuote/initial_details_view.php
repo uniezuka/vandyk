@@ -57,7 +57,7 @@ $deductibles = $calculations->getDeductibles();
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5">Lowest Living Floor:</div>
-                    <div class="col-sm-7"><?= $calculations->getMetaValue("lfe") ?></div>
+                    <div class="col-sm-7"><?= $calculations->getMetaValue("flfe") ?></div>
                 </div>
 
                 <div class="row mb-3">
@@ -72,12 +72,12 @@ $deductibles = $calculations->getDeductibles();
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5">Building Diagram #:</div>
-                    <div class="col-sm-7"><?= $calculations->getMetaValue("diagram_num") ?></div>
+                    <div class="col-sm-7"><?= $calculations->getMetaValue("diagramNumber") ?></div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5">Mid Level Entry Elev:</div>
-                    <div class="col-sm-7"><?= $calculations->getMetaValue("mle") ?></div>
+                    <div class="col-sm-7"><?= $calculations->getMetaValue("mle", "N/A") ?></div>
                 </div>
             </div>
         </div>
@@ -134,7 +134,7 @@ $deductibles = $calculations->getDeductibles();
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5"><?= $calculations->getMetaValue("propertyState") ?> State Tax =</div>
-                    <div class="col-sm-7 text-end"><?= $formatter->formatCurrency($deductibles["rent_deductible"], 'USD') ?></div>
+                    <div class="col-sm-7 text-end"><?= $formatter->formatCurrency($calculations->taxAmount, 'USD') ?></div>
                 </div>
 
                 <div class="row mb-3">

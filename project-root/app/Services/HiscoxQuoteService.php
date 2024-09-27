@@ -107,4 +107,75 @@ class HiscoxQuoteService extends BaseService
         $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxIssuedDate", $hiscox->hiscoxIssuedDate);
         $this->updateFloodQuoteMeta($flood_quote_id, "hiscoxBoundReference", $hiscox->boundReference);
     }
+
+    public function reinstate($flood_quote_id, $reinstatementDate, $hiscox_id) 
+    {
+        $builder = $this->db->table('flood_quote');
+        $query = $builder->getWhere(['flood_quote_id' => $flood_quote_id]);
+        $row = $query->getRowArray();
+
+        $mortgages = $this->getMortgages($flood_quote_id);
+
+        if ($row) {
+            unset($row['flood_quote_id']);
+            $builder->insert($row);
+            $newId = $this->db->insertID();
+
+            $floodQuoteMetas = (array) $this->getFloodQuoteMetas($flood_quote_id);
+            $floodQuoteMetas['policyType'] = "REI";
+            $floodQuoteMetas['hiscoxID'] = $hiscox_id;
+            $floodQuoteMetas['hiscoxReinstatementDate'] = $reinstatementDate;
+            
+            $this->upsertMetaValues($floodQuoteMetas, $newId);
+
+            foreach ($mortgages as $mortgage) {
+                $mortgageData = (array) $mortgage;
+                unset($mortgageData['flood_quote_mortgage_id']);
+                $mortgageData['flood_quote_id'] = $newId;
+
+                $mortgageBuilder = $this->db->table('flood_quote_mortgage');
+                $mortgageBuilder->insert($mortgageData);
+            }
+        } else {
+            throw new Exception("Unable to reinstate quote!");
+        }
+    }
+
+    private function getMortgages($flood_quote_id)
+    {
+        $builder = $this->db->table('flood_quote_mortgage');
+
+        $builder->where('flood_quote_id', $flood_quote_id);
+
+        $query = $builder->get();
+
+        return $query->getResult();
+    }
+
+    private function getFloodQuoteMetas($flood_quote_id)
+    {
+        $builder = $this->db->table('flood_quote_meta');
+
+        $builder->where('flood_quote_id', $flood_quote_id);
+
+        $query = $builder->get();
+
+        $resultArray = [];
+
+        foreach ($query->getResult() as $row) {
+            $resultArray[$row->meta_key] = $row->meta_value;
+        }
+
+        return $resultArray;
+    }
+
+    private function upsertMetaValues($message, $flood_quote_id)
+    {
+        foreach ($message as $key => $value) {
+            $sql = "INSERT INTO fq_flood_quote_meta (flood_quote_id, meta_key, meta_value) 
+                    VALUES (?, ?, ?)
+                    ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)";
+            $this->db->query($sql, [$flood_quote_id, $key, $value]);
+        }
+    }
 }

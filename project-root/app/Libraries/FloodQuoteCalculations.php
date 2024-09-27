@@ -6,6 +6,7 @@ use App\Services\StateRateService;
 use App\Services\FloodARateService;
 use App\Services\FloodVRateService;
 use App\Services\FloodBCXRateService;
+use App\Services\FloodZoneService;
 
 class FloodQuoteCalculations
 {
@@ -16,6 +17,7 @@ class FloodQuoteCalculations
     protected $floodBCXRateService;
     protected $floodVRateService;
     protected $stateRate;
+    protected $floodZoneService;
 
     public $baseCoverages;
     public $totalCoverages;
@@ -72,6 +74,7 @@ class FloodQuoteCalculations
         $this->floodARateService = new FloodARateService();
         $this->floodVRateService = new FloodVRateService();
         $this->floodBCXRateService = new FloodBCXRateService();
+        $this->floodZoneService = new FloodZoneService();
         $this->bindAuthorityService = service('bindAuthorityService');
 
         $this->setBaseValues();
@@ -82,11 +85,13 @@ class FloodQuoteCalculations
         $covABuilding = (int)$this->getMetaValue("covABuilding", 0);
         $covCContent = (int)$this->getMetaValue("covCContent", 0);
         $elevationDifference = (float)$this->getMetaValue("elevationDifference", 0);
-        $floodZone = $this->getMetaValue("floodZone");
+        $flood_zone = $this->getMetaValue("flood_zone");
         $baseRateAdjustment = (float)$this->getMetaValue("baseRateAdjustment", 0);
         $covDLossUse = (float)$this->getMetaValue("covDLossUse", 0);
         $has10PercentAdjustment = (bool)$this->getMetaValue("has10PercentAdjustment", false);
         $tenPercentAdjustment = 0;
+
+        $floodZone = $this->floodZoneService->findOne($flood_zone);
 
         $state = $this->getMetaValue("propertyState", "NJ");
         $stateRate = $this->stateRateService->getByState($state);
@@ -155,23 +160,25 @@ class FloodQuoteCalculations
         }
 
         if ($covABuilding > 0 && $covCContent == 0) {
-            $this->baseFieldPrefix = "Dwl";
+            $this->baseFieldPrefix = "dwl";
         } else if ($covABuilding > 0 && $covCContent > 0) {
-            $this->baseFieldPrefix = "Both";
+            $this->baseFieldPrefix = "both";
         } else if ($covABuilding == 0 && $covCContent > 0) {
-            $this->baseFieldPrefix = "Cont";
+            $this->baseFieldPrefix = "cont";
         } else {
-            $this->baseFieldPrefix = "Dwl";
+            $this->baseFieldPrefix = "dwl";
         }
 
         $this->baseField = $this->baseFieldPrefix . $this->baseFieldEnum;
 
-        if (strpos($floodZone, "A") !== false) {
+        if (strpos($floodZone->name, "A") !== false) {
             $this->zoneRate = "A";
-            $this->baseRate = $floodARate[$this->baseField];
-        } else if (strpos($floodZone, "V") !== false) {
+            $rates = (array) $floodARate;
+            $this->baseRate = $rates[$this->baseField];
+        } else if (strpos($floodZone->name, "V") !== false) {
             $this->zoneRate = "V";
-            $this->baseRate = $floodVRate[$this->baseField];
+            $rates = (array) $floodVRate;
+            $this->baseRate = $rates[$this->baseField];
         } else {
             $this->zoneRate = "BCX";
             $this->baseRate = $floodBCXRate->rate;
@@ -307,11 +314,11 @@ class FloodQuoteCalculations
 
     private function calculateDwellingReplacementCost($stateRate)
     {
-        $has_drc = (int)$this->getMetaValue("has_drc", 0);
+        $hasDrc = (int)$this->getMetaValue("hasDrc", 0);
         $isPrimaryResidence = (int)$this->getMetaValue("isPrimaryResidence", 0);
         $isCondo = (int)$this->getMetaValue("isCondo", 0);
 
-        if ($has_drc && !$isPrimaryResidence && !$isCondo) {
+        if ($hasDrc && !$isPrimaryResidence && !$isCondo) {
             $this->dwellingReplacementCost = $this->basePremium * $stateRate->dwell_repl_cost_rate;
             $this->dwellingReplacementCost = ceil($this->dwellingReplacementCost);
             $this->rentDwellingReplacementCost = $this->lossRentPremium * $stateRate->dwell_repl_cost_rate;
@@ -321,9 +328,9 @@ class FloodQuoteCalculations
 
     private function calculatePersonalPropertyReplacementCost($stateRate)
     {
-        $has_opprc = (int)$this->getMetaValue("has_opprc", 0);
+        $hasOpprc = (int)$this->getMetaValue("hasOpprc", 0);
 
-        if ($has_opprc) {
+        if ($hasOpprc) {
             $this->personalPropertyReplacementCost = $this->basePremium * $stateRate->pers_prop_repl_rate;
             $this->personalPropertyReplacementCost = ceil($this->personalPropertyReplacementCost);
             $this->rentPropertyReplacementCost = $this->lossRentPremium * $stateRate->pers_prop_repl_rate;
@@ -459,8 +466,8 @@ class FloodQuoteCalculations
 
     private function getRateIds()
     {
-        $flood_foundation_id = (int)$this->getMetaValue("flood_foundation_id", 0);
-        $numberOfFloors = (int)$this->getMetaValue("numberOfFloors", 0);
+        $flood_foundation_id = (int)$this->getMetaValue("flood_foundation", 0);
+        $numOfFloors = (int)$this->getMetaValue("numOfFloors", 0);
 
         $rateIds = [
             'arate' => 0,
@@ -488,17 +495,17 @@ class FloodQuoteCalculations
             $rateIds['arate'] = 4;
         }
 
-        if ($numberOfFloors == 1 && $flood_foundation_id == 1) {
+        if ($numOfFloors == 1 && $flood_foundation_id == 1) {
             $rateIds['bcxrate'] = 4;
-        } else if ($numberOfFloors == 2 && $flood_foundation_id == 1) {
+        } else if ($numOfFloors == 2 && $flood_foundation_id == 1) {
             $rateIds['bcxrate'] = 5;
-        } else if ($numberOfFloors >= 3 && $flood_foundation_id == 1) {
+        } else if ($numOfFloors >= 3 && $flood_foundation_id == 1) {
             $rateIds['bcxrate'] = 6;
-        } else if ($numberOfFloors == 1 && $flood_foundation_id >= 2) {
+        } else if ($numOfFloors == 1 && $flood_foundation_id >= 2) {
             $rateIds['bcxrate'] = 4;
-        } else if ($numberOfFloors == 2 && $flood_foundation_id >= 2) {
+        } else if ($numOfFloors == 2 && $flood_foundation_id >= 2) {
             $rateIds['bcxrate'] = 5;
-        } else if ($numberOfFloors >= 3 && $flood_foundation_id >= 2) {
+        } else if ($numOfFloors >= 3 && $flood_foundation_id >= 2) {
             $rateIds['bcxrate'] = 6;
         } else {
             $rateIds['bcxrate'] = 6;
@@ -511,7 +518,10 @@ class FloodQuoteCalculations
     {
         foreach ($this->floodQuoteMetas as $meta) {
             if ($meta->meta_key === $meta_key) {
-                return $meta->meta_value;
+                if ($meta->meta_value == "" && $default != "")
+                    return $default;
+                else
+                    return $meta->meta_value;
             }
         }
         return $default;

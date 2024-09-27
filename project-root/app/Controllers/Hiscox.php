@@ -1350,9 +1350,21 @@ class Hiscox extends BaseController
         $hiscox = $this->hixcoxAPI->previewCancel($payload);
         $hiscoxResponse = $hiscox['response'];
 
-        $validations = $hiscoxResponse->messages->validation;
+        $validation = $hiscoxResponse->messages->validation;
         $underwriterDecisions = $hiscoxResponse->messages->underwriterDecisions;
         $errors = $hiscoxResponse->messages->errors;
+
+        if (count($errors) || count($validation)) {
+            $text = "";
+
+            if (count($errors))
+                $text .= "Errors: " . implode("; ", $errors);
+
+            if (count($validation))
+                $text .= "Validations: " . implode("; ", $validation);
+
+            session()->setFlashdata('error', $text);
+        }
 
         $cancellationDate = isset($hiscoxResponse->response) ? 
             $hiscoxResponse->response->cancellationDate : "";
@@ -1364,13 +1376,56 @@ class Hiscox extends BaseController
 
         $this->floodQuoteService->cancelQuoteWithHiscox($hiscox, $id);
 
-        $data['validations'] = $validations;
-        $data['underwriterDecisions'] = $underwriterDecisions;
-        $data['errors'] = $errors;
         $data['prevHiscoxBoundID'] = $prevHiscoxBoundID;
         $data['cancellationDate'] = $cancellationDate;
         $data['returnPremium'] = $returnPremium;
 
         return view('Hiscox/cancel_preview_view', ['data' => $data]);
+    }
+
+    public function reinstate($id = null)
+    {
+        helper('form');
+        $data['title'] = "Reinstate Hiscox Quote";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+        $data['hiscoxFloodQuote'] = null;
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($floodQuote->flood_quote_id);
+        $hiscoxID = $this->getMetaValue($floodQuoteMetas, "hiscoxID");
+        $prevHiscoxBoundID = $this->getMetaValue($floodQuoteMetas, "prevHiscoxBoundID");
+
+        $payload = [
+            "hiscoxId" => $prevHiscoxBoundID,
+        ];
+
+        $hiscox = $this->hixcoxAPI->reinstate($payload);
+        $hiscoxResponse = $hiscox['response'];
+
+        $validation = $hiscoxResponse->messages->validation;
+        $underwriterDecisions = $hiscoxResponse->messages->underwriterDecisions;
+        $errors = $hiscoxResponse->messages->errors;
+
+        if (count($errors) || count($validation)) {
+            $text = "";
+
+            if (count($errors))
+                $text .= "Errors: " . implode("; ", $errors);
+
+            if (count($validation))
+                $text .= "Validations: " . implode("; ", $validation);
+
+            session()->setFlashdata('error', $text);
+        } else {
+            $this->hiscoxQuoteService->reinstate($floodQuote->flood_quote_id, $hiscoxResponse->response->reinstatementDate, $prevHiscoxBoundID) ;
+
+            return redirect()->to('/client/details/' . $floodQuote->client_id)->with('message', 'Flood Quote was successfully reinstated.');
+        }
+
+        return view('Hiscox/reinstate_view', ['data' => $data]);
     }
 }

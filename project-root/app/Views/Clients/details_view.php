@@ -229,7 +229,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                                 echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Start Endorsement Quote</a></p>";
                                             } else if ($policyType == "CAN" && $prevHiscoxBoundID != "") {
                                                 if ($hiscoxID == "" && $boundHiscoxID != "") {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Reinstate</a></p>";
+                                                    echo "<p><a href=\"" . base_url('/flood_quote/hiscox/reinstate/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Reinstate</a></p>";
                                                 } else {
                                                     echo "<p><a href=\"" . base_url('/flood_quote/hiscox/cancel_preview/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Preview/Calculate Hiscox Cancellation</a></p>";
                                                 }
