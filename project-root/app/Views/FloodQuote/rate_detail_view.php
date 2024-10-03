@@ -22,8 +22,7 @@ $isProperlyVented = ($flood_foundation == 1 || $flood_foundation == 2 || $flood_
 
 $canRenew = true;
 
-if ($policyType == "CAN")
-{
+if ($policyType == "CAN") {
     if (strpos($bindAuthorityText, '250') !== false && $isBounded) {
         $canRenew = false;
     }
@@ -147,6 +146,33 @@ if ($policyType == "CAN")
                     <div class="col-sm-7 text-end"><strong><?= $formatter->formatCurrency($deductibles["rent_deductible"], 'USD') ?></strong></div>
                 </div>
             </div>
+
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="d-flex col-sm-5">Total Base Premium =</div>
+                    <div class="col-sm-7 text-end"><?= $formatter->formatCurrency($boundBasePremium, 'USD') ?></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="d-flex col-sm-5"><?= $calculations->getMetaValue("propertyState") ?> State Tax =</div>
+                    <div class="col-sm-7 text-end"><?= $formatter->formatCurrency($boundTaxAmount, 'USD') ?></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="d-flex col-sm-5">Policy Fee =</div>
+                    <div class="col-sm-7 text-end"><?= $formatter->formatCurrency($boundPolicyFee, 'USD') ?></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="d-flex col-sm-5">Stamping Fee =</div>
+                    <div class="col-sm-7 text-end"><?= $formatter->formatCurrency($boundStampFee, 'USD') ?></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="d-flex col-sm-5"><strong>Total Premium =</strong></div>
+                    <div class="col-sm-7 text-end"><strong><?= $formatter->formatCurrency($calculations->finalCost, 'USD') ?></strong></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -157,7 +183,7 @@ if ($policyType == "CAN")
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5 justify-content-end"><strong>Base Rate:</strong></div>
-                    <div class="col-sm-7"><strong><?= $formatter->formatCurrency($boundBaseRate, 'USD') ?></strong></div>
+                    <div class="col-sm-7"><strong><?= $boundBaseRate ?></strong></div>
                 </div>
 
                 <div class="row mb-3">
@@ -202,7 +228,7 @@ if ($policyType == "CAN")
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5 justify-content-end">Dwelling Replacement Cost:</div>
-                    <div class="col-sm-7"><strong><?= $formatter->formatCurrency($boundDwellSurcharge, 'USD') ?></strong></div>
+                    <div class="col-sm-7"><strong><?= $formatter->formatCurrency($boundDwellingSurcharge, 'USD') ?></strong></div>
                 </div>
 
                 <div class="row mb-3">

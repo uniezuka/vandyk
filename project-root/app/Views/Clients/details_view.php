@@ -306,17 +306,17 @@ function getMetaValue($metas, $meta_key, $default = '')
                                         echo "<p><a href=\"" . base_url('/flood_quote/hiscox/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Cancel Hiscox Policy</a></p>";
                                     } else {
                                         if (strpos($bindAuthorityText, "70") !== false) {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Chubb Policy</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Chubb Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "260") !== false) {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind QBE Policy</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind QBE Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "230") !== false) {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Brit Policy</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Brit Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "240") !== false) {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Canop Policy</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Canop Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "250") !== false && $hiscoxID != "") {
                                             echo "<p><a href=\"" . base_url('/flood_quote/hiscox/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Hiscox Policy</a></p>";
                                         } else if ($bindAuthorityText == "") {
-                                            echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Chubb Policy</a></p>";
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Chubb Policy</a></p>";
                                         }
                                     }
                                     ?>

@@ -322,7 +322,7 @@
             <label class="form-check-label">Yes</label>
         </div>
         <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" value="0" checked name="hasDrc" <?= set_checkbox('hasDrc', '0', getMetaValue($floodQuoteMetas, "hasDrc", "0") == "0"); ?> />
+            <input class="form-check-input" type="radio" value="0" name="hasDrc" <?= set_checkbox('hasDrc', '0', getMetaValue($floodQuoteMetas, "hasDrc", "0") == "0"); ?> />
             <label class="form-check-label">No</label>
         </div>
     </div>

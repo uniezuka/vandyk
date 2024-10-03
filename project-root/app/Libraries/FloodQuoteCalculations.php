@@ -61,6 +61,8 @@ class FloodQuoteCalculations
     public $rentDwellingReplacementCost;
     public $stampFee;
     public $finalCost;
+    public $lossUseAdjustmentRate;
+    public $additionalPremium;
 
     protected $bindAuthorityService;
 
@@ -140,6 +142,8 @@ class FloodQuoteCalculations
         $this->rentDwellingReplacementCost = 0;
         $this->stampFee = 0;
         $this->finalCost = 0;
+        $this->lossUseAdjustmentRate = 0;
+        $this->additionalPremium = 0;
 
         $bind_authority = $this->getMetaValue('bind_authority');
         $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
@@ -196,21 +200,20 @@ class FloodQuoteCalculations
             $this->baseRate = $this->hiscoxQuotedRate;
         } else {
             $this->basePremium = $this->baseCoverages * $this->baseRate / 100;
+            $this->basePremium = ceil($this->basePremium);
         }
 
         if ($has10PercentAdjustment) {
             $tenPercentAdjustment = $this->basePremium * 0.1;
         }
 
-        $lossUseAdjustmentRate = 0;
-
         if ($stateRate) {
             if ($this->baseRate < 0.5) {
-                $lossUseAdjustmentRate = $stateRate->loss_rent_over_5k_rate;
+                $this->lossUseAdjustmentRate = $stateRate->loss_rent_over_5k_rate;
             } else if ($this->baseRate >= 0.5) {
-                $lossUseAdjustmentRate = $this->baseRate;
+                $this->lossUseAdjustmentRate = $this->baseRate;
             } else {
-                $lossUseAdjustmentRate = 0.01;
+                $this->lossUseAdjustmentRate = 0.01;
             }
         }
 
@@ -225,7 +228,7 @@ class FloodQuoteCalculations
             }
         } else if ($covDLossUse > 5000 && $covDLossUse <= 20000) {
             $this->lossUseCoverage = $covDLossUse;
-            $this->lossRentPremium = $lossUseAdjustmentRate * $covDLossUse / 100;
+            $this->lossRentPremium = $this->lossUseAdjustmentRate * $covDLossUse / 100;
             $this->lossRentPremium = ceil($this->lossRentPremium);
 
             if ($this->lossRentPremium < 100) {
@@ -233,7 +236,7 @@ class FloodQuoteCalculations
                 $this->lossUseCoverage = 20000;
             }
         } else if ($covDLossUse > 20000 && $covDLossUse <= 50000) {
-            $this->lossRentPremium = $lossUseAdjustmentRate * $covDLossUse / 100;
+            $this->lossRentPremium = $this->lossUseAdjustmentRate * $covDLossUse / 100;
             $this->lossUseCoverage = $covDLossUse;
             $this->lossRentPremium = ceil($this->lossRentPremium);
         } else {
@@ -262,6 +265,10 @@ class FloodQuoteCalculations
             if (strpos($this->bindingAuthority, "250") !== false) {
                 $this->finalPremium = ($this->hiscoxPremiumOverride > 0) ?
                     $this->hiscoxPremiumOverride : $this->hiscoxQuotedPremium + $this->renewalAdditionalPremium;
+
+                if ($this->policyType == 'END') {
+                    $this->policyFee = 0;
+                }
             } else {
                 $additionalPremium = (float)$this->getMetaValue("additionalPremium", 0);
 
@@ -269,6 +276,7 @@ class FloodQuoteCalculations
                     $this->finalPremium = $this->fullPremiumOverride;
                 } else if ($this->totalRenewalPremium > 0) {
                     $computedAdditionalPremium = $this->totalRenewalPremium * $additionalPremium * 0.01;
+                    $this->additionalPremium = $computedAdditionalPremium;
                     $this->finalPremium = $this->totalRenewalPremium + $computedAdditionalPremium;
                 } else {
                     $totalCosts = $this->basePremium
@@ -284,16 +292,13 @@ class FloodQuoteCalculations
                         + $this->lossRentPremium;
 
                     $computedAdditionalPremium = $totalCosts * $additionalPremium * 0.01;
+                    $this->additionalPremium = $computedAdditionalPremium;
 
                     $this->finalPremium = $totalCosts + $computedAdditionalPremium + $this->renewalAdditionalPremium;
                 }
             }
 
             $this->taxAmount = $this->finalPremium * $this->taxRate;
-        }
-
-        if ($this->policyType == 'END') {
-            $this->policyFee = 0;
         }
 
         if ($stateRate) {

@@ -22,6 +22,8 @@ class FloodQuote extends BaseController
     protected $hiscoxQuoteService;
     protected $constructionService;
     protected $hixcoxAPI;
+    protected $floodZoneService;
+    protected $floodOccupancyService;
 
     public function initController(
         RequestInterface $request,
@@ -40,6 +42,8 @@ class FloodQuote extends BaseController
         $this->bindAuthorityService = service('bindAuthorityService');
         $this->hiscoxQuoteService = service('hiscoxQuoteService');
         $this->constructionService = service('constructionService');
+        $this->floodZoneService = service('floodZoneService');
+        $this->floodOccupancyService = service('floodOccupancyService');
         $this->hixcoxAPI = new HiscoxApiV2();
     }
 
@@ -247,7 +251,8 @@ class FloodQuote extends BaseController
         return true;
     }
 
-    private function renewHiscoxQuote($floodQuote) {
+    private function renewHiscoxQuote($floodQuote)
+    {
         $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($floodQuote->flood_quote_id);
         $hasOpprc = $this->getMetaValue($floodQuoteMetas, "hasOpprc");
         $flood_foundation = $this->getMetaValue($floodQuoteMetas, "flood_foundation", "0");
@@ -985,7 +990,7 @@ class FloodQuote extends BaseController
         $boundMidLevelSurcharge = 0;
         $boundReplacementCostSurcharge = 0;
         $boundPersonalPropertySurcharge = 0;
-        $boundDwellSurcharge = 0;
+        $boundDwellingSurcharge = 0;
 
         if (strpos($bindAuthorityText, '250') === false) {
             $boundDeductibleSaving = (float)$this->getMetaValue($floodQuoteMetas, "boundDeductibleSaving", 0);
@@ -995,11 +1000,11 @@ class FloodQuote extends BaseController
             $boundMidLevelSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundMidLevelSurcharge", 0);
             $boundReplacementCostSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundReplacementCostSurcharge", 0);
             $boundPersonalPropertySurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundPersonalPropertySurcharge", 0);
-            $boundDwellSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundDwellSurcharge", 0);
+            $boundDwellingSurcharge = (float)$this->getMetaValue($floodQuoteMetas, "boundDwellingSurcharge", 0);
         }
 
         $data["boundBaseRate"] = (float)$this->getMetaValue($floodQuoteMetas, "boundBaseRate", 0);
-        $data["boundBasePremium"] = (float)$this->getMetaValue($floodQuoteMetas, "boundBaseRate", 0);
+        $data["boundBasePremium"] = (float)$this->getMetaValue($floodQuoteMetas, "boundBasePremium", 0);
         $data["boundDeductibleSaving"] = $boundDeductibleSaving;
         $data["boundCoverageDiscount"] = $boundCoverageDiscount;
         $data["boundPrimaryDiscount"] = $boundPrimaryDiscount;
@@ -1007,7 +1012,7 @@ class FloodQuote extends BaseController
         $data["boundMidLevelSurcharge"] = $boundMidLevelSurcharge;
         $data["boundReplacementCostSurcharge"] = $boundReplacementCostSurcharge;
         $data["boundPersonalPropertySurcharge"] = $boundPersonalPropertySurcharge;
-        $data["boundDwellSurcharge"] = $boundDwellSurcharge;
+        $data["boundDwellingSurcharge"] = $boundDwellingSurcharge;
         $data["boundFinalPremium"] = (float)$this->getMetaValue($floodQuoteMetas, "boundFinalPremium", 0);
         $data["boundTaxAmount"] = (float)$this->getMetaValue($floodQuoteMetas, "boundTaxAmount", 0);
         $data["boundPolicyFee"] = (float)$this->getMetaValue($floodQuoteMetas, "boundPolicyFee", 0);
@@ -1255,6 +1260,117 @@ class FloodQuote extends BaseController
             return redirect()->to('/flood_quote/initial_details/' . $newFloodQuote->flood_quote_id)->with('message', 'Flood Quote was successfully added.');
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
+    }
+
+    public function bind($id = null)
+    {
+        helper('form');
+        $data['title'] = "Flood Quote Binding Process";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+        if (strpos($bindAuthorityText, "250") === true) {
+            return redirect()->to('/flood_quotes')->with('error', "Invalid Binding Authority");
+        }
+
+        $flood_zone = (int)$this->getMetaValue($floodQuoteMetas, "flood_zone", 0);
+        $floodZone = $this->floodZoneService->findOne($flood_zone);
+
+        $flood_occupancy = (int)$this->getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
+        $floodOccupancy = $this->floodOccupancyService->findOne($flood_occupancy);
+        $mle = (int)$this->getMetaValue($floodQuoteMetas, "mle", 0);
+
+        $data["floodZone"] = ($floodZone) ? $floodZone->name : "";
+        $data["bfe"] = $this->getMetaValue($floodQuoteMetas, "bfe");
+        $data["lfe"] = $this->getMetaValue($floodQuoteMetas, "lfe");
+        $data["floodOccupancy"] = ($floodOccupancy) ? $floodOccupancy->name : "N/A";
+        $data["diagramNumber"] = $this->getMetaValue($floodQuoteMetas, "diagramNumber");
+        $data["mle"] = ($mle) ? $mle : "N/A";
+
+        $data["bindAuthority"] = $bindAuthority->name;
+        $data["policyType"] = $this->getMetaValue($floodQuoteMetas, "policyType");
+        $data["propertyAddress"] = $this->getMetaValue($floodQuoteMetas, "propertyAddress");
+        $data["propertyCity"] = $this->getMetaValue($floodQuoteMetas, "propertyCity");
+        $data["propertyState"] = $this->getMetaValue($floodQuoteMetas, "propertyState");
+        $data["propertyZip"] = $this->getMetaValue($floodQuoteMetas, "propertyZip");
+        $data["proratedDue"] = $this->getMetaValue($floodQuoteMetas, "proratedDue", 0);
+        $data["previousPolicyNumber"] = $this->getMetaValue($floodQuoteMetas, "previousPolicyNumber");
+        $data["covABuilding"] = $this->getMetaValue($floodQuoteMetas, "covABuilding", 0);
+        $data["covCContent"] = $this->getMetaValue($floodQuoteMetas, "covCContent", 0);
+        $data["covDLossUse"] = $this->getMetaValue($floodQuoteMetas, "covDLossUse", 0);
+
+        $calculations = new FloodQuoteCalculations($floodQuote);
+        $data['calculations'] = $calculations;
+
+        $policyType = $data["policyType"];
+
+        switch ($policyType) {
+            case "END":
+            case "CAN":
+                $data["policyNumber"] = $this->getMetaValue($floodQuoteMetas, "policyNumber");
+                break;
+
+            case "REN":
+                $data["policyNumber"] = substr(date("Y"), -2) . "FHI00" . $id;
+                break;
+
+            default:
+                $data["policyNumber"] = substr(date("Y"), -2) . "FHI00" . $id;
+                break;
+        }
+
+        if ($this->request->is('post')) {
+            $post = $this->request->getPost();
+            $inForce = isset($post['inForce']) ? (int)$post['inForce'] : 0;
+
+            $message = new \stdClass();
+            $message->flood_quote_id = $id;
+            $message->boundBaseRate = $post['boundBaseRate'];
+            $message->boundBasePremium = $post['boundBasePremium'];
+            $message->boundLossUseRate = $post['boundLossUseRate'];
+            $message->boundLossUseCoverage = $post['boundLossUseCoverage'];
+            $message->boundLossUsePremium = $post['boundLossUsePremium'];
+            $message->boundTotalCoverages = $post['boundTotalCoverages'];
+            $message->boundDeductibleSaving = $post['boundDeductibleSaving'];
+            $message->boundCoverageDiscount = $post['boundCoverageDiscount'];
+            $message->boundPrimaryDiscount = $post['boundPrimaryDiscount'];
+            $message->boundLossSurcharge = $post['boundLossSurcharge'];
+            $message->boundMidLevelSurcharge = $post['boundMidLevelSurcharge'];
+            $message->boundReplacementCostSurcharge = $post['boundReplacementCostSurcharge'];
+            $message->boundPersonalPropertySurcharge = $post['boundPersonalPropertySurcharge'];
+            $message->boundDwellingSurcharge = $post['boundDwellingSurcharge'];
+            $message->boundFinalPremium = $post['boundFinalPremium'];
+            $message->boundTaxAmount = $post['boundTaxAmount'];
+            $message->boundPolicyFee = $post['boundPolicyFee'];
+            $message->boundTotalCost = $post['boundTotalCost'];
+            $message->proratedDue = isset($post['proratedDue']) ? $post['proratedDue'] : 0;
+            $message->policyNumber = $post['policyNumber'];
+            $message->previousPolicyNumber = $post['previousPolicyNumber'];
+            $message->inForce = ($policyType == "NEW") ? 0 : $inForce;
+            $message->boundDate = $post['boundDate'];
+            $message->isBounded = true;
+            $message->boundAdditionalPremium = $post['boundAdditionalPremium'];
+            $message->boundStampFee = $post['boundStampFee'];
+
+            try {
+                $this->floodQuoteService->bind($message);
+                return redirect()->to('/flood_quote/choose_sla/' . $id)->with('message', 'Binding was successful.');
+            } catch (Exception $e) {
+                return redirect()->back()->withInput()->with('error', $e->getMessage());
+            }
+        } else {
+            return view('FloodQuote/bind_view', ['data' => $data]);
         }
     }
 }

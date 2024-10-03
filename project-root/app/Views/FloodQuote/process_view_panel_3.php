@@ -1,5 +1,7 @@
 <?php
 $policyNumber = "";
+$previousPolicyNumber = "";
+$slaNumber = "";
 
 $effectiveDate = date('Y-m-d', strtotime($floodQuote->effectivity_date));
 $expirationDate = date('Y-m-d', strtotime($floodQuote->expiration_date));
@@ -9,11 +11,15 @@ if ($action == "cancel") {
     $buttonText = "Submit Cancellation";
 
     $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
+    $slaNumber = getMetaValue($floodQuoteMetas, "slaNumber");
+    $previousPolicyNumber = "";
 } else if ($action == "endorse") {
     $actionText = "Endorse";
     $buttonText = "Submit Endorsement";
 
     $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
+    $slaNumber = getMetaValue($floodQuoteMetas, "slaNumber");
+    $previousPolicyNumber = "";
 } else if ($action == "renew") {
     $actionText = "Renew";
     $buttonText = "Submit Renewal";
@@ -24,7 +30,9 @@ if ($action == "cancel") {
     $date = date('Y-m-d', strtotime($floodQuote->expiration_date));
     $expirationDate =  date('Y-m-d', strtotime($date . ' +1 year'));
 
-    $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
+    $policyNumber = "";
+    $slaNumber = "";
+    $previousPolicyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
 }
 ?>
 
@@ -140,14 +148,14 @@ if ($action == "cancel") {
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">SLA #:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="slaNumber" value="<?= set_value('slaNumber', getMetaValue($floodQuoteMetas, "slaNumber")) ?>" />
+        <input type="text" class="form-control" placeholder="" name="slaNumber" value="<?= set_value('slaNumber', $slaNumber) ?>" />
     </div>
 </div>
 
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-4 col-form-label">Previous Policy #:</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="previousPolicyNumber" value="<?= set_value('previousPolicyNumber', getMetaValue($floodQuoteMetas, "previousPolicyNumber")) ?>" />
+        <input type="text" class="form-control" placeholder="" name="previousPolicyNumber" value="<?= set_value('previousPolicyNumber',  $previousPolicyNumber) ?>" />
     </div>
 </div>
 

@@ -162,7 +162,7 @@ $deductibles = $calculations->getDeductibles();
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5 justify-content-end"><strong>Base Rate:</strong></div>
-                    <div class="col-sm-7"><strong><?= $formatter->formatCurrency($calculations->baseRate, 'USD') ?></strong></div>
+                    <div class="col-sm-7"><strong><?= $calculations->baseRate ?></strong></div>
                 </div>
 
                 <div class="row mb-3">

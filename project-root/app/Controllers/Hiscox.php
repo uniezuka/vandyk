@@ -1185,6 +1185,7 @@ class Hiscox extends BaseController
             $message->boundTaxAmount = $post['boundTaxAmount'];
             $message->boundPolicyFee = $post['boundPolicyFee'];
             $message->boundTotalCost = $post['boundTotalCost'];
+            $message->proratedDue = isset($post['proratedDue']) ? $post['proratedDue'] : 0;
             $message->policyNumber = $post['policyNumber'];
             $message->previousPolicyNumber = $post['previousPolicyNumber'];
             $message->inForce = ($policyType == "NEW") ? 0 : $inForce;
@@ -1366,9 +1367,9 @@ class Hiscox extends BaseController
             session()->setFlashdata('error', $text);
         }
 
-        $cancellationDate = isset($hiscoxResponse->response) ? 
+        $cancellationDate = isset($hiscoxResponse->response) ?
             $hiscoxResponse->response->cancellationDate : "";
-        $returnPremium = isset($hiscoxResponse->response) ? 
+        $returnPremium = isset($hiscoxResponse->response) ?
             $hiscoxResponse->response->returnPremium : 0;
 
         $hiscox = new \stdClass();
@@ -1421,7 +1422,7 @@ class Hiscox extends BaseController
 
             session()->setFlashdata('error', $text);
         } else {
-            $this->hiscoxQuoteService->reinstate($floodQuote->flood_quote_id, $hiscoxResponse->response->reinstatementDate, $prevHiscoxBoundID) ;
+            $this->hiscoxQuoteService->reinstate($floodQuote->flood_quote_id, $hiscoxResponse->response->reinstatementDate, $prevHiscoxBoundID);
 
             return redirect()->to('/client/details/' . $floodQuote->client_id)->with('message', 'Flood Quote was successfully reinstated.');
         }
