@@ -61,6 +61,35 @@ $client = $data['client'];
                 $('#propertyState').val($('#state').val());
             }
         });
+
+        $('input[name="effectiveDate"]').change(function() {
+            var effectiveDate = new Date($(this).val());
+
+            if (!isNaN(effectiveDate.getTime())) {
+                var expirationDate = new Date(effectiveDate);
+                expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+
+                var formattedDate = expirationDate.toISOString().split('T')[0];
+
+                $('input[name="expirationDate"]').val(formattedDate);
+            }
+        });
+
+        $('input[name="flfe"]').change(function() {
+            calculateForm('elevationDifference', 100, -1, '#flfe', '-', '#bfe');
+        });
+
+        $('input[name="bfe"]').change(function() {
+            calculateForm('elevationDifference', 100, -1, '#flfe', '-', '#bfe');
+        });
+
+        $('input[name="covABuilding"]').change(function() {
+            calculateForm('rceRatio', 10000, -1, '#covABuilding', '/', '#buildingReplacementCost');
+        });
+
+        $('input[name="buildingReplacementCost"]').change(function() {
+            calculateForm('rceRatio', 10000, -1, '#covABuilding', '/', '#buildingReplacementCost');
+        });
     });
 </script>
 

@@ -22,6 +22,7 @@ class DeductibleService extends BaseService
 
         $data = [
             'name'                  => $message->name,
+            'credit'                  => $message->credit,
         ];
 
         $builder->insert($data);
@@ -49,6 +50,7 @@ class DeductibleService extends BaseService
 
         $data = [
             'name'                  => $message->name,
+            'credit'                  => $message->credit,
         ];
 
         $builder->set($data);

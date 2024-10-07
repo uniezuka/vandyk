@@ -35,6 +35,7 @@ extract($data);
                         <tr>
                             <th scope="col">ID</th>
                             <th scope="col">Name</th>
+                            <th scope="col">Credit</th>
                             <th scope="col"></th>
                         </tr>
                     </thead>
@@ -43,6 +44,7 @@ extract($data);
                             <tr>
                                 <td><?= $deductible->deductible_id ?></td>
                                 <td><strong><?= $deductible->name ?></strong></td>
+                                <td><strong><?= $deductible->credit ?></strong></td>
                                 <td>
                                     <a href="<?= base_url('/deductible/update/' . $deductible->deductible_id); ?>">Update</a>
                                 </td>

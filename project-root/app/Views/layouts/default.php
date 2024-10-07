@@ -104,4 +104,39 @@
     </div>
 </body>
 
+<script type="text/javascript">
+    function calculateForm(targetFieldName, precision, decimalPlaces, ...expressionParts) {
+        let expression = "";
+
+        expressionParts.forEach(part => {
+            if (part.indexOf("#") === 0) {
+                let fieldValue = jQuery(`[name="${part.substring(1)}"]`).val(); // Fetch the value using jQuery
+                expression += fieldValue;
+            } else {
+                expression += part;
+            }
+        });
+
+        let result = eval(expression);
+        result = Math.round(precision * result) / precision;
+
+        let resultString = result.toString();
+
+        if (decimalPlaces > 0) {
+            let decimalPosition = resultString.indexOf(".");
+
+            if (decimalPosition === -1) {
+                resultString += ".";
+                decimalPosition = resultString.indexOf(".");
+            }
+
+            while (resultString.length - 1 - decimalPosition < decimalPlaces) {
+                resultString += "0";
+            }
+        }
+
+        jQuery(`[name="${targetFieldName}"]`).val(resultString);
+    }
+</script>
+
 </html>

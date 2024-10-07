@@ -288,7 +288,7 @@
 <div class="row mb-3">
     <label class="d-flex justify-content-end col-sm-5 col-form-label">Underinsured Rate</label>
     <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="underInsuredRate" />
+        <input type="text" class="form-control" placeholder="" name="underInsuredRate" value="0.25" />
     </div>
     <span class="col-sm-3">(ex. 0.01)</span>
 </div>

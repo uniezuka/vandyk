@@ -125,7 +125,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                             $isBounded = (int)getMetaValue($flood_quote_metas, 'isBounded', 0);
                             $boundDate = getMetaValue($flood_quote_metas, 'boundDate');
                             $inForce = (int)getMetaValue($flood_quote_metas, 'inForce', 0);
-                            $isPolicyDeclined = (int)getMetaValue($flood_quote_metas, 'isPolicyDeclined', 0);
+                            $isQuoteDeclined = (int)getMetaValue($flood_quote_metas, 'isQuoteDeclined', 0);
                             $isSandbarQuote = (int)getMetaValue($flood_quote_metas, 'isSandbarQuote', 0);
                             $bind_authority = getMetaValue($flood_quote_metas, 'bind_authority');
                             $hiscoxID = getMetaValue($flood_quote_metas, 'hiscoxID');
@@ -173,7 +173,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     <?php } ?>
 
                                     <p>
-                                        <?php if ($isPolicyDeclined) { ?>
+                                        <?php if ($isQuoteDeclined) { ?>
                                             Inactive
                                         <?php } else if ($isBounded) { ?>
                                             <a href="<?= base_url('/flood_quote/rate_detail/') . $floodQuote->flood_quote_id; ?>" class="btn btn-primary btn-sm w-100" target="_blank">View Bound Rating</a>
@@ -192,10 +192,6 @@ function getMetaValue($metas, $meta_key, $default = '')
                                         $appText = "Brit App";
                                         $quoteText = "Brit Quote";
                                         $invoiceText = "Brit Invoice";
-                                    } else if (strpos($bindAuthorityText, "240") !== false) {
-                                        $appText = "Canopius App";
-                                        $quoteText = "Canopius Quote";
-                                        $invoiceText = "Canopius Invoice";
                                     } else if (strpos($bindAuthorityText, "260") !== false) {
                                         $appText = "QBE App";
                                         $quoteText = "QBE Quote";
@@ -256,7 +252,7 @@ function getMetaValue($metas, $meta_key, $default = '')
 
                                 <td>
                                     <?php
-                                    if ($isPolicyDeclined) {
+                                    if ($isQuoteDeclined) {
                                         echo "<p>Inactive</p>";
                                     } else if ($isBounded) {
                                         if (strpos($bindAuthorityText, "250") !== false) {
@@ -311,8 +307,6 @@ function getMetaValue($metas, $meta_key, $default = '')
                                             echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind QBE Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "230") !== false) {
                                             echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Brit Policy</a></p>";
-                                        } else if (strpos($bindAuthorityText, "240") !== false) {
-                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Canop Policy</a></p>";
                                         } else if (strpos($bindAuthorityText, "250") !== false && $hiscoxID != "") {
                                             echo "<p><a href=\"" . base_url('/flood_quote/hiscox/bind/') . $floodQuote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Hiscox Policy</a></p>";
                                         } else if ($bindAuthorityText == "") {

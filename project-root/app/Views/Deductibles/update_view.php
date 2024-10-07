@@ -32,6 +32,13 @@ extract($data);
                 </div>
             </div>
 
+            <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Credit: </label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" name="credit" value="<?= set_value('credit', $deductible->credit) ?>">
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary">Update Deductible</button>
         </form>
     </div>

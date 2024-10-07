@@ -45,11 +45,13 @@ class Deductibles extends BaseController
         }
 
         $post = $this->request->getPost([
-            'name'
+            'name',
+            'credit'
         ]);
 
         if ($this->validateData($post, [
-            'name' => 'required|max_length[250]'
+            'name' => 'required|max_length[250]',
+            'credit' => 'required|numeric'
         ])) {
             try {
                 $this->deductibleService->create((object) $post);
@@ -78,11 +80,13 @@ class Deductibles extends BaseController
         }
 
         $post = $this->request->getPost([
-            'name'
+            'name',
+            'credit'
         ]);
 
         if ($this->validateData($post, [
-            'name' => 'required|max_length[250]'
+            'name' => 'required|max_length[250]',
+            'credit' => 'required|numeric'
         ])) {
             try {
                 $post['deductible_id'] = $id;
