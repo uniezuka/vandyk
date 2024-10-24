@@ -8,7 +8,7 @@ use App\Services\FloodVRateService;
 use App\Services\FloodBCXRateService;
 use App\Services\FloodZoneService;
 
-class FloodQuoteCalculations
+class BritFloodQuoteCalculations
 {
     protected $floodQuote;
     protected $floodQuoteMetas;

@@ -129,6 +129,40 @@ $routes->get('/sla_setting/update/(:num)', 'SLASettings::update/$1', ['filter' =
 $routes->post('/sla_setting/update/(:num)', 'SLASettings::update/$1', ['filter' => 'authGuard']);
 $routes->get('/sla_setting/set_current/(:num)', 'SLASettings::set_current/$1', ['filter' => 'authGuard']);
 
+$routes->get('/flood_foundations', 'FloodFoundations::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'flood_foundation/create', 'FloodFoundations::create', ['filter' => 'authGuard']);
+$routes->get('/flood_foundation/update/(:num)', 'FloodFoundations::update/$1', ['filter' => 'authGuard']);
+$routes->post('/flood_foundation/update/(:num)', 'FloodFoundations::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/a_rates', 'ARates::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'a_rate/create', 'ARates::create', ['filter' => 'authGuard']);
+$routes->get('/a_rate/update/(:num)', 'ARates::update/$1', ['filter' => 'authGuard']);
+$routes->post('/a_rate/update/(:num)', 'ARates::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/v_rates', 'VRates::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'v_rate/create', 'VRates::create', ['filter' => 'authGuard']);
+$routes->get('/v_rate/update/(:num)', 'VRates::update/$1', ['filter' => 'authGuard']);
+$routes->post('/v_rate/update/(:num)', 'VRates::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/bcx_rates', 'BCXRates::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'bcx_rate/create', 'BCXRates::create', ['filter' => 'authGuard']);
+$routes->get('/bcx_rate/update/(:num)', 'BCXRates::update/$1', ['filter' => 'authGuard']);
+$routes->post('/bcx_rate/update/(:num)', 'BCXRates::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/brit_v_rates', 'BritVRates::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'brit_v_rate/create', 'BritVRates::create', ['filter' => 'authGuard']);
+$routes->get('/brit_v_rate/update/(:num)', 'BritVRates::update/$1', ['filter' => 'authGuard']);
+$routes->post('/brit_v_rate/update/(:num)', 'BritVRates::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/brit_bcx_rates', 'BritBCXRates::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'brit_bcx_rate/create', 'BritBCXRates::create', ['filter' => 'authGuard']);
+$routes->get('/brit_bcx_rate/update/(:num)', 'BritBCXRates::update/$1', ['filter' => 'authGuard']);
+$routes->post('/brit_bcx_rate/update/(:num)', 'BritBCXRates::update/$1', ['filter' => 'authGuard']);
+
+$routes->get('/brit_a_rates', 'BritARates::index', ['filter' => 'authGuard']);
+$routes->match(['get', 'post'], 'brit_a_rate/create', 'BritARates::create', ['filter' => 'authGuard']);
+$routes->get('/brit_a_rate/update/(:num)', 'BritARates::update/$1', ['filter' => 'authGuard']);
+$routes->post('/brit_a_rate/update/(:num)', 'BritARates::update/$1', ['filter' => 'authGuard']);
 //
 
 /*

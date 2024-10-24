@@ -243,4 +243,58 @@ class Services extends BaseService
 
         return new \App\Services\HiscoxQuoteService();
     }
+
+    public static function floodARateService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodARateService');
+        }
+
+        return new \App\Services\FloodARateService();
+    }
+
+    public static function floodBCXRateService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodBCXRateService');
+        }
+
+        return new \App\Services\FloodBCXRateService();
+    }
+
+    public static function floodVRateService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('floodVRateService');
+        }
+
+        return new \App\Services\FloodVRateService();
+    }
+
+    public static function britFloodARateService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('britFloodARateService');
+        }
+
+        return new \App\Services\BritFloodARateService();
+    }
+
+    public static function britFloodBCXRateService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('britFloodBCXRateService');
+        }
+
+        return new \App\Services\BritFloodBCXRateService();
+    }
+
+    public static function britFloodVRateService($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('britFloodVRateService');
+        }
+
+        return new \App\Services\BritFloodVRateService();
+    }
 }

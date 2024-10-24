@@ -6,6 +6,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\FloodQuoteCalculations;
+use App\Libraries\BritFloodQuoteCalculations;
 use App\Libraries\HiscoxApiV2;
 use Exception;
 
@@ -794,7 +795,19 @@ class FloodQuote extends BaseController
             return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
         }
 
-        $calculations = new FloodQuoteCalculations($data['flood_quote']);
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+        $calculations = null;
+
+        if (!strpos($bindAuthorityText, '230') === false) {
+            $calculations = new BritFloodQuoteCalculations($data['flood_quote']);
+        } else {
+            $calculations = new FloodQuoteCalculations($data['flood_quote']);
+        }
+
         $data['calculations'] = $calculations;
 
         return view('FloodQuote/initial_details_view', ['data' => $data]);

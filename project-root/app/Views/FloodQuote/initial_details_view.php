@@ -9,9 +9,13 @@ $calculations = $data['calculations'];
 
 $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
 $floodOccupancyService = service('floodOccupancyService');
+$floodZoneService = service('floodZoneService');
 
 $flood_occupancy_id = $calculations->getMetaValue("flood_occupancy");
 $floodOccupancy = $floodOccupancyService->findOne($flood_occupancy_id);
+
+$flood_zone_id = $calculations->getMetaValue("flood_zone");
+$floodZone = $floodZoneService->findOne($flood_zone_id);
 
 $deductibles = $calculations->getDeductibles();
 ?>
@@ -47,7 +51,7 @@ $deductibles = $calculations->getDeductibles();
                 <br />
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5">Flood Zone:</div>
-                    <div class="col-sm-7"><?= $calculations->getMetaValue("flood_zone") ?></div>
+                    <div class="col-sm-7"><?= $floodZone->name ?></div>
                 </div>
 
                 <div class="row mb-3">

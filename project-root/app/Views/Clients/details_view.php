@@ -7,6 +7,7 @@ helper(['html', 'service']);
 extract($data);
 
 $bindAuthorityService = service('bindAuthorityService');
+$floodZoneService = service('floodZoneService');
 
 function clientDisplay($client): string
 {
@@ -94,7 +95,7 @@ function getMetaValue($metas, $meta_key, $default = '')
 </div>
 
 <div class="row">
-    <div class="col-6">
+    <div class="col-8">
         <div class="card">
             <div class="card-body">
                 <h5>Flood Policies/Quotes</h5>
@@ -136,6 +137,8 @@ function getMetaValue($metas, $meta_key, $default = '')
 
                             $bindAuthority = $bindAuthorityService->findOne($bind_authority);
                             $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+                            $floodZone = $floodZoneService->findOne($flood_zone);
                         ?>
                             <tr>
                                 <td>
@@ -144,7 +147,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                         <br />
                                         Policy # <?= $policyNumber ?>
                                         <br />
-                                        Flood Zone: <?= $flood_zone ?>
+                                        Flood Zone: <?= ($floodZone) ? $floodZone->name : "" ?>
                                     </p>
                                     <p>
                                         <strong>Property Address: </strong>

@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-class FloodVRateService extends BaseService
+class BritFloodARateService extends BaseService
 {
     protected $limit = 20;
 
     public function findOne($id)
     {
-        $builder = $this->db->table('flood_v_rate');
-        $builder->where('flood_v_rate_id ', $id);
+        $builder = $this->db->table('brit_flood_a_rate');
+        $builder->where('brit_flood_a_rate_id ', $id);
 
         $query = $builder->get(1);
 
@@ -20,8 +20,9 @@ class FloodVRateService extends BaseService
 
     public function getAll()
     {
-        $builder = $this->db->table('flood_v_rate');
-        $builder->select('*');
+        $builder = $this->db->table('brit_flood_a_rate');
+        $builder->select('brit_flood_a_rate.*, county.name as county_name');
+        $builder->join('county', 'brit_flood_a_rate.county_id = county.county_id', 'left');
 
         $query = $builder->get();
 
@@ -30,10 +31,13 @@ class FloodVRateService extends BaseService
 
     public function create(object $message)
     {
-        $builder = $this->db->table('flood_v_rate');
+        $builder = $this->db->table('brit_flood_a_rate');
 
         $data = [
             'description' => $message->description,
+            'zip' => $message->zip,
+            'state_code' => $message->state_code,
+            'county_id' => $message->county_id,
             'dwl4' => $message->dwl4,
             'cont4' => $message->cont4,
             'both4' => $message->both4,
@@ -63,10 +67,13 @@ class FloodVRateService extends BaseService
 
     public function update(object $message)
     {
-        $builder = $this->db->table('flood_v_rate');
+        $builder = $this->db->table('brit_flood_a_rate');
 
         $data = [
             'description' => $message->description,
+            'zip' => $message->zip,
+            'state_code' => $message->state_code,
+            'county_id' => $message->county_id,
             'dwl4' => $message->dwl4,
             'cont4' => $message->cont4,
             'both4' => $message->both4,
@@ -87,22 +94,22 @@ class FloodVRateService extends BaseService
             'both-1' => $message->both_1,
         ];
         $builder->set($data);
-        $builder->where('flood_v_rate_id', $message->flood_v_rate_id);
+        $builder->where('brit_flood_a_rate_id', $message->brit_flood_a_rate_id);
         $builder->update();
 
-        return $this->findOne($message->flood_v_rate_id);
+        return $this->findOne($message->brit_flood_a_rate_id);
     }
 
-    public function upsertFloodFoundation($flood_v_rate_id, $flood_foundation_id)
+    public function upsertFloodFoundation($brit_flood_a_rate_id, $flood_foundation_id)
     {
-        $builder = $this->db->table('flood_v_rate_flood_foundation');
-        $builder->where('flood_v_rate_id', $flood_v_rate_id);
+        $builder = $this->db->table('brit_flood_a_rate_flood_foundation');
+        $builder->where('brit_flood_a_rate_id', $brit_flood_a_rate_id);
         $builder->where('flood_foundation_id', $flood_foundation_id);
         $existingRecord = $builder->get()->getRow();
 
         if (!$existingRecord) {
             $data = [
-                'flood_v_rate_id' => $flood_v_rate_id,
+                'brit_flood_a_rate_id' => $brit_flood_a_rate_id,
                 'flood_foundation_id' => $flood_foundation_id
             ];
 
@@ -110,28 +117,28 @@ class FloodVRateService extends BaseService
         }
     }
 
-    public function getFloodFoundations($flood_v_rate_id)
+    public function getFloodFoundations($brit_flood_a_rate_id)
     {
-        $builder = $this->db->table('flood_v_rate_flood_foundation');
+        $builder = $this->db->table('brit_flood_a_rate_flood_foundation');
         $builder->select('flood_foundation.name, flood_foundation.flood_foundation_id');
-        $builder->join('flood_foundation', 'flood_v_rate_flood_foundation.flood_foundation_id = flood_foundation.flood_foundation_id');
-        $builder->where('flood_v_rate_flood_foundation.flood_v_rate_id', $flood_v_rate_id);
+        $builder->join('flood_foundation', 'brit_flood_a_rate_flood_foundation.flood_foundation_id = flood_foundation.flood_foundation_id');
+        $builder->where('brit_flood_a_rate_flood_foundation.brit_flood_a_rate_id', $brit_flood_a_rate_id);
 
         return $builder->get()->getResultArray();
     }
 
-    public function deleteFloodFoundations($flood_v_rate_id)
+    public function deleteFloodFoundations($brit_flood_a_rate_id)
     {
-        $builder = $this->db->table('flood_v_rate_flood_foundation');
-        $builder->where('flood_v_rate_id', $flood_v_rate_id)->delete();
+        $builder = $this->db->table('brit_flood_a_rate_flood_foundation');
+        $builder->where('brit_flood_a_rate_id', $brit_flood_a_rate_id)->delete();
     }
 
-    public function getFloodVRateByFoundation($flood_foundation_id)
+    public function getBritFloodARateByFoundation($flood_foundation_id)
     {
-        $builder = $this->db->table('flood_v_rate');
-        $builder->select('flood_v_rate.*');
-        $builder->join('flood_v_rate_flood_foundation', 'flood_v_rate.flood_v_rate_id = flood_v_rate_flood_foundation.flood_v_rate_id');
-        $builder->where('flood_v_rate_flood_foundation.flood_foundation_id', $flood_foundation_id);
+        $builder = $this->db->table('brit_flood_a_rate');
+        $builder->select('brit_flood_a_rate.*');
+        $builder->join('brit_flood_a_rate_flood_foundation', 'brit_flood_a_rate.brit_flood_a_rate_id = brit_flood_a_rate_flood_foundation.brit_flood_a_rate_id');
+        $builder->where('brit_flood_a_rate_flood_foundation.flood_foundation_id', $flood_foundation_id);
 
         $query = $builder->get();
         return $query->getResultArray();

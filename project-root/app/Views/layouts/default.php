@@ -54,6 +54,21 @@
                                         <li><a class="dropdown-item" href="<?= base_url('/coverages'); ?>">Coverages</a></li>
                                         <li><a class="dropdown-item" href="<?= base_url('/insurers'); ?>">Insurers</a></li>
                                         <li><a class="dropdown-item" href="<?= base_url('/deductibles'); ?>">Deductibles</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/flood_foundations'); ?>">Flood Foundations</a></li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Rates
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="<?= base_url('/a_rates'); ?>">A Rates</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/v_rates'); ?>">V Rates</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/bcx_rates'); ?>">BCX Rates</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/brit_a_rates'); ?>">Brit A Rates</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/brit_v_rates'); ?>">Brit V Rates</a></li>
+                                        <li><a class="dropdown-item" href="<?= base_url('/brit_bcx_rates'); ?>">Brit BCX Rates</a></li>
                                     </ul>
                                 </li>
 
