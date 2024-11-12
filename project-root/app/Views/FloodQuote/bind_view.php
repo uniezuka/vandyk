@@ -8,6 +8,13 @@ extract($data);
 
 $formatter = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
 $deductibles = $calculations->getDeductibles();
+$bindingProcessText = "";
+
+if (!strpos($bindAuthorityText, '230') === false) {
+    $bindingProcessText = "BRIT Binding Process";
+} else {
+    $bindingProcessText = "QBE/Chubb Binding Process";
+}
 ?>
 
 <?php if (session()->getFlashdata('error') || validation_errors()) : ?>
@@ -104,7 +111,7 @@ $deductibles = $calculations->getDeductibles();
     <div class="col-5">
         <div class="card">
             <div class="card-body">
-                <h4>QBE/Chubb Binding Process</h4>
+                <h4><?= $bindingProcessText ?></h4>
                 <form method="POST" name="bindForm" id="bindForm">
                     <?= csrf_field() ?>
                     <div class="row mb-3">

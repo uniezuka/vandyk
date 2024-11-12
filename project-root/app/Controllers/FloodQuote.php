@@ -1322,8 +1322,16 @@ class FloodQuote extends BaseController
         $data["covABuilding"] = $this->getMetaValue($floodQuoteMetas, "covABuilding", 0);
         $data["covCContent"] = $this->getMetaValue($floodQuoteMetas, "covCContent", 0);
         $data["covDLossUse"] = $this->getMetaValue($floodQuoteMetas, "covDLossUse", 0);
+        $data["bindAuthorityText"] = $bindAuthorityText;
 
-        $calculations = new FloodQuoteCalculations($floodQuote);
+        $calculations = null;
+
+        if (!strpos($bindAuthorityText, '230') === false) {
+            $calculations = new BritFloodQuoteCalculations($floodQuote);
+        } else {
+            $calculations = new FloodQuoteCalculations($floodQuote);
+        }
+
         $data['calculations'] = $calculations;
 
         $policyType = $data["policyType"];

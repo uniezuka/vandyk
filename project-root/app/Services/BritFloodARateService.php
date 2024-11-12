@@ -133,14 +133,70 @@ class BritFloodARateService extends BaseService
         $builder->where('brit_flood_a_rate_id', $brit_flood_a_rate_id)->delete();
     }
 
-    public function getBritFloodARateByFoundation($flood_foundation_id)
+    public function getBritFloodARateByFoundation($flood_foundation_id, $zip = null, $state_code = null, $county_id = null)
     {
         $builder = $this->db->table('brit_flood_a_rate');
         $builder->select('brit_flood_a_rate.*');
         $builder->join('brit_flood_a_rate_flood_foundation', 'brit_flood_a_rate.brit_flood_a_rate_id = brit_flood_a_rate_flood_foundation.brit_flood_a_rate_id');
         $builder->where('brit_flood_a_rate_flood_foundation.flood_foundation_id', $flood_foundation_id);
 
-        $query = $builder->get();
-        return $query->getResultArray();
+        $foundItems = [];
+
+        if (!is_null($zip) && $zip !== '') {
+            $builderZipMatch = clone $builder;
+            $builderZipMatch->groupStart()
+                ->where('brit_flood_a_rate.zip', $zip)
+                ->groupEnd();
+
+            $foundItems = $builderZipMatch->get()->getResultArray();
+        }
+
+        if (empty($foundItems) && !is_null($state_code) && !is_null($county_id) && $state_code !== '' && $county_id !== '') {
+            $builderStateCountyMatch = clone $builder;
+            $builderStateCountyMatch->groupStart()
+                ->where('brit_flood_a_rate.state_code', $state_code)
+                ->where('brit_flood_a_rate.county_id', $county_id)
+                ->groupEnd();
+
+            $foundItems = $builderStateCountyMatch->get()->getResultArray();
+        }
+
+        if (empty($foundItems)) {
+            $builderEmptyAll = clone $builder;
+            $builderEmptyAll->groupStart()
+                ->where('brit_flood_a_rate.zip', '')
+                ->where('brit_flood_a_rate.state_code', '')
+                ->where('brit_flood_a_rate.county_id', '')
+                ->groupEnd();
+
+            $foundItems = $builderEmptyAll->get()->getResultArray();
+        }
+
+        return $foundItems;
+
+        // $builder = $this->db->table('brit_flood_a_rate');
+        // $builder->select('brit_flood_a_rate.*');
+        // $builder->join('brit_flood_a_rate_flood_foundation', 'brit_flood_a_rate.brit_flood_a_rate_id = brit_flood_a_rate_flood_foundation.brit_flood_a_rate_id');
+        // $builder->where('brit_flood_a_rate_flood_foundation.flood_foundation_id', $flood_foundation_id);
+
+        // if (!is_null($zip) && $zip !== '') {
+        //     $builder->groupStart()
+        //         ->where('brit_flood_a_rate.zip', $zip)
+        //         ->orWhere('brit_flood_a_rate.zip', '')
+        //         ->groupEnd();
+        // }
+
+        // if (!is_null($state_code) && !is_null($county_id) && $state_code !== '' && $county_id !== '') {
+        //     $builder->groupStart()
+        //         ->where('brit_flood_a_rate.state_code', $state_code)
+        //         ->where('brit_flood_a_rate.county_id', $county_id)
+        //         ->orGroupStart()
+        //         ->where('brit_flood_a_rate.state_code', '')
+        //         ->where('brit_flood_a_rate.county_id', '')
+        //         ->groupEnd()
+        //         ->groupEnd();
+        // }
+        // $query = $builder->get();
+        // return $query->getResultArray();
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Libraries;
 
 use App\Services\StateRateService;
-use App\Services\FloodARateService;
-use App\Services\FloodVRateService;
-use App\Services\FloodBCXRateService;
+use App\Services\BritFloodARateService;
+use App\Services\BritFloodVRateService;
+use App\Services\BritFloodBCXRateService;
 use App\Services\FloodZoneService;
 
 class BritFloodQuoteCalculations
@@ -13,9 +13,9 @@ class BritFloodQuoteCalculations
     protected $floodQuote;
     protected $floodQuoteMetas;
     protected $stateRateService;
-    protected $floodARateService;
-    protected $floodBCXRateService;
-    protected $floodVRateService;
+    protected $britFloodARateService;
+    protected $britFloodBCXRateService;
+    protected $britFloodVRateService;
     protected $stateRate;
     protected $floodZoneService;
 
@@ -73,9 +73,9 @@ class BritFloodQuoteCalculations
         $this->floodQuote = $floodQuote;
         $this->floodQuoteMetas = getFloodQuoteMetas($this->floodQuote->flood_quote_id);
         $this->stateRateService = new StateRateService();
-        $this->floodARateService = new FloodARateService();
-        $this->floodVRateService = new FloodVRateService();
-        $this->floodBCXRateService = new FloodBCXRateService();
+        $this->britFloodARateService = new BritFloodARateService();
+        $this->britFloodVRateService = new BritFloodVRateService();
+        $this->britFloodBCXRateService = new BritFloodBCXRateService();
         $this->floodZoneService = new FloodZoneService();
         $this->bindAuthorityService = service('bindAuthorityService');
 
@@ -185,7 +185,8 @@ class BritFloodQuoteCalculations
             $this->baseRate = $rates[$this->baseField];
         } else {
             $this->zoneRate = "BCX";
-            $this->baseRate = $floodBCXRate["rate"];
+            $rates = (array) $floodBCXRate;
+            $this->baseRate = $rates[$this->baseField];
         }
 
         $this->baseRate = $this->baseRate + $baseRateAdjustment;
@@ -473,6 +474,9 @@ class BritFloodQuoteCalculations
     {
         $flood_foundation_id = (int)$this->getMetaValue("flood_foundation", 0);
         $numOfFloors = (int)$this->getMetaValue("numOfFloors", 0);
+        $zip = $this->floodQuote->zip;
+        $state_code = $this->floodQuote->state;
+        $county_id = (int)$this->getMetaValue("propertyCounty", 0);
 
         $floodRates = [
             'arate' => null,
@@ -480,17 +484,17 @@ class BritFloodQuoteCalculations
             'vrate' => null
         ];
 
-        $floodVRates = $this->floodVRateService->getFloodVRateByFoundation($flood_foundation_id);
+        $floodVRates = $this->britFloodVRateService->getBritFloodVRateByFoundation($flood_foundation_id);
         if (count($floodVRates)) {
             $floodRates['vrate'] = $floodVRates[0];
         }
 
-        $floodARates = $this->floodARateService->getFloodARateByFoundation($flood_foundation_id);
+        $floodARates = $this->britFloodARateService->getBritFloodARateByFoundation($flood_foundation_id, $zip, $state_code, $county_id);
         if (count($floodARates)) {
             $floodRates['arate'] = $floodARates[0];
         }
 
-        $floodBCXRates = $this->floodBCXRateService->getFloodBCXRateByFoundation($flood_foundation_id, $numOfFloors);
+        $floodBCXRates = $this->britFloodBCXRateService->getBritFloodBCXRateByFoundation($flood_foundation_id, $numOfFloors);
         if (count($floodBCXRates)) {
             $floodRates['bcxrate'] = $floodBCXRates[0];
         }

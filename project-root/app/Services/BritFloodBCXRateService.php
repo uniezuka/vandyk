@@ -124,7 +124,7 @@ class BritFloodBCXRateService extends BaseService
     {
         $builder = $this->db->table('brit_flood_bcx_rate');
         $builder->select('brit_flood_bcx_rate.*');
-        $builder->join('brit_flood_bcx_rate_flood_foundation', 'brit_flood_bcx_rate.flood_bcx_rate_id = brit_flood_bcx_rate_flood_foundation.brit_flood_bcx_rate_id');
+        $builder->join('brit_flood_bcx_rate_flood_foundation', 'brit_flood_bcx_rate.brit_flood_bcx_rate_id = brit_flood_bcx_rate_flood_foundation.brit_flood_bcx_rate_id');
         $builder->where('brit_flood_bcx_rate_flood_foundation.flood_foundation_id', $flood_foundation_id);
         $builder->groupStart()
             ->where('brit_flood_bcx_rate_flood_foundation.num_of_floors', $num_of_floors)
