@@ -86,7 +86,7 @@ if ($policyType == "CAN") {
 
                 <div class="row mb-3">
                     <div class="d-flex col-sm-5">Building Diagram #:</div>
-                    <div class="col-sm-7"><?= $calculations->getMetaValue("diagram_num") ?></div>
+                    <div class="col-sm-7"><?= $calculations->getMetaValue("diagramNumber") ?></div>
                 </div>
 
                 <div class="row mb-3">

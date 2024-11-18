@@ -159,7 +159,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     <?php } else if ($isBounded) { ?>
                                         <p><a href="<?= base_url('/flood_quote/rate_detail/') . $flood_quote->flood_quote_id; ?>" target="_blank">View Bound Rating</a></p>
                                     <?php } else { ?>
-                                        <p><a href="#" target="_blank">View Current Rating</a></p>
+                                        <p><a href="<?= base_url('/flood_quote/pre_bound_rate_detail/') . $flood_quote->flood_quote_id; ?>" class="btn btn-primary btn-sm w-100" target="_blank">View Pre Bound Rates</a></p>
                                     <?php } ?>
                                 </td>
                                 <td>

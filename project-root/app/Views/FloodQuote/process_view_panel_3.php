@@ -6,6 +6,8 @@ $slaNumber = "";
 $effectiveDate = date('Y-m-d', strtotime($floodQuote->effectivity_date));
 $expirationDate = date('Y-m-d', strtotime($floodQuote->expiration_date));
 
+$actionText = "";
+
 if ($action == "cancel") {
     $actionText = "Cancel";
     $buttonText = "Submit Cancellation";
@@ -20,6 +22,8 @@ if ($action == "cancel") {
     $policyNumber = getMetaValue($floodQuoteMetas, "policyNumber");
     $slaNumber = getMetaValue($floodQuoteMetas, "slaNumber");
     $previousPolicyNumber = "";
+} else if ($action == "requote") {
+    $buttonText = "Insert Quote";
 } else if ($action == "renew") {
     $actionText = "Renew";
     $buttonText = "Submit Renewal";
@@ -271,61 +275,65 @@ if ($action == "cancel") {
     </div>
 </div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox Dwell Limit Override</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="hiscoxDwellLimitOverride" value="<?= set_value('hiscoxDwellLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxDwellLimitOverride")) ?>" />
-    </div>
-</div>
+<?php if ($action != "requote") { ?>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox Content Limit Override</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="hiscoxContentLimitOverride" value="<?= set_value('hiscoxContentLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxContentLimitOverride")) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox Dwell Limit Override</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="hiscoxDwellLimitOverride" value="<?= set_value('hiscoxDwellLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxDwellLimitOverride")) ?>" />
+        </div>
     </div>
-</div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox LossUse Limit Override</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="hiscoxLossUseLimitOverride" value="<?= set_value('hiscoxLossUseLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxLossUseLimitOverride")) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox Content Limit Override</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="hiscoxContentLimitOverride" value="<?= set_value('hiscoxContentLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxContentLimitOverride")) ?>" />
+        </div>
     </div>
-</div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox Other Limit Override</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="hiscoxOtherLimitOverride" value="<?= set_value('hiscoxOtherLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxOtherLimitOverride")) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox LossUse Limit Override</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="hiscoxLossUseLimitOverride" value="<?= set_value('hiscoxLossUseLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxLossUseLimitOverride")) ?>" />
+        </div>
     </div>
-</div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Premium:</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="cancelPremium" value="<?= set_value('cancelPremium', getMetaValue($floodQuoteMetas, "cancelPremium", 0)) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label">Hiscox Other Limit Override</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="hiscoxOtherLimitOverride" value="<?= set_value('hiscoxOtherLimitOverride', getMetaValue($floodQuoteMetas, "hiscoxOtherLimitOverride")) ?>" />
+        </div>
     </div>
-</div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Tax:</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="cancelTax" value="<?= set_value('cancelTax', getMetaValue($floodQuoteMetas, "cancelTax", 0)) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Premium:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="cancelPremium" value="<?= set_value('cancelPremium', getMetaValue($floodQuoteMetas, "cancelPremium", 0)) ?>" />
+        </div>
     </div>
-</div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label">Prorated <?= $actionText ?> Total Due:</label>
-    <div class="col-sm-4">
-        <input type="text" class="form-control" placeholder="" name="proratedDue" value="<?= set_value('proratedDue', getMetaValue($floodQuoteMetas, "proratedDue", 0)) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Tax:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="cancelTax" value="<?= set_value('cancelTax', getMetaValue($floodQuoteMetas, "cancelTax", 0)) ?>" />
+        </div>
     </div>
-</div>
 
-<div class="row mb-3">
-    <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Effective Date:</label>
-    <div class="col-sm-4">
-        <input type="date" class="form-control" required placeholder="" name="endorseDate" value="<?= set_value('endorseDate', getMetaValue($floodQuoteMetas, "endorseDate")) ?>" />
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label">Prorated <?= $actionText ?> Total Due:</label>
+        <div class="col-sm-4">
+            <input type="text" class="form-control" placeholder="" name="proratedDue" value="<?= set_value('proratedDue', getMetaValue($floodQuoteMetas, "proratedDue", 0)) ?>" />
+        </div>
     </div>
-</div>
+
+    <div class="row mb-3">
+        <label class="d-flex justify-content-end col-sm-4 col-form-label"><?= $actionText ?> Effective Date:</label>
+        <div class="col-sm-4">
+            <input type="date" class="form-control" required placeholder="" name="endorseDate" value="<?= set_value('endorseDate', getMetaValue($floodQuoteMetas, "endorseDate")) ?>" />
+        </div>
+    </div>
+
+<?php } ?>
 
 <strong>Notes</strong>
 

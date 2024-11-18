@@ -1048,7 +1048,7 @@ class FloodQuote extends BaseController
             return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
         }
 
-        if ($action !== 'cancel' && $action !== 'renew' && $action !== 'endorse') {
+        if ($action !== 'cancel' && $action !== 'renew' && $action !== 'endorse' && $action !== 'requote') {
             throw new \CodeIgniter\Exceptions\PageNotFoundException();
         }
 
@@ -1095,6 +1095,10 @@ class FloodQuote extends BaseController
 
             case "endorse":
                 $policyType = "END";
+                break;
+
+            case "requote":
+                $policyType = "NEW";
                 break;
 
             default:
@@ -1393,5 +1397,31 @@ class FloodQuote extends BaseController
         } else {
             return view('FloodQuote/bind_view', ['data' => $data]);
         }
+    }
+
+    public function pre_bound_rate_detail($id = null)
+    {
+        helper('form');
+        $data['title'] = "Pre Bound Rate Details";
+        $data['flood_quote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['flood_quote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+        $defaultCalculations = new FloodQuoteCalculations($data['flood_quote']);
+        $britCalculations = new BritFloodQuoteCalculations($data['flood_quote']);
+
+        $data['defaultCalculations'] = $defaultCalculations;
+        $data['britCalculations'] = $britCalculations;
+        $data['bindAuthorityText'] = $bindAuthorityText;
+        $data['floodQuoteMetas'] = $floodQuoteMetas;
+
+        return view('FloodQuote/pre_bound_rate_detail_view', ['data' => $data]);
     }
 }
