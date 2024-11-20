@@ -12,7 +12,10 @@ function getMetaValue($metas, $meta_key, $default = '')
 {
     foreach ($metas as $meta) {
         if ($meta->meta_key === $meta_key) {
-            return $meta->meta_value;
+            if ($meta->meta_value == "" && $default != "")
+                return $default;
+            else
+                return $meta->meta_value;
         }
     }
     return $default;
@@ -164,10 +167,10 @@ function getMetaValue($metas, $meta_key, $default = '')
                                 </td>
                                 <td>
                                     <p><strong><?= $docsTitle ?></strong></p>
-                                    <p><a href="#" class="btn btn-primary btn-sm w-100" target="_blank"><?= $appText ?></a></p>
-                                    <p><a href="#" class="btn btn-primary btn-sm w-100" target="_blank"><?= $quoteText ?></a></p>
-                                    <p><a href="#" class="btn btn-primary btn-sm w-100" target="_blank"><?= $invoiceText ?></a></p>
-                                    <p><a href="#" class="btn btn-primary btn-sm w-100" target="_blank">No Loss Form</a></p>
+                                    <p><a href="<?= base_url('/flood_quote/docs/') . $flood_quote->flood_quote_id . '/application'; ?>" class="btn btn-primary btn-sm w-100" target="_blank"><?= $appText ?></a></p>
+                                    <p><a href="<?= base_url('/flood_quote/docs/') . $flood_quote->flood_quote_id . '/quote'; ?>" class="btn btn-primary btn-sm w-100" target="_blank"><?= $quoteText ?></a></p>
+                                    <p><a href="<?= base_url('/flood_quote/docs/') . $flood_quote->flood_quote_id . '/invoice'; ?>" class="btn btn-primary btn-sm w-100" target="_blank"><?= $invoiceText ?></a></p>
+                                    <p><a href="<?= base_url('/flood_quote/docs/') . $flood_quote->flood_quote_id . '/no-loss'; ?>" class="btn btn-primary btn-sm w-100" target="_blank">No Loss Form</a></p>
                                 </td>
                                 <td>
                                     <?php

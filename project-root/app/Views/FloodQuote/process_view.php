@@ -9,7 +9,10 @@ function getMetaValue($floodQuoteMetas, $meta_key, $default = '')
 {
     foreach ($floodQuoteMetas as $meta) {
         if ($meta->meta_key === $meta_key) {
-            return $meta->meta_value;
+            if ($meta->meta_value == "" && $default != "")
+                return $default;
+            else
+                return $meta->meta_value;
         }
     }
     return $default;

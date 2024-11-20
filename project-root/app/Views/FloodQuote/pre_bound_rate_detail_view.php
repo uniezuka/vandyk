@@ -20,19 +20,14 @@ $mle = ($mle == "0") ? "N/A" : $mle;
 $flood_foundation = getMetaValue($floodQuoteMetas, "flood_foundation", 0);
 $isProperlyVented = ($flood_foundation == 1 || $flood_foundation == 2 || $flood_foundation == 4) ? "Y" : "N";
 
-// $canRenew = true;
-
-// if ($policyType == "CAN") {
-//     if (strpos($bindAuthorityText, '250') !== false && $isBounded) {
-//         $canRenew = false;
-//     }
-// }
-
 function getMetaValue($floodQuoteMetas, $meta_key, $default = '')
 {
     foreach ($floodQuoteMetas as $meta) {
         if ($meta->meta_key === $meta_key) {
-            return $meta->meta_value;
+            if ($meta->meta_value == "" && $default != "")
+                return $default;
+            else
+                return $meta->meta_value;
         }
     }
     return $default;

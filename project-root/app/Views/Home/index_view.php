@@ -71,9 +71,9 @@
                                 <p>2023-03-28</p>
                                 <p>11:20:37</p>
                             </td>
-                            <td><a href="/brokerprocess/FloodQuoteRequestStart.asp?QuoteID=5898">Finalize<br>Quote</a></td>
+                            <td><a href="#">Finalize<br>Quote</a></td>
                             <td>
-                                <a href="/brokerprocess/FloodRateIndication.asp?QuoteID=5898" target="_blank">View Chubb Indication_</a>
+                                <a href="#" target="_blank">View Chubb Indication_</a>
                             </td>
                         </tr>
                     </tbody>

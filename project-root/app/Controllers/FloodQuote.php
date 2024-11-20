@@ -52,7 +52,10 @@ class FloodQuote extends BaseController
     {
         foreach ($floodQuoteMetas as $meta) {
             if ($meta->meta_key === $meta_key) {
-                return $meta->meta_value;
+                if ($meta->meta_value == "" && $default != "")
+                    return $default;
+                else
+                    return $meta->meta_value;
             }
         }
         return $default;
@@ -708,6 +711,7 @@ class FloodQuote extends BaseController
             $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
             $message->broker = $post['broker'] ?? 0;
             $message->producer = $post['producer'] ?? 0;
+            $message->isSandbarQuote = $post['isSandbarQuote'] ?? 0;
             $message->hasLossOccurred = $post['hasLossOccurred'] ?? 0;
             $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
             $message->lastLossValue = $post['lastLossValue'] ?? 0;
@@ -1176,6 +1180,7 @@ class FloodQuote extends BaseController
             $message->sydicate3Risk = $post['sydicate3Risk'] ?? "";
             $message->broker = $post['broker'] ?? 0;
             $message->producer = $post['producer'] ?? 0;
+            $message->isSandbarQuote = $post['isSandbarQuote'] ?? 0;
             $message->hasLossOccurred = $post['hasLossOccurred'] ?? 0;
             $message->yearLastLoss = $post['yearLastLoss'] ?? 0;
             $message->lastLossValue = $post['lastLossValue'] ?? 0;
@@ -1423,5 +1428,50 @@ class FloodQuote extends BaseController
         $data['floodQuoteMetas'] = $floodQuoteMetas;
 
         return view('FloodQuote/pre_bound_rate_detail_view', ['data' => $data]);
+    }
+
+    public function docs($id = null, $action = "")
+    {
+        helper('form');
+        $pageTitle = "";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        if ($action !== 'application' && $action !== 'quote' && $action !== 'invoice' && $action !== 'no-loss') {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException();
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $isSandbarQuote = $this->getMetaValue($floodQuoteMetas, 'isSandbarQuote');
+        $client_id = $floodQuote->client_id;
+        $client = $this->clientService->findOne($client_id);
+
+        switch ($action) {
+            case 'application':
+                $pageTitle = "Flood Application";
+                break;
+            case 'quote':
+                $pageTitle = "Flood Quote";
+                break;
+            case 'invoice':
+                $pageTitle = "Flood Invoice";
+                break;
+            case 'no-loss':
+                $pageTitle = "No Loss Confirmation";
+                break;
+            default:
+                throw new \CodeIgniter\Exceptions\PageNotFoundException();
+        }
+
+        $folder = $isSandbarQuote ? 'sandbar' : 'default';
+        $folder = $action == "no-loss" ? 'sandbar' : $folder;
+
+        $data['title'] = $pageTitle;
+        $data['client'] = $client;
+        return view('FloodQuote/docs/' . $folder . '/' . $action, ['data' => $data]);
     }
 }
