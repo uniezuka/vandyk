@@ -21,7 +21,7 @@ $locationAddress = $floodQuote->address . ' ' . $floodQuote->city . ', ' . $floo
 
 <div class="content-wrapper">
     <div class="row">
-        <div class="col-12 logo">
+        <div class="col-12 logo text-center">
             <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="Sandbar Flood Logo" alt="logo" class="img-fluid" width="270" height="100">
         </div>
     </div>

@@ -7,18 +7,16 @@ helper('html');
 extract($data);
 
 $invoiceTitle = "";
-$isExcessPolicy = (int)getMetaValue($floodQuoteMetas, "isExcessPolicy", 0);
-$billTo = (int)getMetaValue($floodQuoteMetas, "billTo", 1);
+$isExcessPolicy = getMetaValue($floodQuoteMetas, "isExcessPolicy", 0);
+$billTo = getMetaValue($floodQuoteMetas, "billTo", 1);
 $entityType = getMetaValue($floodQuoteMetas, "entityType");
 $propertyAddress = getMetaValue($floodQuoteMetas, "propertyAddress");
 $propertyCity = getMetaValue($floodQuoteMetas, "propertyCity");
 $propertyState = getMetaValue($floodQuoteMetas, "propertyState");
 $propertyZip = getMetaValue($floodQuoteMetas, "propertyZip");
-$flood_occupancy = (int)getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
-$underlyingBuildLimit = (int)getMetaValue($floodQuoteMetas, "underlyingBuildLimit", 0);
-$underlyingContentLimit = (int)getMetaValue($floodQuoteMetas, "underlyingContentLimit", 0);
-
-$lossUseCov = $calculations->lossUseCoverage;
+$flood_occupancy = getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
+$underlyingBuildLimit = getMetaValue($floodQuoteMetas, "underlyingBuildLimit", 0);
+$underlyingContentLimit = getMetaValue($floodQuoteMetas, "underlyingContentLimit", 0);
 
 $deductibles = $calculations->getDeductibles();
 
@@ -55,7 +53,7 @@ function getMetaValue($metas, $meta_key, $default = '')
     <div class="row">
         <div class="col-6">
             <div class="logo">
-                <img src="<?= base_url('assets/images/IACHeaderLogo.gif'); ?>" alt="logo" width="352" height="75">
+                <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="logo" width="202" height="75">
             </div>
             <div>
                 <strong>609-492-4224</strong>
@@ -242,6 +240,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                         <td>Loss of Use/Rents</td>
                         <td>
                             <?php
+                            $lossUseCov = $calculations->lossUseCoverage;
                             if ($lossUseCov == 0) {
                                 echo "N/A";
                             } else {

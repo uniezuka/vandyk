@@ -25,6 +25,7 @@ class FloodQuote extends BaseController
     protected $hixcoxAPI;
     protected $floodZoneService;
     protected $floodOccupancyService;
+    protected $brokerService;
 
     public function initController(
         RequestInterface $request,
@@ -45,6 +46,7 @@ class FloodQuote extends BaseController
         $this->constructionService = service('constructionService');
         $this->floodZoneService = service('floodZoneService');
         $this->floodOccupancyService = service('floodOccupancyService');
+        $this->brokerService = service('brokerService');
         $this->hixcoxAPI = new HiscoxApiV2();
     }
 
@@ -74,8 +76,8 @@ class FloodQuote extends BaseController
         $selectedPolicyType = $this->getMetaValue($prevFloodQuoteMetas, "selectedPolicyType");
         $selectedDeductible = $this->getMetaValue($prevFloodQuoteMetas, "selectedDeductible");
         $selectedPolicyIndex = $this->getMetaValue($prevFloodQuoteMetas, "selectedPolicyIndex");
-        $hiscoxID = $this->getMetaValue($prevFloodQuoteMetas, "hiscoxID");;
-        $entityType = $this->getMetaValue($prevFloodQuoteMetas, "entityType");;
+        $hiscoxID = $this->getMetaValue($prevFloodQuoteMetas, "hiscoxID");
+        $entityType = $this->getMetaValue($prevFloodQuoteMetas, "entityType");
         $isRented = $this->getMetaValue($prevFloodQuoteMetas, "isRented", 0) == "1";
         $isEndorsement = $policyType == "END";
         $hiscoxQuote = null;
@@ -1449,6 +1451,49 @@ class FloodQuote extends BaseController
         $isSandbarQuote = $this->getMetaValue($floodQuoteMetas, 'isSandbarQuote');
         $client_id = $floodQuote->client_id;
         $client = $this->clientService->findOne($client_id);
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+        $policyType = $this->getMetaValue($floodQuoteMetas, "policyType");
+        $mortgages = $this->floodQuoteMortgageService->getByFloodQuoteId($floodQuote->flood_quote_id);
+        $brokerId = $this->getMetaValue($floodQuoteMetas, "broker", 0);
+        $flood_zone = (int)$this->getMetaValue($floodQuoteMetas, "flood_zone", 0);
+        $floodZone = $this->floodZoneService->findOne($flood_zone);
+        $flood_occupancy = (int)$this->getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
+        $floodOccupancy = $this->floodOccupancyService->findOne($flood_occupancy);
+
+        $mortgage1 = null;
+        $mortgage2 = null;
+        foreach ($mortgages as $mortgagee) {
+            if ($mortgagee->loan_index === '1') {
+                $mortgage1 = $mortgagee;
+            } elseif ($mortgagee->loan_index === '2') {
+                $mortgage2 = $mortgagee;
+            }
+        }
+
+        $broker = $this->brokerService->findOne($brokerId);
+
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+        $data['mortgage1'] = $mortgage1;
+        $data['mortgage2'] = $mortgage2;
+        $data['broker'] = $broker;
+        $data["bindAuthority"] = $bindAuthority->name;
+        $data["bindAuthorityText"] = $bindAuthorityText;
+        $data["floodQuoteMetas"] = $floodQuoteMetas;
+        $data["floodZone"] = ($floodZone) ? $floodZone->name : "";
+        $data["floodOccupancy"] = $floodOccupancy;
+
+        $calculations = null;
+
+        if (!strpos($bindAuthorityText, '230') === false) {
+            $calculations = new BritFloodQuoteCalculations($floodQuote);
+        } else {
+            $calculations = new FloodQuoteCalculations($floodQuote);
+        }
+
+        $data['calculations'] = $calculations;
+        $data["policyType"] = $policyType;
 
         switch ($action) {
             case 'application':

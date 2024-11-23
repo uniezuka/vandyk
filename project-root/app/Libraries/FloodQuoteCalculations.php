@@ -63,6 +63,9 @@ class FloodQuoteCalculations
     public $finalCost;
     public $lossUseAdjustmentRate;
     public $additionalPremium;
+    public $estimatedContentReplacement;
+    public $estimatedBuildingReplacement;
+    public $estimatedLossRent;
 
     protected $bindAuthorityService;
 
@@ -144,6 +147,9 @@ class FloodQuoteCalculations
         $this->finalCost = 0;
         $this->lossUseAdjustmentRate = 0;
         $this->additionalPremium = 0;
+        $this->estimatedContentReplacement = 0;
+        $this->estimatedBuildingReplacement = 0;
+        $this->estimatedLossRent = 0;
 
         $bind_authority = $this->getMetaValue('bind_authority');
         $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
@@ -215,6 +221,9 @@ class FloodQuoteCalculations
             } else {
                 $this->lossUseAdjustmentRate = 0.01;
             }
+
+            $this->estimatedContentReplacement = ceil($this->basePremium * $stateRate->pers_prop_repl_rate) * 1.05;
+            $this->estimatedBuildingReplacement = ceil($this->basePremium * $stateRate->dwell_repl_cost_rate) * 1.05;
         }
 
         if ($covDLossUse == 0) {
@@ -256,6 +265,8 @@ class FloodQuoteCalculations
             $this->calculateDwellingReplacementCost($stateRate);
         }
         $this->calculateRCESurcharge();
+
+        $this->estimatedLossRent = ceil(20000 * $this->lossUseAdjustmentRate / 100);
 
         if ($this->policyType == 'CAN') {
             $this->taxAmount = $this->cancelTax;

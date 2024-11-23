@@ -9,13 +9,23 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" crossorigin="anonymous">
-    <link href="<?= base_url('assets/css/main.css'); ?>" rel="stylesheet">
 
     <style>
         body {
             font-family: "Times New Roman", Times, serif;
             font-size: 16px;
             line-height: 1.5;
+            background-color: none;
+        }
+
+        blockquote {
+            margin: 1em 40px;
+        }
+
+        table>thead>tr>th,
+        table>tbody>tr>td {
+            padding: 5px;
+            text-align: left;
         }
 
         .content-wrapper {
@@ -29,7 +39,6 @@
         }
 
         .logo {
-            text-align: center;
             margin-bottom: 20px;
         }
 
@@ -41,25 +50,45 @@
         }
 
         .footer {
-            margin-top: 50px;
+            margin-top: 20px;
+        }
+
+        .grey-line {
+            border-top: 5px solid #B8B8B8;
         }
 
         @media print {
+            * {
+                background: none !important;
+                color: #000 !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
             body {
                 margin: 0;
                 padding: 0;
+                background-color: none;
+                font-size: 14px;
             }
 
             .container {
                 margin-left: auto;
                 margin-right: auto;
                 padding: 0;
+                width: 100%;
+                max-width: 100%;
             }
 
             .content-wrapper {
                 margin: 0;
-                padding: 10mm;
+                padding: 5mm;
                 page-break-inside: avoid;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .no-print {
@@ -71,16 +100,24 @@
                 width: 100%;
             }
 
-            th,
-            td {
-                border: 1px solid #000;
-                padding: 8px;
-                text-align: left;
+            table>thead>tr>th,
+            table>tbody>tr>td {
+                padding: 5px;
+                font-size: 10px;
             }
 
-            * {
-                background: none !important;
-                color: #000 !important;
+            .title {
+                font-size: 20px;
+            }
+
+            .header,
+            .footer,
+            .content-wrapper {
+                page-break-inside: avoid;
+            }
+
+            .border .table {
+                margin-bottom: 0;
             }
         }
     </style>
