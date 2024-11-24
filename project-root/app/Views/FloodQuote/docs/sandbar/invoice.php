@@ -288,7 +288,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                     <tr>
                         <td>
                             <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX" || $propertyState == "NC") : ?>
-                                <?= $propertyStat . " Stamping Fee" ?>
+                                <?= $propertyState . " Stamping Fee" ?>
                             <?php endif; ?>
                         </td>
                         <td>

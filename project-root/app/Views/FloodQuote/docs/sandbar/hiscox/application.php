@@ -42,10 +42,6 @@ $excessContentLimit = (int)getMetaValue($floodQuoteMetas, "excessContentLimit", 
 $construction = $constructionService->findOne($construction_type);
 $floodZone = $floodZoneService->findOne($flood_zone);
 
-$lossUseCov = $calculations->lossUseCoverage;
-
-$deductibles = $calculations->getDeductibles();
-
 function getMetaValue($metas, $meta_key, $default = '')
 {
     foreach ($metas as $meta) {
@@ -87,15 +83,14 @@ function getMetaValue($metas, $meta_key, $default = '')
     <div class="row">
         <div class="col-6">
             <div class="logo">
-                <img src="<?= base_url('assets/images/IACHeaderLogo.gif'); ?>" alt="logo" width="352" height="100">
+                <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="logo" width="270" height="100">
             </div>
         </div>
 
         <div class="col-6 text-center">
             <h3 class="mt-3">
-                <?= ($isExcessPolicy) ? "Excess" : "Private" ?> Flood Insurance Application
+                Private Flood Insurance Application
             </h3>
-            <p>Application #: FLD000<?= $floodQuote->flood_quote_id ?></p>
         </div>
     </div>
 
@@ -137,7 +132,7 @@ function getMetaValue($metas, $meta_key, $default = '')
             </div>
 
             <div class="row mt-4">
-                <div class="col-10">14 Day Waiting Period</div>
+                <div class="col-10">7 Day Waiting Period</div>
                 <div class="col-2 text-center border"><?= ($hasWaitPeriod == 1) ? "X" : "" ?></div>
             </div>
 
@@ -281,11 +276,6 @@ function getMetaValue($metas, $meta_key, $default = '')
                 <div class="col-10">Slab</div>
                 <div class="col-2 text-center border border-dark"><?= ($flood_foundation == 10 || $flood_foundation == 11) ? "X" : "&nbsp;" ?></div>
             </div>
-
-            <div class="row mt-4">
-                <div class="col-10">Properly Vented</div>
-                <div class="col-2 text-center border border-dark"><?= $isProperlyVented ?></div>
-            </div>
         </div>
 
         <div class="col-4 border border-dark">
@@ -298,7 +288,7 @@ function getMetaValue($metas, $meta_key, $default = '')
 
             <div class="row">
                 <div class="col-8">Construction Type</div>
-                <div class="col-4 text-center border border-dark"><?= $construction->name ?></div>
+                <div class="col-4 text-center border border-dark"><?= $calculations->constructionType ?></div>
             </div>
 
             <div class="row">
@@ -317,18 +307,24 @@ function getMetaValue($metas, $meta_key, $default = '')
             </div>
 
             <div class="row">
-                <div class="col-8">Substantial Improvement Date</div>
-                <div class="col-4 text-center border border-dark"><?= $improvementDate ?></div>
+                <div class="col-8">Finished Basement/Enclosure</div>
+                <div class="col-4 text-center border border-dark">
+                    <?php
+                    if ($calculations->requiredElevated == 'No' && $calculations->requiredBasement == 'No') {
+                        echo "N";
+                    } elseif ($calculations->requiredBasement == 'Yes' && $calculations->basementStatus == 'Finished') {
+                        echo "Y";
+                    } elseif ($calculations->requiredElevated == 'Yes') {
+                        echo "Y";
+                    } else {
+                        echo "N";
+                    } ?>
+                </div>
             </div>
 
             <div class="row">
-                <div class="col-8">Square Feet of Enclosure</div>
-                <div class="col-4 text-center border border-dark"><?= getMetaValue($floodQuoteMetas, "enclosure", "&nbsp;") ?></div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-8">Number of Units</div>
-                <div class="col-4 text-center border border-dark"><?= getMetaValue($floodQuoteMetas, "condoUnits", 0) ?></div>
+                <div class="col-8">Has home been elevated</div>
+                <div class="col-4 text-center border border-dark">N</div>
             </div>
         </div>
     </div>
@@ -381,17 +377,8 @@ function getMetaValue($metas, $meta_key, $default = '')
                 </td>
             </tr>
             <tr>
-                <td colspan="2">
-                    <strong>Sandy Loss Amount</strong>
-                </td>
-                <td>
-                    <?= $formatter->formatCurrency(getMetaValue($floodQuoteMetas, "sandyLossAmount", 0), 'USD') ?>
-                </td>
-                <td colspan="2">
-                    <strong>Has Home Been Raised</strong>
-                </td>
-                <td>
-                    <?= ($hasElevatedSinceLastLoss == 1) ? "Y" : "N" ?>
+                <td colspan="6">
+                    &nbsp;
                 </td>
             </tr>
             <tr>
@@ -412,19 +399,19 @@ function getMetaValue($metas, $meta_key, $default = '')
                 </td>
                 <td><?= getMetaValue($floodQuoteMetas, "diagramNumber", 0) ?></td>
                 <td>
-                    <strong>First Floor Elevation</strong>
+                    <strong>Elevated Home</strong>
                 </td>
-                <td><?= getMetaValue($floodQuoteMetas, "flfe", 0) ?></td>
+                <td><?= $calculations->requiredElevated == "Yes" ? "Y" : "N" ?></td>
                 <td>
                     <strong>Elevation Difference</strong>
                 </td>
-                <td><?= getMetaValue($floodQuoteMetas, "elevationDifference", 0) ?></td>
+                <td><?= $calculations->requiredElevated == "Yes" ? getMetaValue($floodQuoteMetas, "elevationDifference", 0) : "N/A" ?></td>
             </tr>
             <tr>
                 <td colspan="2">
                     <strong>Secondary Home Replacement Cost</strong>
                 </td>
-                <td><?= ($hasDrc == 1) ? "Y" : "N" ?></td>
+                <td><?= ($flood_occupancy == 2) ? "Y" : "N/A" ?></td>
                 <td colspan="2">
                     <strong>Personal Property Replacement Cost</strong>
                 </td>
@@ -440,89 +427,97 @@ function getMetaValue($metas, $meta_key, $default = '')
                     <tr>
                         <th class="text-center">Coverage Type</th>
                         <th class="text-center">Amount</th>
-                        <th class="text-center"><?= ($isExcessPolicy) ? "Underlying Limits" : "Deductible" ?></th>
+                        <th class="text-center">Deductible</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="text-center">Building</td>
-                        <td class="text-center">
-                            <?php if ($isExcessPolicy) : ?>
-                                <?php if ($excessBuildingLimit > 0) : ?>
-                                    <?= $formatter->formatCurrency($excessBuildingLimit, 'USD') ?>
-                                <?php else : ?>
-                                    <?= $formatter->formatCurrency(getMetaValue($floodQuoteMetas, "covABuilding", 0), 'USD') ?>
-                                <?php endif; ?>
-                            <?php else : ?>
-                                <?= $formatter->formatCurrency(getMetaValue($floodQuoteMetas, "covABuilding", 0), 'USD') ?>
-                            <?php endif; ?>
-                        </td>
-                        <td class="text-center">
-                            <?php if ($isExcessPolicy) : ?>
-                                <?php if ($underlyingBuildLimit) : ?>
-                                    <?= $formatter->formatCurrency($underlyingBuildLimit, 'USD') ?>
-                                <?php else : ?>
-                                    <?php if ($flood_occupancy == 4) : ?>
-                                        $500,000
-                                    <?php else : ?>
-                                        $250,000
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            <?php else : ?>
-                                <?= $formatter->formatCurrency($deductibles["building_deductible"], 'USD') ?>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-center">Contents</td>
-                        <td class="text-center">
-                            <?php if ($isExcessPolicy) : ?>
-                                <?php if ($excessContentLimit > 0) : ?>
-                                    <?= $formatter->formatCurrency($excessContentLimit, 'USD') ?>
-                                <?php else : ?>
-                                    N/A
-                                <?php endif; ?>
-                            <?php else : ?>
-                                <?php if (getMetaValue($floodQuoteMetas, "covCContent", 0) == 0) : ?>
-                                    N/A
-                                <?php else : ?>
-                                    <?= $formatter->formatCurrency(getMetaValue($floodQuoteMetas, "covCContent", 0), 'USD') ?>
-                                <?php endif; ?>
-                            <?php endif; ?>
-                        </td>
-                        <td class="text-center">
-                            <?php if ($isExcessPolicy) : ?>
-                                <?php if ($underlyingContentLimit) : ?>
-                                    <?= $formatter->formatCurrency($underlyingContentLimit, 'USD') ?>
-                                <?php else : ?>
-                                    N/A
-                                <?php endif; ?>
-                            <?php else : ?>
-                                <?= $formatter->formatCurrency($deductibles["content_deductible"], 'USD') ?>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-center">Loss of Use/Rents</td>
-                        <td class="text-center">
-                            <?php
-                            if ($lossUseCov == 0 || $isExcessPolicy == 1) {
-                                echo "N/A";
-                            } else {
-                                echo $formatter->formatCurrency($lossUseCov, 'USD');
-                            }
-                            ?>
-                        </td>
-                        <td class="text-center">
-                            <?php
-                            if ($lossUseCov == 0 || $isExcessPolicy == 1) {
-                                echo "N/A";
-                            } else {
-                                echo $formatter->formatCurrency($deductibles["rent_deductible"], 'USD');
-                            }
-                            ?>
-                        </td>
-                    </tr>
+                    <?php if ($entityType == 0) { ?>
+                        <tr>
+                            <td class="text-center">Building</td>
+                            <td class="text-center">
+                                <?= $formatter->formatCurrency($calculations->dwellingCoverage, 'USD') ?>
+                            </td>
+                            <td class="text-center">
+                                <?= $formatter->formatCurrency($calculations->quoteOptionDeductible, 'USD') ?>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-center">Contents</td>
+                            <td class="text-center">
+                                <?= $formatter->formatCurrency($calculations->personalPopertyCoverage, 'USD') ?>
+                            </td>
+                            <td class="text-center">&nbsp;</td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-center">Loss of Use/Rents</td>
+                            <td class="text-center">
+                                <?= $formatter->formatCurrency($calculations->lossOfUseCoverage, 'USD') ?>
+                            </td>
+                            <td class="text-center">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">Other Structures</td>
+                            <td class="text-center">
+                                <?= $formatter->formatCurrency($calculations->otherStructureCoverage, 'USD') ?>
+                            </td>
+                            <td class="text-center">&nbsp;</td>
+                        </tr>
+                        <?php
+                    } else {
+                        if ($isRented) {
+                        ?>
+                            <tr>
+                                <td class="text-center">Contents</td>
+                                <td class="text-center">
+                                    <?= $formatter->formatCurrency($calculations->personalPopertyCoverage, 'USD') ?>
+                                </td>
+                                <td class="text-center">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">Improvements</td>
+                                <td class="text-center">
+                                    <?= $formatter->formatCurrency($calculations->improvementsAndBettermentsLimit, 'USD') ?>
+                                </td>
+                                <td class="text-center">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">BI & Extra Expense</td>
+                                <td class="text-center">
+                                    <?= $formatter->formatCurrency($calculations->businessIncomeAndExtraExpenseAnnualValue, 'USD') ?>
+                                </td>
+                                <td class="text-center">&nbsp;</td>
+                            </tr>
+                        <?php } else { ?>
+                            <tr>
+                                <td class="text-center">Building</td>
+                                <td class="text-center">
+                                    <?= $formatter->formatCurrency($calculations->dwellingCoverage, 'USD') ?>
+                                </td>
+                                <td class="text-center">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">Contents</td>
+                                <td class="text-center">
+                                    <?= $formatter->formatCurrency($calculations->personalPopertyCoverage, 'USD') ?>
+                                </td>
+                                <td class="text-center">&nbsp;</td>
+                            </tr>
+
+                            <tr>
+                                <td class="text-center">BI & Extra Expense</td>
+                                <td class="text-center">
+                                    <?= $formatter->formatCurrency($calculations->businessIncomeAndExtraExpenseAnnualValue, 'USD') ?>
+                                </td>
+                                <td class="text-center">&nbsp;</td>
+                            </tr>
+                    <?php
+                        }
+                    } ?>
                 </tbody>
             </table>
         </div>
@@ -533,12 +528,12 @@ function getMetaValue($metas, $meta_key, $default = '')
         <div class="col-6">
             <div class="row text-end">
                 <div class="col-6">Total Base Premium:</div>
-                <div class="col-6"><?= $formatter->formatCurrency($calculations->finalPremium, 'USD') ?></div>
+                <div class="col-6"><?= $formatter->formatCurrency($calculations->basePremium, 'USD') ?></div>
             </div>
 
             <div class="row text-end">
                 <div class="col-6"><?= $propertyState ?> Surplus Lines Tax:</div>
-                <div class="col-6"><?= $formatter->formatCurrency($calculations->taxAmount, 'USD') ?></div>
+                <div class="col-6"><?= $formatter->formatCurrency($calculations->finalTax, 'USD') ?></div>
             </div>
 
             <div class="row text-end">
@@ -548,12 +543,12 @@ function getMetaValue($metas, $meta_key, $default = '')
 
             <div class="row text-end">
                 <div class="col-6">
-                    <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX" || $propertyState == "NC") : ?>
+                    <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX") : ?>
                         <?= $propertyState . " Stamping Fee:" ?>
                     <?php endif; ?>
                 </div>
                 <div class="col-6">
-                    <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX" || $propertyState == "NC") : ?>
+                    <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX") : ?>
                         <?= $formatter->formatCurrency($calculations->stampFee, 'USD') ?>
                     <?php endif; ?>
                 </div>
@@ -611,48 +606,30 @@ function getMetaValue($metas, $meta_key, $default = '')
             By initialing and signing below, the insured understands and/or agrees with each of the following statements in regards to this policy compared to a National Flood Insurance Program (NFIP) policy
             <br />
             <br />
-            <br />
-            _________ Insured understands that this is a Private Flood Insurance Policy in lieu of a NFIP Policy
-            <br />
+            _________ Insured understands that this is a Private Flood Insurance Policy in lieu of a NFIP Policy <br />
             <br />
             <br />
-            _________ Insured has been offered and has declined a National Flood Insurance Policy
+            _________ Insured has been offered and has declined a National Flood Insurance Policy <br />
             <br />
             <br />
-            <br />
-            _________ Any current or future grandfathering under the NFIP is unavailable under this policy at this time
-            <br />
+            _________ Any current or future grandfathering under the NFIP is unavailable under this policy at this time <br />
             <br />
             <br />
-            _________ This policy may not be cancelled except under the same conditions as a NFIP policy
+            _________ This policy may not be cancelled except under the same conditions as a NFIP policy <br />
             <br />
             <br />
-            <br />
-            _________ Insured has chosen the Building Coverage amount, coverage is available up to $1,000,000
-            <br />
+            _________ Insured has chosen the Building Coverage amount, coverage is available up to $1,000,000 <br />
             <br />
             <br />
-            _________ Insured has chosen the Contents Coverage amount, coverage is available up to $250,000
+            _________ Coverage on this policy begins on the first living floor. There is no coverage below the specified first floor<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for either Building or Contents except as specifically named in the policy documents <br />
             <br />
             <br />
-            <br />
-            _________ Coverage on this policy begins on the first living floor. There is no coverage below the specified first floor<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for either Building or Contents except as specifically named in the policy documents
-            <br />
-            <br />
-            <br />
-            _________ Only structural coverage is available for any Mid-Level or Ground Level entry or Foyer
-            <br />
-            <br />
-            <br />
-            _________ Insured agrees to Electronic delivery of all policy documents (email required)
+            _________ Insured agrees to Electronic delivery of all policy documents (email required) <br />
             <br />
             <br />
             <br />
             <br />
-            <br />
-            Insured Signature __________________________________________ Date______________
-            <br />
+            Insured Signature __________________________________________ Date______________ <br />
             <br />
             <br />
             <br />

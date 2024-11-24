@@ -320,7 +320,7 @@ function getMetaValue($metas, $meta_key, $default = '')
             <div class="row">
                 <div class="col-6">
                     <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX" || $propertyState == "NC") : ?>
-                        <?= $propertyStat . " Stamping Fee" ?>
+                        <?= $propertyState . " Stamping Fee" ?>
                     <?php endif; ?>
                 </div>
                 <div class="col-6">

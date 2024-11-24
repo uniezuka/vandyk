@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\FloodQuoteCalculations;
 use App\Libraries\BritFloodQuoteCalculations;
+use App\Libraries\HiscoxCalculations;
 use App\Libraries\HiscoxApiV2;
 use Exception;
 
@@ -1484,10 +1485,15 @@ class FloodQuote extends BaseController
         $data["floodZone"] = ($floodZone) ? $floodZone->name : "";
         $data["floodOccupancy"] = $floodOccupancy;
 
+        $isHiscox = strpos($bindAuthorityText, '250') !== false;
+
         $calculations = null;
 
         if (!strpos($bindAuthorityText, '230') === false) {
             $calculations = new BritFloodQuoteCalculations($floodQuote);
+        }
+        if (strpos($bindAuthorityText, '250') !== false) {
+            $calculations = new HiscoxCalculations($floodQuote);
         } else {
             $calculations = new FloodQuoteCalculations($floodQuote);
         }
@@ -1513,6 +1519,7 @@ class FloodQuote extends BaseController
         }
 
         $folder = $isSandbarQuote ? 'sandbar' : 'default';
+        $folder = $isHiscox ? $folder . '/hiscox' : $folder;
         $folder = $action == "no-loss" ? 'sandbar' : $folder;
 
         $data['title'] = $pageTitle;

@@ -17,22 +17,23 @@ $propertyZip = getMetaValue($floodQuoteMetas, "propertyZip");
 $flood_occupancy = (int)getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
 $underlyingBuildLimit = (int)getMetaValue($floodQuoteMetas, "underlyingBuildLimit", 0);
 $underlyingContentLimit = (int)getMetaValue($floodQuoteMetas, "underlyingContentLimit", 0);
-
-$lossUseCov = $calculations->lossUseCoverage;
-
-$deductibles = $calculations->getDeductibles();
+$isRented = (int)getMetaValue($floodQuoteMetas, "isRented", 0) == "1";
 
 switch ($policyType) {
     case "REN":
-        $invoiceTitle = "Renewal Invoice";
+        $invoiceTitle = "RENEWAL Business Invoice";
         break;
 
     case "END":
-        $invoiceTitle = "Endorsement Invoice";
+        $invoiceTitle = "REVISED Business Invoice";
+        break;
+
+    case "CAN":
+        $invoiceTitle = "CANCELLATION Business Invoice";
         break;
 
     default:
-        $invoiceTitle = "New Business Invoice";
+        $invoiceTitle = "NEW Business Invoice";
         break;
 }
 
@@ -64,7 +65,6 @@ function getMetaValue($metas, $meta_key, $default = '')
 
         <div class="col-6 text-center">
             <h3 class="mt-3">
-                <?= ($isExcessPolicy) ? "Excess Flood <br />" : "" ?>
                 <?= $invoiceTitle ?>
             </h3>
             <p>Invoice # : <?= $floodQuote->flood_quote_id ?></p>
@@ -80,14 +80,14 @@ function getMetaValue($metas, $meta_key, $default = '')
                 <p>
                     <?php if ($billTo == 1) : ?>
                         <?php if ($entityType == "1") : ?>
-                            <?= $floodQuote->company_name ?><br>
-                            <?= $floodQuote->company_name_2 ?><br>
+                            <?= $client->business_name ?><br>
+                            <?= $client->business_name2 ?><br>
                         <?php else : ?>
-                            <?= $floodQuote->first_name ?> <?= $floodQuote->last_name ?><br>
-                            <?= $floodQuote->insured_name_2 ?><br>
+                            <?= $client->first_name ?> <?= $client->last_name ?><br>
+                            <?= $client->insured2_name ?><br>
                         <?php endif; ?>
-                        <?= $floodQuote->address ?><br>
-                        <?= $floodQuote->city ?>, <?= $floodQuote->state ?> <?= $floodQuote->zip ?>
+                        <?= $client->address ?><br>
+                        <?= $client->city ?>, <?= $client->state ?> <?= $client->zip ?>
                     <?php else : ?>
                         <?= $mortgage1->name ?><br>
                         <?= $mortgage1->name2 ?><br>
@@ -106,14 +106,14 @@ function getMetaValue($metas, $meta_key, $default = '')
                         Same as Payor
                     <?php else : ?>
                         <?php if ($entityType == "1") : ?>
-                            <?= $floodQuote->company_name ?><br>
-                            <?= $floodQuote->company_name_2 ?><br>
+                            <?= $client->business_name ?><br>
+                            <?= $client->business_name2 ?><br>
                         <?php else : ?>
-                            <?= $floodQuote->first_name ?> <?= $floodQuote->last_name ?><br>
-                            <?= $floodQuote->insured_name_2 ?><br>
+                            <?= $client->first_name ?> <?= $client->last_name ?><br>
+                            <?= $client->insured2_name ?><br>
                         <?php endif; ?>
-                        <?= $floodQuote->address ?><br>
-                        <?= $floodQuote->city ?>, <?= $floodQuote->state ?> <?= $floodQuote->zip ?><br>
+                        <?= $client->address ?><br>
+                        <?= $client->city ?>, <?= $client->state ?> <?= $client->zip ?>
                     <?php endif; ?>
                 </p>
             </blockquote>
@@ -138,9 +138,7 @@ function getMetaValue($metas, $meta_key, $default = '')
             <div class="col-4 fw-bold text-start">
                 <strong>Policy Type:</strong>
             </div>
-            <div class="col-8">
-                Flood
-            </div>
+            <div class="col-8">Flood</div>
         </div>
 
         <div class="col-6 d-flex align-items-start">
@@ -159,23 +157,19 @@ function getMetaValue($metas, $meta_key, $default = '')
             <tr>
                 <td colspan="2">
                     <strong>First Mortgage:</strong><br>
-                    <?php if (!empty($mortgage1->name)) : ?>
-                        <?= $mortgage1->name ?><br>
-                        <?= $mortgage1->name2 ?><br>
-                        <?= $mortgage1->address ?><br>
-                        <?= $mortgage1->city ?>, <?= $mortgage1->state ?>&nbsp;&nbsp;<?= $mortgage1->zip ?><br>
-                        <?= $mortgage1->phone ?>
-                    <?php endif; ?>
+                    <?= $mortgage1->name ?><br>
+                    <?= $mortgage1->name2 ?><br>
+                    <?= $mortgage1->address ?><br>
+                    <?= $mortgage1->city ?>, <?= $mortgage1->state ?>&nbsp;&nbsp;<?= $mortgage1->zip ?><br>
+                    <?= $mortgage1->phone ?>
                 </td>
                 <td colspan="2">
                     <strong>Second Mortgage:</strong><br>
-                    <?php if (!empty($mortgage2->name)) : ?>
-                        <?= $mortgage2->name ?><br>
-                        <?= $mortgage2->name2 ?><br>
-                        <?= $mortgage2->address ?><br>
-                        <?= $mortgage2->city ?>, <?= $mortgage2->state ?>&nbsp;&nbsp;<?= $mortgage2->zip ?><br>
-                        <?= $mortgage2->phone ?>
-                    <?php endif; ?>
+                    <?= $mortgage2->name ?><br>
+                    <?= $mortgage2->name2 ?><br>
+                    <?= $mortgage2->address ?><br>
+                    <?= $mortgage2->city ?>, <?= $mortgage2->state ?>&nbsp;&nbsp;<?= $mortgage2->zip ?><br>
+                    <?= $mortgage2->phone ?>
                 </td>
             </tr>
             <tr>
@@ -200,65 +194,71 @@ function getMetaValue($metas, $meta_key, $default = '')
                     <tr>
                         <th>Coverage Type</th>
                         <th>Limit</th>
-                        <th><?= ($isExcessPolicy) ? "Underlying Limits" : "Deductible" ?></th>
+                        <th>Deductible</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Building</td>
-                        <td><?= $formatter->formatCurrency(getMetaValue($floodQuoteMetas, "covABuilding", 0), 'USD') ?></td>
-                        <td>
-                            <?php if ($isExcessPolicy) : ?>
-                                <?php if ($underlyingBuildLimit) : ?>
-                                    <?= $formatter->formatCurrency($underlyingBuildLimit, 'USD') ?>
-                                <?php else : ?>
-                                    <?php if ($flood_occupancy == 4) : ?>
-                                        $500,000
-                                    <?php else : ?>
-                                        $250,000
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            <?php else : ?>
-                                <?= $formatter->formatCurrency($deductibles["building_deductible"], 'USD') ?>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Contents</td>
-                        <td><?= $formatter->formatCurrency(getMetaValue($floodQuoteMetas, "covCContent", 0), 'USD') ?></td>
-                        <td>
-                            <?php if ($isExcessPolicy) : ?>
-                                <?php if ($underlyingContentLimit) : ?>
-                                    <?= $formatter->formatCurrency($underlyingContentLimit, 'USD') ?>
-                                <?php else : ?>
-                                    N/A
-                                <?php endif; ?>
-                            <?php else : ?>
-                                <?= $formatter->formatCurrency($deductibles["content_deductible"], 'USD') ?>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Loss of Use/Rents</td>
-                        <td>
-                            <?php
-                            if ($lossUseCov == 0) {
-                                echo "N/A";
-                            } else {
-                                echo $formatter->formatCurrency($lossUseCov, 'USD');
-                            }
-                            ?>
-                        </td>
-                        <td>
-                            <?php
-                            if ($lossUseCov == 0 || $lossUseCov == "") {
-                                echo "N/A";
-                            } else {
-                                echo $formatter->formatCurrency($deductibles["rent_deductible"], 'USD');
-                            }
-                            ?>
-                        </td>
-                    </tr>
+                    <?php if ($entityType == 0) { ?>
+                        <tr>
+                            <td>Building</td>
+                            <td><?= $formatter->formatCurrency($calculations->dwellingCoverage, 'USD') ?></td>
+                            <td><?= $formatter->formatCurrency($calculations->quoteOptionDeductible, 'USD') ?></td>
+                        </tr>
+                        <tr>
+                            <td>Contents</td>
+                            <td><?= $formatter->formatCurrency($calculations->personalPopertyCoverage, 'USD') ?></td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>Loss of Use/Rents</td>
+                            <td>
+                                <?= $formatter->formatCurrency($calculations->lossOfUseCoverage, 'USD') ?>
+                            </td>
+                            <td>>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>Other Structures</td>
+                            <td><?= $formatter->formatCurrency($calculations->otherStructureCoverage, 'USD') ?></td>
+                            <td>&nbsp;</td>
+                        </tr>
+                        <?php
+                    } else {
+                        if ($isRented) {
+                        ?>
+                            <tr>
+                                <td>Contents</td>
+                                <td><?= $formatter->formatCurrency($calculations->personalPopertyCoverage, 'USD') ?></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>Improvements</td>
+                                <td><?= $formatter->formatCurrency($calculations->improvementsAndBettermentsLimit, 'USD') ?></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>BI & Extra Expense</td>
+                                <td><?= $formatter->formatCurrency($calculations->businessIncomeAndExtraExpenseAnnualValue, 'USD') ?></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                        <?php } else { ?>
+                            <tr>
+                                <td>Building</td>
+                                <td><?= $formatter->formatCurrency($calculations->dwellingCoverage, 'USD') ?></td>
+                                <td><?= $formatter->formatCurrency($calculations->quoteOptionDeductible, 'USD') ?></td>
+                            </tr>
+                            <tr>
+                                <td>Contents</td>
+                                <td><?= $formatter->formatCurrency($calculations->personalPopertyCoverage, 'USD') ?></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td>BI & Extra Expense</td>
+                                <td><?= $formatter->formatCurrency($calculations->businessIncomeAndExtraExpenseAnnualValue, 'USD') ?></td>
+                                <td>&nbsp;</td>
+                            </tr>
+                    <?php
+                        }
+                    } ?>
                 </tbody>
             </table>
         </div>
@@ -276,11 +276,11 @@ function getMetaValue($metas, $meta_key, $default = '')
                 <tbody>
                     <tr>
                         <td>Total Policy Premium:</td>
-                        <td><?= $formatter->formatCurrency($calculations->finalPremium, 'USD') ?></td>
+                        <td><?= $formatter->formatCurrency($calculations->basePremium, 'USD') ?></td>
                     </tr>
                     <tr>
                         <td><?= $propertyState ?> Surplus Lines Tax:</td>
-                        <td><?= $formatter->formatCurrency($calculations->taxAmount, 'USD') ?></td>
+                        <td><?= $formatter->formatCurrency($calculations->finalTax, 'USD') ?></td>
                     </tr>
                     <tr>
                         <td>Policy Fee:</td>
@@ -288,12 +288,12 @@ function getMetaValue($metas, $meta_key, $default = '')
                     </tr>
                     <tr>
                         <td>
-                            <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX" || $propertyState == "NC") : ?>
+                            <?php if ($propertyState == "NY" || $propertyState == "PA") : ?>
                                 <?= $propertyState . " Stamping Fee" ?>
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php if ($propertyState == "NY" || $propertyState == "PA" || $propertyState == "TX" || $propertyState == "NC") : ?>
+                            <?php if ($propertyState == "NY" || $propertyState == "PA") : ?>
                                 <?= $formatter->formatCurrency($calculations->stampFee, 'USD') ?>
                             <?php endif; ?>
                         </td>

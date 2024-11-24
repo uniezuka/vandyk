@@ -87,7 +87,7 @@ function getMetaValue($metas, $meta_key, $default = '')
     <div class="row">
         <div class="col-6">
             <div class="logo">
-                <img src="<?= base_url('assets/images/IACHeaderLogo.gif'); ?>" alt="logo" width="352" height="100">
+                <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="logo" width="270" height="100">
             </div>
         </div>
 
@@ -596,7 +596,7 @@ function getMetaValue($metas, $meta_key, $default = '')
     <div class="row">
         <div class="col-6">
             <div class="logo">
-                <img src="<?= base_url('assets/images/IACHeaderLogo.gif'); ?>" alt="logo" width="352" height="100">
+                <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="logo" width="270" height="100">
             </div>
         </div>
 
@@ -835,7 +835,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                 <strong>_____________________________________</strong><br />
                 <strong>(Signature of Insured) </strong>
             </p>
-            <p class="mb-0">
+            <p>
                 <strong>(1) = Fully earned  (2)= Taxes and stamping fees are calculated on the portion of the risk located in N.Y. only</strong><br>
                 NYSID Form:NELP/2011
             </p>

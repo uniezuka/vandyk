@@ -89,10 +89,15 @@
                 page-break-inside: avoid;
                 width: 100%;
                 box-sizing: border-box;
+                page-break-after: always;
             }
 
             .no-print {
                 display: none !important;
+            }
+
+            .logo {
+                margin-bottom: 0;
             }
 
             table {
@@ -118,6 +123,10 @@
 
             .border .table {
                 margin-bottom: 0;
+            }
+
+            .content-wrapper:last-child {
+                page-break-after: auto;
             }
         }
     </style>
