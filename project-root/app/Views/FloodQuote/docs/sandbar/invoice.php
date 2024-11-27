@@ -9,7 +9,7 @@ extract($data);
 $invoiceTitle = "";
 $isExcessPolicy = getMetaValue($floodQuoteMetas, "isExcessPolicy", 0);
 $billTo = getMetaValue($floodQuoteMetas, "billTo", 1);
-$entityType = getMetaValue($floodQuoteMetas, "entityType");
+$entityType = $floodQuote->entity_type;
 $propertyAddress = getMetaValue($floodQuoteMetas, "propertyAddress");
 $propertyCity = getMetaValue($floodQuoteMetas, "propertyCity");
 $propertyState = getMetaValue($floodQuoteMetas, "propertyState");
@@ -77,7 +77,7 @@ function getMetaValue($metas, $meta_key, $default = '')
             <blockquote>
                 <p>
                     <?php if ($billTo == 1) : ?>
-                        <?php if ($entityType == "1") : ?>
+                        <?php if ($entityType == 1) : ?>
                             <?= $floodQuote->company_name ?><br>
                             <?= $floodQuote->company_name_2 ?><br>
                         <?php else : ?>
@@ -103,7 +103,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                     <?php if ($billTo == 1) : ?>
                         Same as Payor
                     <?php else : ?>
-                        <?php if ($entityType == "1") : ?>
+                        <?php if ($entityType == 1) : ?>
                             <?= $floodQuote->company_name ?><br>
                             <?= $floodQuote->company_name_2 ?><br>
                         <?php else : ?>

@@ -125,7 +125,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                             $propertyAddress = getMetaValue($flood_quote_metas, 'propertyAddress');
                             $propertyCity = getMetaValue($flood_quote_metas, 'propertyCity');
                             $propertyState = getMetaValue($flood_quote_metas, 'propertyState');
-                            $hasExcessPolicy = (int)getMetaValue($flood_quote_metas, 'hasExcessPolicy', 0);
+                            $isExcessPolicy = (int)getMetaValue($flood_quote_metas, 'isExcessPolicy', 0);
                             $isBounded = (int)getMetaValue($flood_quote_metas, 'isBounded', 0);
                             $boundDate = getMetaValue($flood_quote_metas, 'boundDate');
                             $inForce = (int)getMetaValue($flood_quote_metas, 'inForce', 0);
@@ -162,7 +162,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     <p>
                                         Entered: <?= $floodQuote->date_entered ?>
                                     </p>
-                                    <?php if ($hasExcessPolicy) { ?>
+                                    <?php if ($isExcessPolicy) { ?>
                                         <p><strong>EXCESS POLICY</strong></p>
                                     <?php } ?>
                                 </td>
@@ -261,46 +261,37 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     if ($isQuoteDeclined) {
                                         echo "<p>Inactive</p>";
                                     } else if ($isBounded) {
+                                        $docType = $isSandbarQuote ? "<p><strong>Sandbar Docs</strong></p>" : "<p><strong>IAC Docs</strong></p>";
+
                                         if (strpos($bindAuthorityText, "250") !== false) {
-                                            if ($isSandbarQuote) {
-                                                echo "<p><strong>Sandbar Docs</strong></p>";
+                                            echo $docType;
 
-                                                if ($hasExcessPolicy) {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Excess Dec Page</a></p>";
-                                                } else {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Dec Page</a></p>";
-                                                }
+                                            if ($isExcessPolicy) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/excess\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Excess Dec Page</a></p>";
                                             } else {
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Dec Page</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/dec\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Dec Page</a></p>";
                                             }
+
+                                            echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Hiscox Policy</a></p>";
                                         } else {
-                                            if ($isSandbarQuote) {
-                                                echo "<p><strong>Sandbar Docs</strong></p>";
+                                            echo $docType;
 
-                                                if ($hasExcessPolicy) {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Excess Dec Page</a></p>";
-                                                } else {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Dec Page</a></p>";
-                                                }
+                                            if ($isExcessPolicy) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/excess\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Excess Dec Page</a></p>";
                                             } else {
-                                                echo "<p><strong>IAC Docs</strong></p>";
-
-                                                if ($hasExcessPolicy) {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Excess Dec Page</a></p>";
-                                                } else {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Dec Page</a></p>";
-                                                }
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/dec\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Dec Page</a></p>";
                                             }
 
                                             if ($flood_occupancy == 4) {
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">General Policy</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/general\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">General Policy</a></p>";
                                             } else if ($isCondo) {
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Condo Policy</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/condo\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Condo Policy</a></p>";
                                             } else if (strpos($bindAuthorityText, "230") !== false) {
-                                                echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Brit Policy</a></p>";
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Brit Policy</a></p>";
                                             } else {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Policy</a></p>";
                                                 if ($propertyState == "CT") {
-                                                    echo "<p><a href=\"#\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Broker CT SL-8 Form</a></p>";
+                                                    echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $floodQuote->flood_quote_id . "/broker\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Broker CT SL-8 Form</a></p>";
                                                 }
                                             }
                                         }

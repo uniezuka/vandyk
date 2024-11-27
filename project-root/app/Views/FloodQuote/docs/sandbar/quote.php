@@ -9,7 +9,7 @@ extract($data);
 $invoiceTitle = "";
 $isExcessPolicy = (int)getMetaValue($floodQuoteMetas, "isExcessPolicy", 0);
 $billTo = (int)getMetaValue($floodQuoteMetas, "billTo", 1);
-$entityType = getMetaValue($floodQuoteMetas, "entityType");
+$entityType = $floodQuote->entity_type;
 $propertyAddress = getMetaValue($floodQuoteMetas, "propertyAddress");
 $propertyCity = getMetaValue($floodQuoteMetas, "propertyCity");
 $propertyState = getMetaValue($floodQuoteMetas, "propertyState");
@@ -115,7 +115,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                     </td>
                     <td>
                         <div class="fw-bold">Insured Name & Mailing Address</div>
-                        <?php if ($entityType == "1"): ?>
+                        <?php if ($entityType == 1): ?>
                             <?= $client->business_name ?><br>
                             <?= $client->business_name2 ?>
                         <?php else: ?>

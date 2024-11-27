@@ -290,6 +290,16 @@ class FloodQuoteService extends BaseService
 
         $flood_quote_id = $message->flood_quote_id;
 
+        $builder = $this->db->table('flood_quote');
+
+        $data = [
+            'bound_date'   => $message->boundDate,
+        ];
+
+        $builder->set($data);
+        $builder->where('flood_quote_id', $message->flood_quote_id);
+        $builder->update();
+
         $excluded_keys = [
             'flood_quote_id',
         ];

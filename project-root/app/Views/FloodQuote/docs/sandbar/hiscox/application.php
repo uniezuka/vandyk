@@ -13,7 +13,7 @@ $floodZoneService = service('floodZoneService');
 $invoiceTitle = "";
 $isExcessPolicy = (int)getMetaValue($floodQuoteMetas, "isExcessPolicy", 0);
 $billTo = (int)getMetaValue($floodQuoteMetas, "billTo", 1);
-$entityType = getMetaValue($floodQuoteMetas, "entityType");
+$entityType = $floodQuote->entity_type;
 $propertyAddress = getMetaValue($floodQuoteMetas, "propertyAddress");
 $propertyCity = getMetaValue($floodQuoteMetas, "propertyCity");
 $propertyState = getMetaValue($floodQuoteMetas, "propertyState");
@@ -146,7 +146,7 @@ function getMetaValue($metas, $meta_key, $default = '')
             <p>
                 <strong>Insured Name &amp; Mailing Address</strong><br />
 
-                <?php if ($entityType == "1"): ?>
+                <?php if ($entityType == 1): ?>
                     <?= $client->business_name ?><br>
                     <?= $client->business_name2 ?>
                 <?php else: ?>
@@ -654,7 +654,7 @@ function getMetaValue($metas, $meta_key, $default = '')
             </p>
             <p>&nbsp;</p>
             <p>
-                <?php if ($entityType == "1"): ?>
+                <?php if ($entityType == 1): ?>
                     <?= $client->business_name ?><br>
                     <?= $client->business_name2 ?>
                 <?php else: ?>
@@ -709,7 +709,7 @@ function getMetaValue($metas, $meta_key, $default = '')
 
         <div class="row">
             <div class="col-6 border border-dark">
-                <?php if ($entityType == "1"): ?>
+                <?php if ($entityType == 1): ?>
                     <?= $client->business_name ?><br>
                     <?= $client->business_name2 ?>
                 <?php else: ?>
@@ -725,7 +725,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                 <strong>Consistent with the requirements of the New York Insurance Law and Regulation 41 </strong>
                 <strong>
                     <u>
-                        <?php if ($entityType == "1"): ?>
+                        <?php if ($entityType == 1): ?>
                             <?= $client->business_name ?><br>
                             <?= $client->business_name2 ?>
                         <?php else: ?>

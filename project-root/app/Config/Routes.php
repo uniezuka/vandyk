@@ -82,6 +82,7 @@ $routes->get('/flood_quote/hiscox/cancel_preview/(:num)', 'Hiscox::cancel_previe
 $routes->get('/flood_quote/hiscox/reinstate/(:num)', 'Hiscox::reinstate/$1', ['filter' => 'authGuard']);
 $routes->get('/flood_quote/pre_bound_rate_detail/(:num)', 'FloodQuote::pre_bound_rate_detail/$1', ['filter' => 'authGuard']);
 $routes->get('/flood_quote/docs/(:num)/(:segment)', 'FloodQuote::docs/$1/$2', ['filter' => 'authGuard']);
+$routes->get('/flood_quote/policy/(:num)/(:segment)', 'FloodQuote::policy/$1/$2', ['filter' => 'authGuard']);
 
 $routes->get('/counties', 'Counties::index', ['filter' => 'authGuard']);
 $routes->match(['get', 'post'], 'county/create', 'Counties::create', ['filter' => 'authGuard']);

@@ -75,7 +75,7 @@ function getMetaValue($metas, $meta_key, $default = '')
 
                             $isPerson = $flood_quote->entity_type == 0;
                             $policyType = getMetaValue($flood_quote_metas, 'policyType');
-                            $hasExcessPolicy = getMetaValue($flood_quote_metas, 'hasExcessPolicy');
+                            $isExcessPolicy = getMetaValue($flood_quote_metas, 'isExcessPolicy');
                             $propertyAddress = getMetaValue($flood_quote_metas, "propertyAddress");
                             $propertyCity = getMetaValue($flood_quote_metas, "propertyCity");
                             $propertyState = getMetaValue($flood_quote_metas, "propertyState");
@@ -88,6 +88,8 @@ function getMetaValue($metas, $meta_key, $default = '')
                             $hiscoxID = getMetaValue($flood_quote_metas, 'hiscoxID');
                             $prevHiscoxBoundID = getMetaValue($flood_quote_metas, 'prevHiscoxBoundID');
                             $boundHiscoxID = getMetaValue($flood_quote_metas, 'boundHiscoxID');
+                            $flood_occupancy = (int)getMetaValue($flood_quote_metas, 'flood_occupancy', 0);
+                            $isCondo = (int)getMetaValue($flood_quote_metas, 'isCondo', 0);
 
                             $bindAuthority = $bindAuthorityService->findOne($bind_authority);
                             $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
@@ -117,7 +119,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     <p><strong><?= $policyType ?></strong></p>
                                     <p>ID: <a href="<?= base_url('/flood_quote/update/') . $flood_quote->flood_quote_id; ?>"><?= $flood_quote->flood_quote_id ?></a></p>
                                     <p>Entered: <?= $flood_quote->date_entered; ?></p>
-                                    <?php if ($hasExcessPolicy) { ?>
+                                    <?php if ($isExcessPolicy) { ?>
                                         <p><strong>EXCESS POLICY</strong></p>
                                     <?php } ?>
                                 </td>
@@ -206,7 +208,62 @@ function getMetaValue($metas, $meta_key, $default = '')
                                     }
                                     ?>
                                 </td>
-                                <td></td>
+                                <td>
+                                    <?php
+                                    if ($isQuoteDeclined) {
+                                        echo "<p>Inactive</p>";
+                                    } else if ($isBounded) {
+                                        $docType = $isSandbarQuote ? "<p><strong>Sandbar Docs</strong></p>" : "<p><strong>IAC Docs</strong></p>";
+
+                                        if (strpos($bindAuthorityText, "250") !== false) {
+                                            echo $docType;
+
+                                            if ($isExcessPolicy) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/excess\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Excess Dec Page</a></p>";
+                                            } else {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/dec\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Hiscox Dec Page</a></p>";
+                                            }
+
+                                            echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Hiscox Policy</a></p>";
+                                        } else {
+                                            echo $docType;
+
+                                            if ($isExcessPolicy) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/excess\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Excess Dec Page</a></p>";
+                                            } else {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/dec\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Dec Page</a></p>";
+                                            }
+
+                                            if ($flood_occupancy == 4) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/general\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">General Policy</a></p>";
+                                            } else if ($isCondo) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/condo\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Condo Policy</a></p>";
+                                            } else if (strpos($bindAuthorityText, "230") !== false) {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Brit Policy</a></p>";
+                                            } else {
+                                                echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Policy</a></p>";
+                                                if ($propertyState == "CT") {
+                                                    echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/broker\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Broker CT SL-8 Form</a></p>";
+                                                }
+                                            }
+                                        }
+                                    } else if ($policyType == "CAN" && $prevHiscoxBoundID != "") {
+                                        echo "<p><a href=\"" . base_url('/flood_quote/hiscox/bind/') . $flood_quote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Cancel Hiscox Policy</a></p>";
+                                    } else {
+                                        if (strpos($bindAuthorityText, "70") !== false) {
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $flood_quote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Chubb Policy</a></p>";
+                                        } else if (strpos($bindAuthorityText, "260") !== false) {
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $flood_quote->flood_quote_id . "\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind QBE Policy</a></p>";
+                                        } else if (strpos($bindAuthorityText, "230") !== false) {
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $flood_quote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Brit Policy</a></p>";
+                                        } else if (strpos($bindAuthorityText, "250") !== false && $hiscoxID != "") {
+                                            echo "<p><a href=\"" . base_url('/flood_quote/hiscox/bind/') . $flood_quote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Hiscox Policy</a></p>";
+                                        } else if ($bindAuthorityText == "") {
+                                            echo "<p><a href=\"" . base_url('/flood_quote/bind/') . $flood_quote->flood_quote_id . "\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Bind Chubb Policy</a></p>";
+                                        }
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                         <?php } ?>
                     </tbody>

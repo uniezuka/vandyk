@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\FloodQuoteCalculations;
 use App\Libraries\BritFloodQuoteCalculations;
+use App\Libraries\FloodDeclarationCalculations;
 use App\Libraries\HiscoxCalculations;
 use App\Libraries\HiscoxApiV2;
 use Exception;
@@ -754,6 +755,7 @@ class FloodQuote extends BaseController
             $message->isBounded = $post['isBounded'] ?? 0;
             $message->inForce = $post['inForce'] ?? 0;
             $message->isForRenewal = $post['isForRenewal'] ?? 0;
+            $message->isExcessPolicy = $post['isExcessPolicy'] ?? 0;
 
             $this->floodQuoteService->update($message);
 
@@ -1525,5 +1527,78 @@ class FloodQuote extends BaseController
         $data['title'] = $pageTitle;
         $data['client'] = $client;
         return view('FloodQuote/docs/' . $folder . '/' . $action, ['data' => $data]);
+    }
+
+    public function policy($id = null, $action = "")
+    {
+        helper('form');
+        $pageTitle = "";
+        $data['floodQuote'] = $this->floodQuoteService->findOne($id);
+
+        if (!$data['floodQuote']) {
+            return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
+        }
+
+        if ($action !== 'excess' && $action !== 'dec' && $action !== 'full' && $action !== 'general' && $action !== 'condo' && $action !== 'full') {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException();
+        }
+
+        $floodQuote = $data['floodQuote'];
+        $floodQuoteMetas = $this->floodQuoteService->getFloodQuoteMetas($id);
+        $isSandbarQuote = $this->getMetaValue($floodQuoteMetas, 'isSandbarQuote');
+        $client_id = $floodQuote->client_id;
+        $client = $this->clientService->findOne($client_id);
+        $bind_authority = $this->getMetaValue($floodQuoteMetas, 'bind_authority');
+        $policyType = $this->getMetaValue($floodQuoteMetas, "policyType");
+        $mortgages = $this->floodQuoteMortgageService->getByFloodQuoteId($floodQuote->flood_quote_id);
+        $brokerId = $this->getMetaValue($floodQuoteMetas, "broker", 0);
+        $flood_zone = (int)$this->getMetaValue($floodQuoteMetas, "flood_zone", 0);
+        $floodZone = $this->floodZoneService->findOne($flood_zone);
+        $flood_occupancy = (int)$this->getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
+        $floodOccupancy = $this->floodOccupancyService->findOne($flood_occupancy);
+
+        $mortgage1 = null;
+        $mortgage2 = null;
+        foreach ($mortgages as $mortgagee) {
+            if ($mortgagee->loan_index === '1') {
+                $mortgage1 = $mortgagee;
+            } elseif ($mortgagee->loan_index === '2') {
+                $mortgage2 = $mortgagee;
+            }
+        }
+
+        $broker = $this->brokerService->findOne($brokerId);
+
+        $bindAuthority = $this->bindAuthorityService->findOne($bind_authority);
+        $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
+
+        $data['mortgage1'] = $mortgage1;
+        $data['mortgage2'] = $mortgage2;
+        $data['broker'] = $broker;
+        $data["bindAuthority"] = $bindAuthority->name;
+        $data["bindAuthorityText"] = $bindAuthorityText;
+        $data["floodQuoteMetas"] = $floodQuoteMetas;
+        $data["floodZone"] = ($floodZone) ? $floodZone->name : "";
+        $data["floodOccupancy"] = $floodOccupancy;
+
+        $isHiscox = strpos($bindAuthorityText, '250') !== false;
+
+        $calculations = null;
+
+        if (strpos($bindAuthorityText, '250') !== false) {
+            $calculations = new HiscoxCalculations($floodQuote);
+        } else {
+            $calculations = new FloodDeclarationCalculations($floodQuote);
+        }
+
+        $data['calculations'] = $calculations;
+        $data["policyType"] = $policyType;
+
+        $folder = $isSandbarQuote ? 'sandbar' : 'default';
+        $folder = $isHiscox ? $folder . '/hiscox' : $folder;
+
+        $data['title'] = "Flood Declaration Page";
+        $data['client'] = $client;
+        return view('FloodQuote/policy/' . $folder . '/' . $action, ['data' => $data]);
     }
 }
