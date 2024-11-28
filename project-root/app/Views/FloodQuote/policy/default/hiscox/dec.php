@@ -27,7 +27,7 @@ $construction_type = (int)getMetaValue($floodQuoteMetas, "construction_type", 0)
 $flood_zone = (int)getMetaValue($floodQuoteMetas, 'flood_zone', 0);
 $billTo = (int)getMetaValue($floodQuoteMetas, "billTo", 1);
 $isRented = (int)getMetaValue($floodQuoteMetas, "isRented", 0);
-$improvementDate = (getMetaValue($floodQuoteMetas, "improvementDate") == "") ? "" : date('m/d/Y', getMetaValue($floodQuoteMetas, "improvementDate"));
+$improvementDate = (getMetaValue($floodQuoteMetas, "improvementDate") == "") ? "" : date('m/d/Y', strtotime(getMetaValue($floodQuoteMetas, "improvementDate")));
 $isCondo = (int)getMetaValue($floodQuoteMetas, "isCondo", 0);
 $cancelPremium = (int)getMetaValue($floodQuoteMetas, "cancelPremium", 0);
 $cancelTax = (int)getMetaValue($floodQuoteMetas, "cancelTax", 0);

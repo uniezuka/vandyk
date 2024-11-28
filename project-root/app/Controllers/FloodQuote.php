@@ -2,14 +2,18 @@
 
 namespace App\Controllers;
 
+include "../Libraries/pdf-merger/vendor/autoload.php";
+
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use App\Libraries\FloodQuoteCalculations;
 use App\Libraries\BritFloodQuoteCalculations;
 use App\Libraries\FloodDeclarationCalculations;
+use App\Libraries\HiscoxDeclarationCalculations;
 use App\Libraries\HiscoxCalculations;
 use App\Libraries\HiscoxApiV2;
+use Clegginabox\PDFMerger\PDFMerger;
 use Exception;
 
 class FloodQuote extends BaseController
@@ -1532,7 +1536,6 @@ class FloodQuote extends BaseController
     public function policy($id = null, $action = "")
     {
         helper('form');
-        $pageTitle = "";
         $data['floodQuote'] = $this->floodQuoteService->findOne($id);
 
         if (!$data['floodQuote']) {
@@ -1586,19 +1589,34 @@ class FloodQuote extends BaseController
         $calculations = null;
 
         if (strpos($bindAuthorityText, '250') !== false) {
-            $calculations = new HiscoxCalculations($floodQuote);
+            $calculations = new HiscoxDeclarationCalculations($floodQuote);
         } else {
             $calculations = new FloodDeclarationCalculations($floodQuote);
         }
 
         $data['calculations'] = $calculations;
         $data["policyType"] = $policyType;
-
-        $folder = $isSandbarQuote ? 'sandbar' : 'default';
-        $folder = $isHiscox ? $folder . '/hiscox' : $folder;
-
-        $data['title'] = "Flood Declaration Page";
+        $data['title'] = "Flood Insurance Declaration Page";
         $data['client'] = $client;
-        return view('FloodQuote/policy/' . $folder . '/' . $action, ['data' => $data]);
+
+        if ($action == "full") {
+            if (strpos($bindAuthorityText, '230') !== false) {
+                return view('FloodQuote/policy/full_brit', ['data' => $data]);
+            } else {
+                $pdf = new PDFMerger;
+
+                if (strpos($bindAuthorityText, '250') !== false) {
+                    $pdf->addPDF('hiscox-comm.pdf', 'all');
+                    $pdf->merge('browser', 'hiscox-comm.pdf', 'P');
+                } else {
+                }
+            }
+        } else {
+            $folder = $isSandbarQuote ? 'sandbar' : 'default';
+            $folder = $isHiscox ? $folder . '/hiscox' : $folder;
+
+
+            return view('FloodQuote/policy/' . $folder . '/' . $action, ['data' => $data]);
+        }
     }
 }

@@ -64,8 +64,6 @@ $construction = $constructionService->findOne($construction_type);
 $floodZone = $floodZoneService->findOne($flood_zone);
 $bindAuthorityText = ($bindAuthority) ? $bindAuthority->reference : "";
 
-$deductibles = $calculations->getDeductibles();
-
 function getMetaValue($metas, $meta_key, $default = '')
 {
     foreach ($metas as $meta) {
@@ -139,7 +137,7 @@ function getMetaValue($metas, $meta_key, $default = '')
     <div class="row">
         <div class="col-6">
             <div class="logo mb-1">
-                <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="logo">
+                <img src="<?= base_url('assets/images/IACHeaderLogo.gif'); ?>" alt="logo" width="352" height="100">
             </div>
             <p><strong>Private Market Flood Insurance</strong></p>
             <p class="broker-info">
@@ -439,7 +437,7 @@ function getMetaValue($metas, $meta_key, $default = '')
     <div class="row">
         <div class="col-12">
             <div class="logo mb-1">
-                <img src="<?= base_url('assets/images/sandbarLogo100x270.png'); ?>" alt="logo">
+                <img src="<?= base_url('assets/images/IACHeaderLogo.gif'); ?>" alt="logo" width="352" height="100">
             </div>
         </div>
     </div>
