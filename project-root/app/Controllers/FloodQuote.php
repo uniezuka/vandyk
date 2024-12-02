@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-include "../Libraries/pdf-merger/vendor/autoload.php";
-
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -1542,7 +1540,11 @@ class FloodQuote extends BaseController
             return redirect()->to('/flood_quotes')->with('error', "Flood Quote not found.");
         }
 
-        if ($action !== 'excess' && $action !== 'dec' && $action !== 'full' && $action !== 'general' && $action !== 'condo' && $action !== 'full') {
+        if (
+            $action !== 'excess' && $action !== 'dec' && $action !== 'full'
+            && $action !== 'general' && $action !== 'condo' && $action !== 'full'
+            && $action !== 'form'
+        ) {
             throw new \CodeIgniter\Exceptions\PageNotFoundException();
         }
 
@@ -1559,6 +1561,10 @@ class FloodQuote extends BaseController
         $floodZone = $this->floodZoneService->findOne($flood_zone);
         $flood_occupancy = (int)$this->getMetaValue($floodQuoteMetas, "flood_occupancy", 0);
         $floodOccupancy = $this->floodOccupancyService->findOne($flood_occupancy);
+        $entityType = $floodQuote->entity_type;
+        $propertyState = $this->getMetaValue($floodQuoteMetas, "propertyState");
+        $hasOpprc = (int)$this->getMetaValue($floodQuoteMetas, "hasOpprc", 0);
+        $isCondo = (int)$this->getMetaValue($floodQuoteMetas, "isCondo", 0);
 
         $mortgage1 = null;
         $mortgage2 = null;
@@ -1599,22 +1605,83 @@ class FloodQuote extends BaseController
         $data['title'] = "Flood Insurance Declaration Page";
         $data['client'] = $client;
 
-        if ($action == "full") {
-            if (strpos($bindAuthorityText, '230') !== false) {
+        if ($action == "full" || $action == "general" || $action == "condo" || $action == "form") {
+            if ($action == "form") {
+                $pdf = new PDFMerger;
+
+                $pdf->addPDF(FCPATH . '/policies/StatementSL-8.pdf', 'all');
+
+                $pdf->merge('browser', 'StatementSL-8.pdf', 'P');
+            } else if (strpos($bindAuthorityText, '230') !== false && $action == "full") {
                 return view('FloodQuote/policy/full_brit', ['data' => $data]);
             } else {
                 $pdf = new PDFMerger;
 
                 if (strpos($bindAuthorityText, '250') !== false) {
-                    $pdf->addPDF('hiscox-comm.pdf', 'all');
-                    $pdf->merge('browser', 'hiscox-comm.pdf', 'P');
+                    $this->response->setHeader("Content-Type", "application/pdf");
+
+                    if ($flood_occupancy == 4 || $flood_occupancy == 7 || $entityType == 1) {
+                        $pdf->addPDF(FCPATH . '/policies/Hiscox/hiscox-comm.pdf', 'all');
+
+                        if ($propertyState == "NJ") {
+                            $pdf->addPDF(FCPATH . '/policies/Hiscox/LMA9063 - NJ SURPLUS LINES NOTICE.pdf', 'all');
+                            $pdf->addPDF(FCPATH . '/policies/Hiscox/LMA9064 - NJ SURPLUS LINES DISCLOSURE NOTICE.pdf', 'all');
+
+                            $pdf->merge('browser', 'hiscox-comm-nj.pdf', 'P');
+                        } else {
+                            $pdf->merge('browser', 'hiscox-comm.pdf', 'P');
+                        }
+                    } else {
+                        $pdf->addPDF(FCPATH . '/policies/Hiscox/hiscox-residence.pdf', 'all');
+
+                        if ($hasOpprc) {
+                            $pdf->addPDF(FCPATH . '/policies/Hiscox/hiscox-residence-loss-settlement.pdf', 'all');
+                        }
+
+                        if ($propertyState == "NJ") {
+                            $pdf->addPDF(FCPATH . '/policies/Hiscox/LMA9063 - NJ SURPLUS LINES NOTICE.pdf', 'all');
+                            $pdf->addPDF(FCPATH . '/policies/Hiscox/LMA9064 - NJ SURPLUS LINES DISCLOSURE NOTICE.pdf', 'all');
+                        }
+
+                        $pdf->merge('browser', 'hiscox-residence-' . $floodQuote->flood_quote_id  . '.pdf', 'P');
+                    }
                 } else {
+                    $this->response->setHeader("Content-Type", "application/pdf");
+
+                    if ($flood_occupancy == 4) {
+                        $pdf->addPDF(FCPATH . '/policies/QBE/QBE Commercial.pdf', 'all');
+                    } else if ($isCondo) {
+                        $pdf->addPDF(FCPATH . '/policies/QBE/QBE RCBAP.pdf', 'all');
+                    } else {
+                        $pdf->addPDF(FCPATH . '/policies/QBE/QBE Residential.pdf', 'all');
+                    }
+
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA5401.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/NMA2962.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/NMA0464.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/NMA2920.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/NMA2340.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/NMA1191.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA5018.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA5019.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA3100.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA5020.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA5313.pdf', 'all');
+                    $pdf->addPDF(FCPATH . '/policies/QBE/LMA5393.pdf', 'all');
+
+                    if ($propertyState == "NJ") {
+                        $pdf->addPDF(FCPATH . '/policies/QBE/LMA9063 - NJ SURPLUS LINES NOTICE.pdf', 'all');
+                        $pdf->addPDF(FCPATH . '/policies/QBE/LMA9064 - NJ SURPLUS LINES DISCLOSURE NOTICE.pdf', 'all');
+
+                        $pdf->merge('browser', 'qbe-policy-nj.pdf', 'P');
+                    } else {
+                        $pdf->merge('browser', 'qbe-policy.pdf', 'P');
+                    }
                 }
             }
         } else {
             $folder = $isSandbarQuote ? 'sandbar' : 'default';
             $folder = $isHiscox ? $folder . '/hiscox' : $folder;
-
 
             return view('FloodQuote/policy/' . $folder . '/' . $action, ['data' => $data]);
         }

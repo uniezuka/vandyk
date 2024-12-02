@@ -243,7 +243,7 @@ function getMetaValue($metas, $meta_key, $default = '')
                                             } else {
                                                 echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/full\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Full Policy</a></p>";
                                                 if ($propertyState == "CT") {
-                                                    echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/broker\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Broker CT SL-8 Form</a></p>";
+                                                    echo "<p><a href=\"" . base_url('/flood_quote/policy/') . $flood_quote->flood_quote_id . "/form\" target=\"_blank\" class=\"btn btn-primary btn-sm w-100\">Broker CT SL-8 Form</a></p>";
                                                 }
                                             }
                                         }
